@@ -62,3 +62,5 @@ out/
 hs_err_pid*
 replay_pid*
 >>>>>>> 9e40f0e5b9502409740bbe0a7dc31a31f63338bd
+
+application.*
