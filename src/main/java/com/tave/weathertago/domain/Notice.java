@@ -11,7 +11,7 @@ public class Notice {
 
     @Id @GeneratedValue
     @Column(name="notice_id")
-    private Long id;
+    private Long noticeId;
 
     private String title;
 
