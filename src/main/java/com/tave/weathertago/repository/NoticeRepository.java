@@ -17,8 +17,8 @@ public class NoticeRepository {
         em.persist(notice);
     }
 
-    public Notice findOne(Long noticeId) {
-        return em.find(Notice.class, noticeId);
+    public Notice findOne(Long notice_id) {
+        return em.find(Notice.class, notice_id);
     }
 
     public List<Notice> findAll() {
