@@ -21,10 +21,10 @@ public class NoticeService {
     }
 
     @Transactional
-    public void updateNotice(Long noticeId, String title, String content) {
-        Notice notice = noticeRepository.findOne(noticeId);
+    public void updateNotice(Long notice_id, String title, String content) {
+        Notice notice = noticeRepository.findOne(notice_id);
         if (notice == null) {
-            throw new IllegalStateException("해당 ID의 공지가 존재하지 않습니다." + noticeId);
+            throw new IllegalStateException("해당 ID의 공지가 존재하지 않습니다." + notice_id);
         }
         notice.setTitle(title);
         notice.setContent(content);
@@ -34,7 +34,7 @@ public class NoticeService {
         return noticeRepository.findAll();
     }
 
-    public Notice findOne(Long noticeId) {
-        return noticeRepository.findOne(noticeId);
+    public Notice findOne(Long notice_id) {
+        return noticeRepository.findOne(notice_id);
     }
 }
