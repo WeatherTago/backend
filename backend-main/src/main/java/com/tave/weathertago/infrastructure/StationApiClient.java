@@ -161,6 +161,7 @@ public class StationApiClient {
 
         } catch (IOException e) {
             throw new RuntimeException("역 코드 조회 실패", e);
+            return 0;
         }
     }
 }
