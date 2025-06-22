@@ -1,16 +1,15 @@
 package com.tave.weathertago.domain;
 
+import com.tave.weathertago.domain.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
 
 @Entity
 @Table(name="notice")
-@Getter @Setter
-public class Notice {
+@Getter
+public class Notice extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="notice_id")
     private Long notice_id;
 
     private String title;
