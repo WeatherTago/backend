@@ -14,7 +14,7 @@ public class NoticeQueryServiceImpl implements NoticeQueryService {
     private final NoticeRepository noticeRepository;
 
     @Override
-    public Notice getNoticesByNoticeId(Long noticeId) { return noticeRepository.findAllByNoticeId(noticeId); }
+    public Notice getNoticesByNoticeId(Long noticeId) { return noticeRepository.findByNoticeId(noticeId); }
 
     @Override
     public List<Notice> getAllNotices() { return noticeRepository.findAll();
