@@ -25,7 +25,7 @@ public class NoticeRestController {
     private final NoticeQueryService noticeQueryService;
 
     @Operation(summary = "공지사항 전체 조회", description = "DB에 저장된 모든 공지사항을 조회합니다.")
-    @GetMapping({"", "/"})
+    @GetMapping("")
     public ApiResponse<List<NoticeResponseDTO.NoticeDetail>> getNotices() {
         List<Notice> notices=noticeQueryService.getAllNotices();
         List<NoticeResponseDTO.NoticeDetail> noticeDetails = notices.stream()
