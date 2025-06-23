@@ -6,6 +6,7 @@ import com.tave.weathertago.converter.NoticeConverter;
 import com.tave.weathertago.domain.Notice;
 import com.tave.weathertago.dto.Notice.NoticeResponseDTO;
 import com.tave.weathertago.service.Notice.NoticeQueryService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +24,7 @@ public class NoticeRestController {
 
     private final NoticeQueryService noticeQueryService;
 
+    @Operation(summary = "공지사항 전체 조회", description = "DB에 저장된 모든 공지사항을 조회합니다.")
     @GetMapping({"", "/"})
     public ApiResponse<List<NoticeResponseDTO.NoticeDetail>> getNotices() {
         List<Notice> notices=noticeQueryService.getAllNotices();
@@ -32,6 +34,7 @@ public class NoticeRestController {
         return ApiResponse.onSuccess(noticeDetails);
     }
 
+    @Operation(summary = "특정 공지사항 조회", description = "특정 공지사항을 id로 조회합니다.")
     @GetMapping("/{noticeId}")
     public ApiResponse<NoticeResponseDTO.NoticeDetail> getNotice(@PathVariable("noticeId") Long noticeId) {
         Notice notice = noticeQueryService.getNoticesByNoticeId(noticeId);
