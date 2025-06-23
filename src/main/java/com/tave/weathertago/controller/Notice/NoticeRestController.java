@@ -6,6 +6,7 @@ import com.tave.weathertago.converter.NoticeConverter;
 import com.tave.weathertago.domain.Notice;
 import com.tave.weathertago.dto.Notice.NoticeResponseDTO;
 import com.tave.weathertago.service.Notice.NoticeQueryService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Tag(name = "notice", description = "공지사항 조회 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/notice")
