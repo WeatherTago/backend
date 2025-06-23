@@ -19,7 +19,7 @@ public class SwaggerConfig {
         Info info = new Info()
                 .title("WeatherTago API")
                 .description("WeatherTago API 명세서")
-                .version("1.0.0");
+                .version("3.0.0");
 
         String jwtSchemeName = "JWT TOKEN";
         // API 요청헤더에 인증정보 포함
