@@ -1,10 +1,6 @@
 package com.tave.weathertago.service.Notice;
 
 import com.tave.weathertago.domain.Notice;
-import com.tave.weathertago.repository.NoticeRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 

@@ -1,9 +1,6 @@
 package com.tave.weathertago.repository;
 
 import com.tave.weathertago.domain.Notice;
-import jakarta.persistence.EntityManager;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
