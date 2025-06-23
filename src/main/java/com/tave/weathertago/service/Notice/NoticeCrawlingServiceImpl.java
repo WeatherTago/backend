@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -87,5 +88,12 @@ public class NoticeCrawlingServiceImpl implements NoticeCrawlingService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    // 1시간마다 크롤링 실행 (cron: 초 분 시 일 월 요일)
+    @Scheduled(cron = "0 0 0/1 * * *", zone = "Asia/Seoul")
+    public void scheduledCrawlAndSaveNotices() {
+        System.out.println("스케줄러에 의해 공지사항 크롤링 시작: " + java.time.LocalDateTime.now());
+        crawlAndSaveNotices();
     }
 }
