@@ -11,7 +11,7 @@ public class NoticeResponseDTO {
     @Getter
     @Builder
     @AllArgsConstructor
-    public static class Response {
+    public static class NoticeDetail {
         Long noticeId;
         String title;
         String content;
