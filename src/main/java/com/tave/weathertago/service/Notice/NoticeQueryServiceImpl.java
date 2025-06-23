@@ -14,11 +14,11 @@ public class NoticeQueryServiceImpl implements NoticeQueryService {
     private final NoticeRepository noticeRepository;
 
     @Override
-    public List<Notice> getNoticesByTitle(String title) { return noticeRepository.findAllByTitle(title); }
+    public Notice getNoticesByNoticeId(Long noticeId) { return noticeRepository.findAllByNoticeId(noticeId); }
 
     @Override
-    public List<Notice> getAllNotices() { return noticeRepository.findAll(); }
+    public List<Notice> getAllNotices() { return noticeRepository.findAll();
 
-    @Override
-    public List<Notice> getNoticesById(Long noticeId) { return noticeRepository.findAllById(noticeId); }
     }
+}
+

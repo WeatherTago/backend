@@ -6,9 +6,8 @@ import java.util.List;
 
 public interface NoticeQueryService {
 
-    List<Notice> getNoticesByTitle(String title);
+    Notice getNoticesByNoticeId(Long noticeId);
 
     List<Notice> getAllNotices();
 
-    List<Notice> getNoticesById(Long noticeId);
 }

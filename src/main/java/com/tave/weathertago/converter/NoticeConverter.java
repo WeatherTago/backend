@@ -7,8 +7,8 @@ import java.time.LocalDateTime;
 
 public class NoticeConverter {
 
-    public static NoticeResponseDTO.Response toResponse(Notice notice) {
-        return NoticeResponseDTO.Response.builder()
+    public static NoticeResponseDTO.NoticeDetail toNoticeDetail(Notice notice) {
+        return NoticeResponseDTO.NoticeDetail.builder()
                 .noticeId(notice.getNoticeId())
                 .title(notice.getTitle())
                 .content(notice.getContent())
