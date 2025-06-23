@@ -1,4 +1,4 @@
-package com.tave.weathertago.controller;
+package com.tave.weathertago.controller.Notice;
 
 
 import com.tave.weathertago.apiPayload.ApiResponse;
@@ -21,7 +21,7 @@ public class NoticeRestController {
 
     private final NoticeQueryService noticeQueryService;
 
-    @GetMapping
+    @GetMapping({"", "/"})
     public ApiResponse<List<NoticeResponseDTO.NoticeDetail>> getNotices() {
         List<Notice> notices=noticeQueryService.getAllNotices();
         List<NoticeResponseDTO.NoticeDetail> noticeDetails = notices.stream()

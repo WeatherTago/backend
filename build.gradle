@@ -31,6 +31,9 @@ dependencies {
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
 	testImplementation 'org.springdoc:springdoc-openapi-starter-webmvc-api:2.8.6'
 
+	implementation 'org.jsoup:jsoup:1.17.2' // 크롤링을 위한 라이브러리
+	implementation 'org.json:json:20210307'
+
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'

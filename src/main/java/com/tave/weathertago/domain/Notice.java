@@ -7,8 +7,9 @@ import lombok.*;
 @Entity
 @Table(name="notice")
 @Getter
+@Setter
 @Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @AllArgsConstructor
 public class Notice extends BaseEntity {
 
@@ -17,5 +18,7 @@ public class Notice extends BaseEntity {
 
     private String title;
 
+    @Lob
     private String content;
+
 }
