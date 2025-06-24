@@ -10,8 +10,7 @@ import org.jsoup.Jsoup;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +36,7 @@ public class NoticeCrawlingServiceImpl implements NoticeCrawlingService {
 
             Connection.Response response = Jsoup.connect(listApiUrl)
                     .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-                    .ignoreContentType(true)
+                    .ignoreContentType(true) // json을 받아오려면 타입 무시 해야함
                     .method(Connection.Method.POST)
                     .data(data)
                     .execute();
@@ -45,46 +44,67 @@ public class NoticeCrawlingServiceImpl implements NoticeCrawlingService {
             JSONObject json = new JSONObject(response.body());
             JSONArray rows = json.getJSONArray("rows");
 
+
+            List<JSONObject> rowList = new ArrayList<>();
+
             for (int i = 0; i < rows.length(); i++) {
-                JSONObject row = rows.getJSONObject(i);
-                String title = row.getString("bdwrTtlNm");
-                String noticeId = row.getString("bdwrSeq");
-
-                // 중복 제목 체크
-                if (noticeRepository.existsByTitle(title)) {
-                    System.out.println("중복 제목, 저장 건너뜀: " + title);
-                    continue;
-                }
-
-                // 상세 본문은 AJAX로 받아온다
-                String detailApiUrl = "https://topis.seoul.go.kr/notice/selectNotice.do";
-                Map<String, String> detailParam = new HashMap<>();
-                detailParam.put("blbdDivCd", "02");
-                detailParam.put("bdwrSeq", noticeId);
-
-                Connection.Response detailResponse = Jsoup.connect(detailApiUrl)
-                        .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-                        .ignoreContentType(true)
-                        .method(Connection.Method.POST)
-                        .data(detailParam)
-                        .execute();
-
-                JSONObject detailJson = new JSONObject(detailResponse.body());
-                JSONArray detailRows = detailJson.getJSONArray("rows");
-                String content = "";
-                if (detailRows.length() > 0) {
-                    JSONObject detail = detailRows.getJSONObject(0);
-                    content = detail.optString("bdwrCts", "");
-                }
-
-                Notice notice = new Notice();
-                notice.setTitle(title);
-                notice.setContent(content);
-                noticeRepository.save(notice);
-                System.out.println("DB 저장 성공: " + title + " / content: " + (content.length() > 30 ? content.substring(0, 30) + "..." : content));
+                rowList.add(rows.getJSONObject(i));
             }
-            System.out.println("크롤링 완료 - 성공: " + rows.length());
 
+            // bdwrSeq 내림차순 정렬
+            rowList.sort((a, b) -> Long.compare(
+                    Long.parseLong(b.getString("bdwrSeq")),
+                    Long.parseLong(a.getString("bdwrSeq"))
+            ));
+
+            int createdCount = 0;
+            int updatedCount = 0;
+            int unchangedCount = 0;
+
+            for (JSONObject row : rowList) {
+                Long noticeId = Long.parseLong(row.getString("bdwrSeq"));
+                String title = row.getString("bdwrTtlNm");
+                String content = row.optString("bdwrCts", "");
+                String createAt = row.optString("createDate", "");
+                String updateAt = row.optString("updateDate", "");
+
+                Optional<Notice> existing = noticeRepository.findByNoticeId(noticeId);
+
+                if (existing.isEmpty()) {
+                    // 신규 저장
+                    Notice notice = Notice.builder()
+                            .noticeId(noticeId)
+                            .title(title)
+                            .content(content)
+                            .createAt(createAt)
+                            .updateAt(updateAt)
+                            .build();
+                    noticeRepository.save(notice);
+                    System.out.println("DB 저장: " + title);
+                    createdCount++;
+                } else {
+                    Notice notice = existing.get();
+                    // 기존 DB의 updateAt과 크롤링한 updateAt이 다를 때만 업데이트
+                    if (!Objects.equals(updateAt, notice.getUpdateAt())) {
+                        // 업데이트된 공지 다시 DB에 저장!
+                        notice.setTitle(title);
+                        notice.setContent(content);
+                        notice.setCreateAt(createAt);
+                        notice.setUpdateAt(updateAt);
+                        noticeRepository.save(notice);
+                        System.out.println("DB 업데이트: " + title);
+                        updatedCount++;
+                    } else {
+                        // 변경 없음
+                        System.out.println("변경 없음: " + title);
+                        unchangedCount++;
+                    }
+                }
+            }
+            System.out.println("크롤링 완료 - 전체: " + rows.length()
+                    + ", 신규: " + createdCount
+                    + ", 업데이트: " + updatedCount
+                    + ", 그대로: " + unchangedCount);
         } catch (Exception e) {
             e.printStackTrace();
         }

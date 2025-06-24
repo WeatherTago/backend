@@ -12,7 +12,8 @@ public class NoticeConverter {
                 .noticeId(notice.getNoticeId())
                 .title(notice.getTitle())
                 .content(notice.getContent())
-                .createdAt(LocalDateTime.now())
+                .createdAt(notice.getCreateAt())
+                .updatedAt(notice.getUpdateAt())
                 .build();
 
     }
