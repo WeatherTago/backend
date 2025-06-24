@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @Tag(name = "notice", description = "공지사항 조회 API")
 @RestController
@@ -24,7 +25,7 @@ public class NoticeRestController {
 
     private final NoticeQueryService noticeQueryService;
 
-    @Operation(summary = "공지사항 전체 조회", description = "DB에 저장된 모든 공지사항을 조회합니다.")
+    @Operation(summary = "공지사항 전체 조회", description = "DB에 저장된 모든 공지사항을 최신순으로 조회합니다.")
     @GetMapping("")
     public ApiResponse<List<NoticeResponseDTO.NoticeDetail>> getNotices() {
         List<Notice> notices=noticeQueryService.getAllNotices();
@@ -37,8 +38,8 @@ public class NoticeRestController {
     @Operation(summary = "특정 공지사항 조회", description = "특정 공지사항을 id로 조회합니다.")
     @GetMapping("/{noticeId}")
     public ApiResponse<NoticeResponseDTO.NoticeDetail> getNotice(@PathVariable("noticeId") Long noticeId) {
-        Notice notice = noticeQueryService.getNoticesByNoticeId(noticeId);
-        NoticeResponseDTO.NoticeDetail noticeDetail = NoticeConverter.toNoticeDetail(notice);
+        Optional<Notice> notice = noticeQueryService.getNoticesByNoticeId(noticeId);
+        NoticeResponseDTO.NoticeDetail noticeDetail = NoticeConverter.toNoticeDetail(notice.orElse(null));
         return ApiResponse.onSuccess(noticeDetail);
     }
 }
