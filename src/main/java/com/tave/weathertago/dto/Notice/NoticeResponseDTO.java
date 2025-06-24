@@ -15,7 +15,8 @@ public class NoticeResponseDTO {
         Long noticeId;
         String title;
         String content;
-        LocalDateTime createdAt;
+        String createdAt;
+        String updatedAt;
     }
 
 }
