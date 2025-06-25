@@ -39,6 +39,7 @@ public class NoticeCrawlingServiceImpl implements NoticeCrawlingService {
                     .ignoreContentType(true) // json을 받아오려면 타입 무시 해야함
                     .method(Connection.Method.POST)
                     .data(data)
+                    .timeout(60000) // 60초
                     .execute();
 
             JSONObject json = new JSONObject(response.body());
