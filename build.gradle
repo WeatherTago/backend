@@ -45,6 +45,8 @@ dependencies {
 	implementation 'org.jsoup:jsoup:1.17.2' // 크롤링을 위한 라이브러리
 	implementation 'org.json:json:20210307'
 
+	implementation 'com.google.firebase:firebase-admin:9.5.0'
+
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
