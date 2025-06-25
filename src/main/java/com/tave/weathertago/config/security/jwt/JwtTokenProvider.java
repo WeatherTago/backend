@@ -1,7 +1,7 @@
 package com.tave.weathertago.config.security.jwt;
 
 import com.tave.weathertago.apiPayload.code.status.ErrorStatus;
-import com.tave.weathertago.apiPayload.exception.handler.UserHandler;
+import com.tave.weathertago.apiPayload.exception.GeneralException;
 import com.tave.weathertago.config.security.properties.Constants;
 import com.tave.weathertago.config.security.properties.JwtProperties;
 import io.jsonwebtoken.*;
@@ -57,9 +57,9 @@ public class JwtTokenProvider {
                     .parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
-            throw new UserHandler(ErrorStatus.EXPIRED_TOKEN);
+            throw new GeneralException(ErrorStatus.EXPIRED_TOKEN);
         } catch (JwtException | IllegalArgumentException e) {
-            throw new UserHandler(ErrorStatus.INVALID_TOKEN);
+            throw new GeneralException(ErrorStatus.INVALID_TOKEN);
         }
     }
 
@@ -95,7 +95,7 @@ public class JwtTokenProvider {
     public Authentication extractAuthentication(HttpServletRequest request) {
         String token = resolveToken(request);
         if (token == null || !validateToken(token)) {
-            throw new UserHandler(ErrorStatus._UNAUTHORIZED);
+            throw new GeneralException(ErrorStatus._UNAUTHORIZED);
         }
 
         String kakaoId = getKakaoId(token);

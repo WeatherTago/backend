@@ -1,6 +1,7 @@
 package com.tave.weathertago.config.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tave.weathertago.apiPayload.code.status.ErrorStatus;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,14 +23,15 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
                          AuthenticationException authException)
             throws IOException, ServletException {
 
-        // 401 Unauthorized 응답
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        ErrorStatus errorStatus = ErrorStatus.INVALID_TOKEN;
+
+        response.setStatus(errorStatus.getHttpStatus().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("isSuccess", false);
-        responseBody.put("code", "COMMON401");
-        responseBody.put("message", "인증되지 않은 사용자입니다.");
+        responseBody.put("code", errorStatus.getCode());
+        responseBody.put("message", errorStatus.getMessage());
 
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.writeValue(response.getOutputStream(), responseBody);
