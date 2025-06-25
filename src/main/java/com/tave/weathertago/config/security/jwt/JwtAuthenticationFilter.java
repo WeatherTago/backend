@@ -23,21 +23,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        try {
-            // 요청에서 토큰 추출
-            String token = jwtTokenProvider.resolveToken(request);
+        // 요청에서 토큰 추출
+        String token = jwtTokenProvider.resolveToken(request);
 
-            // 유효한 토큰이면 인증 객체 생성 후 SecurityContext에 저장
-            if (token != null && jwtTokenProvider.validateToken(token)) {
-                Authentication authentication = jwtTokenProvider.getAuthentication(token);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
-
-            // 다음 필터로 넘김
-            filterChain.doFilter(request, response);
-
-        } catch (Exception e) {
-            throw new AuthenticationServiceException("JWT 인증 실패: " + e.getMessage(), e);
+        // 유효한 토큰이면 인증 객체 생성 후 SecurityContext에 등록
+        if (token != null && jwtTokenProvider.validateToken(token)) {
+            Authentication authentication = jwtTokenProvider.getAuthentication(token);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
+
+        // 예외 발생 없이 다음 필터로 넘김
+        filterChain.doFilter(request, response);
     }
 }
