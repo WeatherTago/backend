@@ -43,8 +43,9 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public AuthResponseDTO.ReissueResultDTO reissueToken(AuthRequestDTO.ReissueRequest request) {
+
         jwtTokenProvider.validateToken(request.getRefreshToken());
 
         String kakaoId = jwtTokenProvider.getKakaoId(request.getRefreshToken());
@@ -57,8 +58,11 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String newAccessToken = jwtTokenProvider.generateAccessToken(user.getKakaoId());
+        String newRefreshToken = jwtTokenProvider.generateRefreshToken(kakaoId);
 
-        return AuthConverter.toReissueResultDTO(newAccessToken);
+        user.updateRefreshToken(newRefreshToken);
+
+        return AuthConverter.toReissueResultDTO(newAccessToken, newRefreshToken);
     }
 
     private User findOrCreateUser(KakaoUserInfo kakaoUserInfo) {
