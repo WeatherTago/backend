@@ -18,5 +18,6 @@ public class AuthResponseDTO {
     @Builder
     public static class ReissueResultDTO {
         private String accessToken;
+        private String refreshToken;
     }
 }
