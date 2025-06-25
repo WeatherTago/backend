@@ -48,7 +48,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // jwt 유효성 검사
+    // JWT 유효성 검사
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
@@ -56,6 +56,18 @@ public class JwtTokenProvider {
                     .build()
                     .parseClaimsJws(token);
             return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    // JWT 유효성 검사(서비스 계층에서 사용) -> 에러 원인 파악을 위해
+    public void assertValidToken(String token) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
         } catch (ExpiredJwtException e) {
             throw new GeneralException(ErrorStatus.EXPIRED_TOKEN);
         } catch (JwtException | IllegalArgumentException e) {
