@@ -4,7 +4,11 @@ import com.tave.weathertago.infrastructure.csv.StationCsvImporter;
 import com.tave.weathertago.repository.StationRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 @Service
 @RequiredArgsConstructor
@@ -16,10 +20,11 @@ public class StationCommandServiceImpl implements StationCommandService {
     @Override
     @Transactional
     public void initializeStations() {
-        // CSV 경로 지정
-        String csvPath = "src/main/resources/stations.xlsx.csv";
-
-        // CSV를 통해 초기화
-        stationCsvImporter.importFromCsv(csvPath);
+        // classpath에서 리소스 InputStream으로 읽기
+        try (InputStream inputStream = new ClassPathResource("stations.xlsx.csv").getInputStream()) {
+            stationCsvImporter.importFromCsv(inputStream);
+        } catch (IOException e) {
+            throw new RuntimeException("CSV 파일을 읽는 중 오류가 발생했습니다.", e);
+        }
     }
 }
