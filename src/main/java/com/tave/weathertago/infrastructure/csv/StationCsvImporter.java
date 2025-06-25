@@ -5,9 +5,8 @@ import com.tave.weathertago.repository.StationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 @Service
 @RequiredArgsConstructor
@@ -15,8 +14,8 @@ public class StationCsvImporter {
 
     private final StationRepository stationRepository;
 
-    public void importFromCsv(String csvPath) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(csvPath))) {
+    public void importFromCsv(InputStream inputStream) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             String line;
             boolean isFirst = true;
             while ((line = reader.readLine()) != null) {
