@@ -10,6 +10,8 @@ import com.tave.weathertago.service.Station.StationQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,12 +28,16 @@ public class StationRestController {
 
     @PostMapping("/initialize")
     public ApiResponse<String> initializeStations() {
-        String path = Objects.requireNonNull(
-                getClass().getClassLoader().getResource("station.xlsx.csv")
-        ).getPath();
-
-        stationCsvImporter.importFromCsv(path);
-        return ApiResponse.onSuccess("역 정보 초기화 완료");
+        // InputStream으로 리소스 읽기
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("station.xlsx.csv")) {
+            if (inputStream == null) {
+                throw new RuntimeException("station.xlsx.csv 파일을 classpath에서 찾을 수 없습니다.");
+            }
+            stationCsvImporter.importFromCsv(inputStream);
+            return ApiResponse.onSuccess("역 정보 초기화 완료");
+        } catch (IOException e) {
+            throw new RuntimeException("CSV 파일을 읽는 중 오류가 발생했습니다.", e);
+        }
     }
 
     @GetMapping("/search")
