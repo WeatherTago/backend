@@ -58,11 +58,9 @@ jobs:
 
       # DockerHub Push
       - name: Build and Push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
+        run: |
+          docker build --no-cache -t ${{ secrets.DOCKER_HUB_USERNAME }}/weathertago:${{ steps.meta.outputs.tags }}.
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/weathertago:${{ steps.meta.outputs.tags }}
 
 
   deploy:
