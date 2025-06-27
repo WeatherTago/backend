@@ -38,14 +38,6 @@ jobs:
           sudo chmod +x ./gradlew
           sudo ./gradlew clean build
 
-      # JAR 파일 수집 및 확인
-      - name: Collect and verify JAR files
-        run: |
-          mkdir -p build/libs
-          find . -path '*/build/libs/*.jar' -exec cp -v {} build/libs/ \;
-          echo "JAR files in build/libs:"
-          ls -l build/libs/
-
       # 날짜 기반 태그 생성
       - name: Set Docker image tag
         id: set_tag
