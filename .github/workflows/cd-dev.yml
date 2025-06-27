@@ -11,7 +11,7 @@ jobs:
     name: build
     runs-on: ubuntu-latest
     outputs:
-      docker_image_tag: ${{ steps.export_tag.outputs.docker_image_tag }}
+      docker_image_tag: ${{ steps.set_tag.outputs.docker_image_tag }}
     steps:
       # 코드 체크아웃
       - name: Checkout repository
@@ -37,13 +37,10 @@ jobs:
           sudo chmod +x ./gradlew
           sudo ./gradlew clean build
 
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ secrets.DOCKER_HUB_USERNAME }}/weathertago
-          tags: |
-            type=raw,value={{date 'YYYYMMDD-HHmm'}} 
+      # 날짜 기반 태그 생성 (예: 20250627-1530)
+      - name: Set Docker image tag
+        id: set_tag
+        run: echo "docker_image_tag=$(date +'%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
 
       - name: Export Docker tag
         id: export_tag
@@ -59,8 +56,8 @@ jobs:
       # DockerHub Push
       - name: Build and Push Docker image
         run: |
-          docker build --no-cache -t ${{ secrets.DOCKER_HUB_USERNAME }}/weathertago:${{ steps.meta.outputs.tags }} .
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/weathertago:${{ steps.meta.outputs.tags }}
+          docker build --no-cache -t ${{ secrets.DOCKER_HUB_USERNAME }}/weathertago:${{ steps.set_tag.outputs.docker_image_tag }} .
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/weathertago:${{ steps.set_tag.outputs.docker_image_tag }}
 
 
   deploy:
