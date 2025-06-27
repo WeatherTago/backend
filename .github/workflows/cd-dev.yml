@@ -13,6 +13,13 @@ jobs:
     outputs:
       docker_image_tag: ${{ steps.set_tag.outputs.docker_image_tag }}
     steps:
+      - name: Discord Notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: '🚀 CD - Dev workflow 실행됨'
+
       # 코드 체크아웃
       - name: Checkout repository
         uses: actions/checkout@v2
