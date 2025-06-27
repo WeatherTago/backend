@@ -23,7 +23,6 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 17
-      - name: env
 
       # secret 파일 불러오기
       - name: make secret files
