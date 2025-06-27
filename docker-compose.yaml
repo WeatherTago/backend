@@ -7,7 +7,7 @@ networks:
 
 services:
   weathertago-app:
-    image: ysjjw2003/weathertago
+    image: ysjjw2003/weathertago:${TAG}
     container_name: weathertago-app
     ports:
       - "8080:8080"
