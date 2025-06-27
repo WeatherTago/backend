@@ -18,6 +18,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+
       # JDK 설치
       - name: Set up JDK 17
         uses: actions/setup-java@v1
@@ -37,7 +38,15 @@ jobs:
           sudo chmod +x ./gradlew
           sudo ./gradlew clean build
 
-      # 날짜 기반 태그 생성 (예: 20250627-1530)
+      # JAR 파일 수집 및 확인
+      - name: Collect and verify JAR files
+        run: |
+          mkdir -p build/libs
+          find . -path '*/build/libs/*.jar' -exec cp -v {} build/libs/ \;
+          echo "JAR files in build/libs:"
+          ls -l build/libs/
+
+      # 날짜 기반 태그 생성
       - name: Set Docker image tag
         id: set_tag
         run: echo "docker_image_tag=$(date +'%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
