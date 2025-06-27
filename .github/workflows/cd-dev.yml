@@ -77,7 +77,7 @@ jobs:
           script: |
             cd backend
             git pull
-            export TAG=${{ needs.build.outputs.docker_image_tag }}
+            echo "TAG=${{ needs.build.outputs.docker_image_tag }}" > .env
             sudo docker-compose stop
             sudo docker-compose rm -f     
             sudo docker rmi ${{ secrets.DOCKER_HUB_USERNAME }}/weathertago:$TAG || true         
