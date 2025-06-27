@@ -59,7 +59,7 @@ jobs:
       # DockerHub Push
       - name: Build and Push Docker image
         run: |
-          docker build --no-cache -t ${{ secrets.DOCKER_HUB_USERNAME }}/weathertago:${{ steps.meta.outputs.tags }}.
+          docker build --no-cache -t ${{ secrets.DOCKER_HUB_USERNAME }}/weathertago:${{ steps.meta.outputs.tags }} .
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/weathertago:${{ steps.meta.outputs.tags }}
 
 
