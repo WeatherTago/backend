@@ -33,7 +33,7 @@ jobs:
 
       # Gradle Build
       - name: Build with Gradle
-        run:
+        run: |
           sudo chmod +x ./gradlew
           sudo ./gradlew clean build
 
