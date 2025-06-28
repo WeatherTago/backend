@@ -49,20 +49,7 @@ public class JwtTokenProvider {
     }
 
     // JWT 유효성 검사
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())
-                    .build()
-                    .parseClaimsJws(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
-    }
-
-    // JWT 유효성 검사(서비스 계층에서 사용) -> 에러 원인 파악을 위해
-    public void assertValidToken(String token) {
+    public void validateToken(String token) {
         try {
             Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
@@ -70,6 +57,10 @@ public class JwtTokenProvider {
                     .parseClaimsJws(token);
         } catch (ExpiredJwtException e) {
             throw new GeneralException(ErrorStatus.EXPIRED_TOKEN);
+        } catch (MalformedJwtException e) {
+            throw new GeneralException(ErrorStatus.MALFORMED_TOKEN);
+        } catch (SecurityException | SignatureException e) {
+            throw new GeneralException(ErrorStatus.INVALID_SIGNATURE);
         } catch (JwtException | IllegalArgumentException e) {
             throw new GeneralException(ErrorStatus.INVALID_TOKEN);
         }
@@ -106,9 +97,10 @@ public class JwtTokenProvider {
     // 인증 객체 추출 (Spring Security의 Authentication 객체 생성)
     public Authentication extractAuthentication(HttpServletRequest request) {
         String token = resolveToken(request);
-        if (token == null || !validateToken(token)) {
+        if (token == null) {
             throw new GeneralException(ErrorStatus._UNAUTHORIZED);
         }
+        validateToken(token);
 
         String kakaoId = getKakaoId(token);
         User principal = new User(kakaoId, "", Collections.emptyList());
