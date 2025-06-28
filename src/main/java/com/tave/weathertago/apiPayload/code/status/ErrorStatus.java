@@ -19,6 +19,8 @@ public enum ErrorStatus implements BaseErrorCode {
     // 로그인 에러
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH4011", "유효하지 않은 토큰입니다."),
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH4012", "토큰이 만료되었습니다."),
+    INVALID_SIGNATURE(HttpStatus.UNAUTHORIZED, "AUTH4013", "토큰 서명이 유효하지 않습니다."),
+    MALFORMED_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH4014", "형식이 잘못된 토큰입니다."),
 
     // 사용자 관련 에러
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER4041", "사용자를 찾을 수 없습니다."),
