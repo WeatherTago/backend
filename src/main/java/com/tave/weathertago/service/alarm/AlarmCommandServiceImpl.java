@@ -2,6 +2,7 @@ package com.tave.weathertago.service.alarm;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.Notification;
 import com.tave.weathertago.dto.fcm.AlarmFcmMessageDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,10 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
                 .putData("weather", dto.getWeather() != null ? dto.getWeather() : "")
                 .putData("title", title)
                 .putData("body", body)
+                .setNotification(Notification.builder()
+                    .setTitle(title)
+                    .setBody(body)
+                    .build())
                 .build();
 
         try {
