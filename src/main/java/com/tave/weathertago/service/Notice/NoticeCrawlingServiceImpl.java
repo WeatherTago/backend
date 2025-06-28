@@ -1,6 +1,7 @@
 package com.tave.weathertago.service.Notice;
 
 import com.tave.weathertago.domain.Notice;
+import com.tave.weathertago.dto.Notice.NoticeResponseDTO;
 import com.tave.weathertago.repository.NoticeRepository;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONArray;
@@ -19,7 +20,13 @@ public class NoticeCrawlingServiceImpl implements NoticeCrawlingService {
     private final NoticeRepository noticeRepository;
 
     @Override
-    public void crawlAndSaveNotices() {
+    public NoticeResponseDTO.NoticeCrawlingResult crawlAndSaveNotices() {
+        List<NoticeResponseDTO.NoticeDetail> createdNotices = new ArrayList<>();
+        List<NoticeResponseDTO.NoticeDetail> updatedNotices = new ArrayList<>();
+        List<NoticeResponseDTO.NoticeDetail> unchangedNotices = new ArrayList<>();
+
+        int totalCount = 0;
+
         try {
             String listApiUrl = "https://topis.seoul.go.kr/notice/selectNoticeList.do";
             Map<String, String> data = new HashMap<>();
@@ -44,10 +51,9 @@ public class NoticeCrawlingServiceImpl implements NoticeCrawlingService {
 
             JSONObject json = new JSONObject(response.body());
             JSONArray rows = json.getJSONArray("rows");
-
+            totalCount = rows.length();
 
             List<JSONObject> rowList = new ArrayList<>();
-
             for (int i = 0; i < rows.length(); i++) {
                 rowList.add(rows.getJSONObject(i));
             }
@@ -69,6 +75,14 @@ public class NoticeCrawlingServiceImpl implements NoticeCrawlingService {
                 String createAt = row.optString("createDate", "");
                 String updateAt = row.optString("updateDate", "");
 
+                NoticeResponseDTO.NoticeDetail detail = NoticeResponseDTO.NoticeDetail.builder()
+                        .noticeId(noticeId)
+                        .title(title)
+                        .content(content)
+                        .createdAt(createAt)
+                        .updatedAt(updateAt)
+                        .build();
+
                 Optional<Notice> existing = noticeRepository.findByNoticeId(noticeId);
 
                 if (existing.isEmpty()) {
@@ -81,8 +95,7 @@ public class NoticeCrawlingServiceImpl implements NoticeCrawlingService {
                             .updateAt(updateAt)
                             .build();
                     noticeRepository.save(notice);
-                    System.out.println("DB 저장: " + title);
-                    createdCount++;
+                    createdNotices.add(detail);
                 } else {
                     Notice notice = existing.get();
                     // 기존 DB의 updateAt과 크롤링한 updateAt이 다를 때만 업데이트
@@ -93,22 +106,24 @@ public class NoticeCrawlingServiceImpl implements NoticeCrawlingService {
                         notice.setCreateAt(createAt);
                         notice.setUpdateAt(updateAt);
                         noticeRepository.save(notice);
-                        System.out.println("DB 업데이트: " + title);
-                        updatedCount++;
+                        updatedNotices.add(detail);
                     } else {
                         // 변경 없음
                         System.out.println("변경 없음: " + title);
-                        unchangedCount++;
+                        unchangedNotices.add(detail);
                     }
                 }
             }
-            System.out.println("크롤링 완료 - 전체: " + rows.length()
-                    + ", 신규: " + createdCount
-                    + ", 업데이트: " + updatedCount
-                    + ", 그대로: " + unchangedCount);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return NoticeResponseDTO.NoticeCrawlingResult.builder()
+                .createdNotices(createdNotices)
+                .updatedNotices(updatedNotices)
+                .unchangedNotices(unchangedNotices)
+                .totalCount(totalCount)
+                .build();
     }
 
     // 1시간마다 크롤링 실행 (cron: 초 분 시 일 월 요일)
