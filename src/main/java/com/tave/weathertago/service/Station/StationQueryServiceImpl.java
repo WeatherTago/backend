@@ -1,5 +1,7 @@
 package com.tave.weathertago.service.Station;
 
+import com.tave.weathertago.apiPayload.code.status.ErrorStatus;
+import com.tave.weathertago.apiPayload.exception.handler.StationHandler;
 import com.tave.weathertago.domain.Station;
 import com.tave.weathertago.repository.StationRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -16,7 +18,13 @@ public class StationQueryServiceImpl implements StationQueryService {
 
     @Override
     public List<Station> getStationsByName(String name) {
-        return stationRepository.findAllByName(name);
+        List<Station> result = stationRepository.findAllByName(name);
+
+        if (result.isEmpty()) {
+            throw new StationHandler(ErrorStatus.STATION_NAME_NOT_FOUND);
+        }
+
+        return result;
     }
 
     @Override
@@ -24,38 +32,29 @@ public class StationQueryServiceImpl implements StationQueryService {
         return stationRepository.findAll();
     }
 
-    /**
-     * 역 이름으로 단일 역 코드를 조회
-     * - 중복된 이름이 있으면 예외 발생
-     */
-    public String getStationCodeByName(String name) {
-        List<Station> stations = stationRepository.findAllByName(name);
-
-        if (stations.isEmpty()) {
-            throw new EntityNotFoundException("해당 역을 찾을 수 없습니다: " + name);
-        }
-        if (stations.size() > 1) {
-            throw new IllegalStateException("중복된 역 이름입니다. 호선 정보를 함께 제공해주세요: " + name);
-        }
-
-        return stations.get(0).getStationCode();
-    }
 
     /**
      * 역 이름 + 호선으로 정확히 일치하는 역 코드 조회
      * - DB에 동일한 name + line 조합이 여러 개 있으면 예외 발생
      */
     public String getStationCodeByNameAndLine(String name, String line) {
-        List<Station> results = stationRepository.findAllByNameAndLine(name, line);
+        // 먼저 이름만으로 조회해서 역이 존재하는지 확인
+        List<Station> byName = stationRepository.findAllByName(name);
+        if (byName.isEmpty()) {
+            throw new StationHandler(ErrorStatus.STATION_NAME_NOT_FOUND); // 이름 자체가 없음
+        }
 
-        System.out.println("조회된 개수: " + results.size());
-        results.forEach(s -> System.out.println("→ " + s.getName() + " / " + s.getLine() + " / " + s.getStationCode()));
+        // 이름+호선으로 다시 조회
+        List<Station> results = byName.stream()
+                .filter(s -> s.getLine().equals(line))
+                .toList();
 
         if (results.isEmpty()) {
-            throw new EntityNotFoundException("해당 역(호선 포함)을 찾을 수 없습니다: " + name + " / " + line);
+            throw new StationHandler(ErrorStatus.STATION_LINE_NOT_FOUND); // 이름은 있지만 호선이 안 맞음
         }
+
         if (results.size() > 1) {
-            throw new IllegalStateException("중복된 역 정보가 존재합니다: " + name + " / " + line);
+            throw new StationHandler(ErrorStatus.STATION_LINE_NOT_FOUND); // 동일한 name+line 조합이 여러 개면 중복 오류
         }
 
         return results.get(0).getStationCode();

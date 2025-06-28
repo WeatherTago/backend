@@ -9,6 +9,5 @@ public interface StationQueryService {
 
     List<Station> getAllStations();
 
-    String getStationCodeByName(String name);
     String getStationCodeByNameAndLine(String name, String line);
 }
