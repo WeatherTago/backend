@@ -1,38 +1,56 @@
 package com.tave.weathertago.config.security.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tave.weathertago.apiPayload.code.ErrorReasonDTO;
+import com.tave.weathertago.apiPayload.exception.GeneralException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+
 
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final ObjectMapper objectMapper;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
+        try {
+            String token = jwtTokenProvider.resolveToken(request);
+            if (token != null) {
+                jwtTokenProvider.validateToken(token);
+                Authentication authentication = jwtTokenProvider.getAuthentication(token);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+            filterChain.doFilter(request, response);
+        } catch (GeneralException e) {
+            ErrorReasonDTO reason = e.getErrorReasonHttpStatus();
 
-        // 요청에서 토큰 추출
-        String token = jwtTokenProvider.resolveToken(request);
+            response.setStatus(reason.getHttpStatus().value());
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setCharacterEncoding("UTF-8");
 
-        // 유효한 토큰이면 인증 객체 생성 후 SecurityContext에 등록
-        if (token != null && jwtTokenProvider.validateToken(token)) {
-            Authentication authentication = jwtTokenProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("isSuccess", reason.getIsSuccess());
+            responseBody.put("code", reason.getCode());
+            responseBody.put("message", reason.getMessage());
+
+            objectMapper.writeValue(response.getWriter(), responseBody);
         }
-
-        // 예외 발생 없이 다음 필터로 넘김
-        filterChain.doFilter(request, response);
     }
 }

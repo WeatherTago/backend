@@ -46,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public AuthResponseDTO.ReissueResultDTO reissueToken(AuthRequestDTO.ReissueRequest request) {
 
-        jwtTokenProvider.assertValidToken(request.getRefreshToken());
+        jwtTokenProvider.validateToken(request.getRefreshToken());
 
         String kakaoId = jwtTokenProvider.getKakaoId(request.getRefreshToken());
 
