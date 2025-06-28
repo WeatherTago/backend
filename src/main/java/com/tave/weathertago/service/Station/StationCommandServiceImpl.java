@@ -18,8 +18,11 @@ public class StationCommandServiceImpl implements StationCommandService {
     public void initializeStations() {
         // CSV 경로 지정
         String csvPath = "src/main/resources/stations.xlsx.csv";
+        String detailedCsvPath = "src/main/resources/station_location.csv";
 
         // CSV를 통해 초기화
         stationCsvImporter.importFromCsv(csvPath);
+
+        stationCsvImporter.importFromLocationCsv(detailedCsvPath);
     }
 }

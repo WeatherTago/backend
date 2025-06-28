@@ -29,6 +29,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-devtools'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+	//ObjectMapper가 XML도 처리할 수 있도록 해주는 확장 모듈
+	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.17.0'
+
 	// swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
 	testImplementation 'org.springdoc:springdoc-openapi-starter-webmvc-api:2.8.6'

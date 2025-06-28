@@ -33,6 +33,8 @@ public class StationConverter {
                 .stationCode(stationDTO.getStationCode())
                 .congestionLevel(stationDTO.getCongestionLevel())
                 .congestionRate(stationDTO.getCongestionRate())
+                .latitude(stationDTO.getLatitude())
+                .longitude(stationDTO.getLongitude())
                 .build();
     }
 }

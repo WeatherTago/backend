@@ -14,4 +14,6 @@ public class StationDTO {
     private String stationCode;
     private String congestionLevel;
     private Integer congestionRate;
+    private Double latitude;
+    private Double longitude;
 }
