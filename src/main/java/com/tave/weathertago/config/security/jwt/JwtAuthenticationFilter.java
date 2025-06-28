@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -25,13 +26,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 요청에서 토큰 추출
         String token = jwtTokenProvider.resolveToken(request);
 
-        // 유효한 토큰이면 인증 객체 생성 후 SecurityContext에 저장
+        // 유효한 토큰이면 인증 객체 생성 후 SecurityContext에 등록
         if (token != null && jwtTokenProvider.validateToken(token)) {
             Authentication authentication = jwtTokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
-        // 다음 필터로 넘김
+        // 예외 발생 없이 다음 필터로 넘김
         filterChain.doFilter(request, response);
     }
 }

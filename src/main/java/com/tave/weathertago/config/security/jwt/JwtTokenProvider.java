@@ -1,7 +1,7 @@
 package com.tave.weathertago.config.security.jwt;
 
 import com.tave.weathertago.apiPayload.code.status.ErrorStatus;
-import com.tave.weathertago.apiPayload.exception.handler.UserHandler;
+import com.tave.weathertago.apiPayload.exception.GeneralException;
 import com.tave.weathertago.config.security.properties.Constants;
 import com.tave.weathertago.config.security.properties.JwtProperties;
 import io.jsonwebtoken.*;
@@ -48,7 +48,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // jwt 유효성 검사
+    // JWT 유효성 검사
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
@@ -56,10 +56,22 @@ public class JwtTokenProvider {
                     .build()
                     .parseClaimsJws(token);
             return true;
-        } catch (ExpiredJwtException e) {
-            throw new UserHandler(ErrorStatus.EXPIRED_TOKEN);
         } catch (JwtException | IllegalArgumentException e) {
-            throw new UserHandler(ErrorStatus.INVALID_TOKEN);
+            return false;
+        }
+    }
+
+    // JWT 유효성 검사(서비스 계층에서 사용) -> 에러 원인 파악을 위해
+    public void assertValidToken(String token) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
+        } catch (ExpiredJwtException e) {
+            throw new GeneralException(ErrorStatus.EXPIRED_TOKEN);
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new GeneralException(ErrorStatus.INVALID_TOKEN);
         }
     }
 
@@ -95,7 +107,7 @@ public class JwtTokenProvider {
     public Authentication extractAuthentication(HttpServletRequest request) {
         String token = resolveToken(request);
         if (token == null || !validateToken(token)) {
-            throw new UserHandler(ErrorStatus._UNAUTHORIZED);
+            throw new GeneralException(ErrorStatus._UNAUTHORIZED);
         }
 
         String kakaoId = getKakaoId(token);
