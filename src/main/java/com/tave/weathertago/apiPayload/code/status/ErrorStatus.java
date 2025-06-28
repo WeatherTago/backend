@@ -24,7 +24,16 @@ public enum ErrorStatus implements BaseErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER4041", "사용자를 찾을 수 없습니다."),
 
     // 역 관려 에러
-    STATION_NOT_FOUND(HttpStatus.BAD_REQUEST, "STATION4001", "해당 stationId에 대한 역을 찾을 수 없습니다.");
+    STATION_NOT_FOUND(HttpStatus.BAD_REQUEST, "STATION4001", "해당 stationId에 대한 역을 찾을 수 없습니다."),
+    STATION_NAME_NOT_FOUND(HttpStatus.BAD_REQUEST, "STATION4002", "해당 역을 찾을 수 없습니다."),
+    STATION_LINE_NOT_FOUND(HttpStatus.BAD_REQUEST, "STATION4003", "해당 호선을 찾을 수 없습니다."),
+
+    PATH_NOT_FOUND(HttpStatus.BAD_REQUEST, "STATION4005", "해당 경로를 찾을 수 없습니다."),
+
+    //csv읽기 실패
+    FILE_READ_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "STATION5002", "CSV 파일을 읽는 중 오류가 발생했습니다.");
+
+
 
 
     private final HttpStatus httpStatus;

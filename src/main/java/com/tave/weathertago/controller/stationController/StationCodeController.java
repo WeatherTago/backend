@@ -1,4 +1,4 @@
-package com.tave.weathertago.controller;
+package com.tave.weathertago.controller.stationController;
 
 import com.tave.weathertago.service.Station.StationQueryService;
 import lombok.RequiredArgsConstructor;
@@ -14,12 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class StationCodeController {
 
     private final StationQueryService stationQueryService;
-
-    @GetMapping
-    public ResponseEntity<String> getStationCodeByName(@RequestParam String name) {
-        String code = stationQueryService.getStationCodeByName(name);
-        return ResponseEntity.ok(code);
-    }
 
     @GetMapping("/with-line")
     public ResponseEntity<String> getStationCodeByNameAndLine(@RequestParam String name, @RequestParam String line) {

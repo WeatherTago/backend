@@ -1,4 +1,4 @@
-package com.tave.weathertago.controller;
+package com.tave.weathertago.controller.stationController;
 
 import com.tave.weathertago.apiPayload.ApiResponse;
 import com.tave.weathertago.converter.StationConverter;
@@ -26,11 +26,12 @@ public class StationRestController {
 
     @PostMapping("/initialize")
     public ApiResponse<String> initializeStations() {
-        String path = Objects.requireNonNull(
-                getClass().getClassLoader().getResource("station.xlsx.csv")
-        ).getPath();
+        String path = Objects.requireNonNull(getClass().getClassLoader().getResource("station.xlsx.csv")).getPath();
+        String locationPath = Objects.requireNonNull(getClass().getClassLoader().getResource("station_location.csv")).getPath();
 
         stationCsvImporter.importFromCsv(path);
+        stationCsvImporter.importFromLocationCsv(locationPath); // ← 변경된 메서드 호출
+
         return ApiResponse.onSuccess("역 정보 초기화 완료");
     }
 
