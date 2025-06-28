@@ -18,17 +18,15 @@ public class FcmConfig {
 
     @PostConstruct
     public void initialize() {
-        try {
-            InputStream serviceAccount = new FileInputStream("src/main/resources/weathertago-firebase-adminsdk-fbsvc-4885ca4b1e.json");
-
+        try (InputStream serviceAccount = getClass().getResourceAsStream("/weathertago-firebase-adminsdk-fbsvc-4885ca4b1e.json")) {
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                     .build();
-
             FirebaseApp.initializeApp(options);
             log.info("Fcm 설정 성공");
         } catch (IOException exception) {
             log.error("Fcm 연결 오류 {}", exception.getMessage());
         }
     }
+
 }
