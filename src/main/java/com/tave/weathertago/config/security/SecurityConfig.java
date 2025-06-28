@@ -32,18 +32,18 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
 
-                        /*
+
                     // 🔓 [개발 단계] 전체 API 허용 (Swagger 포함)
                     .anyRequest().permitAll()
 
-                         */
 
 
 
+                    /*
                     // 🔒 [배포 단계] 인증 적용 설정 (필요한 경로만 허용)
                     .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                     .anyRequest().authenticated()
-
+                    */
 
 
 
