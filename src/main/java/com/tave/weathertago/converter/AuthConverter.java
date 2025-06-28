@@ -13,9 +13,10 @@ public class AuthConverter {
                 .build();
     }
 
-    public static AuthResponseDTO.ReissueResultDTO toReissueResultDTO(String newAccessToken) {
+    public static AuthResponseDTO.ReissueResultDTO toReissueResultDTO(String newAccessToken, String newRefreshToken) {
         return AuthResponseDTO.ReissueResultDTO.builder()
                 .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
                 .build();
     }
 }

@@ -1,4 +1,4 @@
-package com.tave.weathertago.controller.stationController;
+package com.tave.weathertago.controller;
 
 import com.tave.weathertago.apiPayload.ApiResponse;
 import com.tave.weathertago.converter.StationConverter;
@@ -10,6 +10,8 @@ import com.tave.weathertago.service.Station.StationQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,13 +28,25 @@ public class StationRestController {
 
     @PostMapping("/initialize")
     public ApiResponse<String> initializeStations() {
-        String path = Objects.requireNonNull(getClass().getClassLoader().getResource("station.xlsx.csv")).getPath();
-        String locationPath = Objects.requireNonNull(getClass().getClassLoader().getResource("station_location.csv")).getPath();
+        try (
+                InputStream inputStream = getClass().getClassLoader().getResourceAsStream("station.xlsx.csv");
+                InputStream locationStream = getClass().getClassLoader().getResourceAsStream("station_location.csv")
+        ) {
+            if (inputStream == null) {
+                throw new RuntimeException("station.xlsx.csv 파일을 classpath에서 찾을 수 없습니다.");
+            }
 
-        stationCsvImporter.importFromCsv(path);
-        stationCsvImporter.importFromLocationCsv(locationPath); // ← 변경된 메서드 호출
+            if (locationStream == null) {
+                throw new RuntimeException("station_location.csv 파일을 classpath에서 찾을 수 없습니다.");
+            }
 
-        return ApiResponse.onSuccess("역 정보 초기화 완료");
+            stationCsvImporter.importFromCsv(inputStream);              // 역 목록 저장
+            stationCsvImporter.importFromLocationCsv(locationStream);   // ⬅ 좌표 정보 저장
+
+            return ApiResponse.onSuccess("역 정보 + 좌표 초기화 완료");
+        } catch (IOException e) {
+            throw new RuntimeException("CSV 파일을 읽는 중 오류가 발생했습니다.", e);
+        }
     }
 
     @GetMapping("/search")
