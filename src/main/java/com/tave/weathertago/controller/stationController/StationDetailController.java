@@ -1,4 +1,4 @@
-package com.tave.weathertago.controller;
+package com.tave.weathertago.controller.stationController;
 
 import com.tave.weathertago.apiPayload.ApiResponse;
 import com.tave.weathertago.dto.StationDetail.StationDetailResponseDTO;

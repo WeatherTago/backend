@@ -2,10 +2,7 @@ package com.tave.weathertago.domain;
 
 import com.tave.weathertago.domain.common.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(
@@ -32,4 +29,13 @@ public class Station extends BaseEntity {
 
     private Integer congestionRate;
 
+    private Double latitude;
+
+    private Double longitude;
+
+    // 위치 좌표를 한 번에 갱신하는 메서드
+    public void updateLocation(Double latitude, Double longitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
 }

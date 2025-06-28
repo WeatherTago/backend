@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,17 +23,16 @@ public class TimetableApiClient {
 
     public List<TimeTableDTO> getTimetable(String stationCode, String weekTag, String inoutTag) {
         try {
-            StringBuilder urlBuilder = new StringBuilder(BASE_URL);
-            urlBuilder.append("/").append(URLEncoder.encode(API_KEY, "UTF-8"));
-            urlBuilder.append("/").append("json");
-            urlBuilder.append("/").append("SearchSTNTimeTableByIDService");
-            urlBuilder.append("/").append("1");
-            urlBuilder.append("/").append("1000");
-            urlBuilder.append("/").append(URLEncoder.encode(stationCode, "UTF-8"));
-            urlBuilder.append("/").append(URLEncoder.encode(weekTag, "UTF-8"));
-            urlBuilder.append("/").append(URLEncoder.encode(inoutTag, "UTF-8"));
+            String urlBuilder = BASE_URL + "/" + URLEncoder.encode(API_KEY, StandardCharsets.UTF_8) +
+                    "/" + "json" +
+                    "/" + "SearchSTNTimeTableByIDService" +
+                    "/" + "1" +
+                    "/" + "1000" +
+                    "/" + URLEncoder.encode(stationCode, StandardCharsets.UTF_8) +
+                    "/" + URLEncoder.encode(weekTag, StandardCharsets.UTF_8) +
+                    "/" + URLEncoder.encode(inoutTag, StandardCharsets.UTF_8);
 
-            URL url = new URL(urlBuilder.toString());
+            URL url = new URL(urlBuilder);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 

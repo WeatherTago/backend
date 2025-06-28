@@ -26,5 +26,12 @@ public class StationCommandServiceImpl implements StationCommandService {
         } catch (IOException e) {
             throw new RuntimeException("CSV 파일을 읽는 중 오류가 발생했습니다.", e);
         }
+
+        // 좌표 정보 import
+        try (InputStream locationStream = new ClassPathResource("station_location.csv").getInputStream()) {
+            stationCsvImporter.importFromLocationCsv(locationStream); // <- 메서드 시그니처 수정 필요
+        } catch (IOException e) {
+            throw new RuntimeException("좌표 CSV 파일을 읽는 중 오류가 발생했습니다.", e);
+        }
     }
 }
