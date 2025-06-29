@@ -66,3 +66,5 @@ replay_pid*
 application.*
 weathertago-firebase-adminsdk-fbsvc-4885ca4b1e.json
 
+src/main/resources/weathertago-firebase-adminsdk-*.json
+
