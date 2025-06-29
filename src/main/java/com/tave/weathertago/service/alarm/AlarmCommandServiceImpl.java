@@ -3,7 +3,7 @@ package com.tave.weathertago.service.alarm;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
-import com.tave.weathertago.dto.fcm.AlarmFcmMessageDto;
+import com.tave.weathertago.dto.alarm.AlarmFcmMessageDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

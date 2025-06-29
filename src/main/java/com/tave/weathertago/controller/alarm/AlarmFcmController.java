@@ -1,6 +1,6 @@
 package com.tave.weathertago.controller.alarm;
 
-import com.tave.weathertago.dto.fcm.AlarmFcmMessageDto;
+import com.tave.weathertago.dto.alarm.AlarmFcmMessageDto;
 import com.tave.weathertago.service.alarm.AlarmCommandService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

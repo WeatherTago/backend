@@ -1,4 +1,4 @@
-package com.tave.weathertago.dto.fcm;
+package com.tave.weathertago.dto.alarm;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
