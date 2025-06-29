@@ -23,8 +23,8 @@ public class AlarmResponseDTO {
         private AlarmDay alarmDay;
         private LocalTime alarmTime;
 
-        private WeatherDTO weather;
-        private CongestionDTO congestion;
+//        private WeatherDTO weather;
+//        private CongestionDTO congestion;
 
     }
 }
