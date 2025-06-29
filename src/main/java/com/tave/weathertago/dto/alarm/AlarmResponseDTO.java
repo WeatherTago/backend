@@ -2,6 +2,7 @@ package com.tave.weathertago.dto.alarm;
 
 import com.tave.weathertago.domain.AlarmDay;
 import com.tave.weathertago.domain.Station;
+import com.tave.weathertago.domain.User;
 import com.tave.weathertago.dto.CongestionDTO;
 import com.tave.weathertago.dto.WeatherDTO;
 import lombok.Builder;
@@ -15,7 +16,7 @@ public class AlarmResponseDTO {
     @Getter
     @Builder
     public static class AlarmDetailDTO {
-        private Long userId;
+        private User userId;
         private Long alarmId;
         private String pushToken;
         private LocalTime referenceTime;
