@@ -16,11 +16,10 @@ public class AlarmResponseDTO {
     @Getter
     @Builder
     public static class AlarmDetailDTO {
-        private User userId;
         private Long alarmId;
         private String pushToken;
         private LocalTime referenceTime;
-        private Station stationName;
+        private String stationName;
         private AlarmDay alarmDay;
         private LocalTime alarmTime;
 

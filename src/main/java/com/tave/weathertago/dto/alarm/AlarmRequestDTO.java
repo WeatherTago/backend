@@ -14,7 +14,7 @@ public class AlarmRequestDTO {
     public static class AlarmCreateRequestDTO {
         private String pushToken;
         private LocalTime referenceTime;
-        private Station stationName;
+        private String stationName;
         private AlarmDay alarmDay;
         private LocalTime alarmTime;
     }
@@ -25,7 +25,7 @@ public class AlarmRequestDTO {
         private Long alarmId;
         private String pushToken;
         private LocalTime referenceTime;
-        private Station stationName;
+        private String stationName;
         private AlarmDay alarmDay;
         private LocalTime alarmTime;
     }

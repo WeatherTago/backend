@@ -10,16 +10,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "alarm fcm controller", description = "알림 전송 API")
-@RestController
-@RequiredArgsConstructor
-@RequestMapping("/api/alarm")
-public class AlarmFcmController {
-    private final AlarmCommandService alarmFcmService;
+//@Tag(name = "alarm fcm controller", description = "알림 전송 API")
+//@RestController
+//@RequiredArgsConstructor
+//@RequestMapping("/api/alarm")
+//public class AlarmFcmController {
+//    private final AlarmCommandService alarmFcmService;
 
 //    @PostMapping("/send")
 //    public ResponseEntity<String> sendAlarm(@RequestBody AlarmFcmMessageDto dto) {
 //        alarmFcmService.sendAlarm(dto);
 //        return ResponseEntity.ok("알림 전송 완료");
 //    }
-}
+//}

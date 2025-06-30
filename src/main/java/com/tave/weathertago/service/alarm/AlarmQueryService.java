@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface AlarmQueryService {
     Optional<AlarmResponseDTO.AlarmDetailDTO> getAlarmDetail(Long alarmId);
-    List<AlarmResponseDTO.AlarmDetailDTO> getAlarmsByUserId(Long userId);
+    List<AlarmResponseDTO.AlarmDetailDTO> getAlarms();
 }

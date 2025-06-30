@@ -32,10 +32,8 @@ public class Alarm extends BaseEntity {
     private LocalTime referenceTime;
 
     // 역 이름 (즐겨찾기 테이블에 있는 역 불러오기)
-    // 임시로 station에서 가져오게 함
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "station_name", referencedColumnName = "name", nullable = false)
-    private Station stationName;
+    @Column(nullable = false)
+    private String stationName;
 
     // 알람 보내는 시점: 당일, 하루 전
     @Enumerated(EnumType.STRING) // Enum 값을 문자열로 저장

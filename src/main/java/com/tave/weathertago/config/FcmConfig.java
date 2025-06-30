@@ -22,8 +22,13 @@ public class FcmConfig {
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                     .build();
-            FirebaseApp.initializeApp(options);
-            log.info("Fcm 설정 성공");
+
+            if (FirebaseApp.getApps().isEmpty()) {  // 초기화된 앱이 없으면 초기화
+                FirebaseApp.initializeApp(options);
+                log.info("Fcm 설정 성공");
+            } else {
+                log.info("FirebaseApp이 이미 초기화되어 있음");
+            }
         } catch (IOException exception) {
             log.error("Fcm 연결 오류 {}", exception.getMessage());
         }
