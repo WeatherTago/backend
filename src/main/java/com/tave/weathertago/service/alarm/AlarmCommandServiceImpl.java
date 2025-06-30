@@ -84,44 +84,5 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
         alarmRepository.delete(alarm);
     }
 
-    @Override
-    public AlarmFcmMessageDto sendAlarm(Long alarmId){
-        // 1. 알람 정보 조회
-        Alarm alarm = alarmRepository.findById(alarmId)
-                .orElseThrow(() -> new RuntimeException("Alarm not found"));
-
-        // 2. 알림 제목/본문 설정 (필요에 따라 커스터마이즈)
-        String title = "지하철 알림";
-        String body = String.format("%s역, %s에 알람이 설정되었습니다.",
-                alarm.getStationName(),
-                alarm.getAlarmTime().toString());
-
-        // 3. FCM 메시지 생성
-        Message message = Message.builder()
-                .setToken(alarm.getPushToken())
-                .setNotification(Notification.builder()
-                        .setTitle(title)
-                        .setBody(body)
-                        .build())
-                .build();
-
-        // 4. FCM 메시지 전송
-        try {
-            String response = FirebaseMessaging.getInstance().send(message);
-            System.out.println("Successfully sent message: " + response);
-        } catch (Exception e) {
-            e.printStackTrace();
-            // 필요하다면 예외 처리 로직 추가
-        }
-
-        // 5. 전송에 사용한 정보를 DTO로 만들어 반환
-        return AlarmFcmMessageDto.builder()
-                .pushToken(alarm.getPushToken())
-                .title(title)
-                .body(body)
-                .build();
-
-    }
-
-    }
+}
 
