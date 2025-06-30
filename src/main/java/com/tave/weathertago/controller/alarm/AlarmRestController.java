@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Tag(name = "alarm", description = "알람 API")
+@Tag(name = "Alarm", description = "알람 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users/me/alarms")
