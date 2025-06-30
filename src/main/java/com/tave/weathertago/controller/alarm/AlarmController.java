@@ -29,7 +29,7 @@ public class AlarmController {
 
     // 알람 수정
     @Operation(summary = "알람 수정", description = "알람을 수정합니다.")
-    @PatchMapping("/{alarmId}")
+    @PatchMapping("/{alarm_id}")
     public ResponseEntity<ApiResponse<Void>> updateAlarm(@RequestBody AlarmRequestDTO.AlarmUpdateRequestDTO dto) {
         alarmCommandService.updateAlarm(dto);
         return ResponseEntity.ok(ApiResponse.onSuccess(null));
@@ -37,7 +37,7 @@ public class AlarmController {
 
     // 알람 삭제
     @Operation(summary = "알람 삭제", description = "알람을 삭제합니다.")
-    @DeleteMapping("/{alarmId}")
+    @DeleteMapping("/{alarm_id}")
     public ResponseEntity<ApiResponse<Void>> deleteAlarm(@PathVariable Long alarmId) {
         alarmCommandService.deleteAlarm(alarmId);
         return ResponseEntity.ok(ApiResponse.onSuccess(null));
