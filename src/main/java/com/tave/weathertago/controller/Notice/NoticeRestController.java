@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Optional;
 
-@Tag(name = "notice", description = "공지사항 조회 API")
+@Tag(name = "Notice", description = "공지사항 조회 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/notice")
