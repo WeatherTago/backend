@@ -18,7 +18,7 @@ public class AlarmFcmController {
     private final AlarmSendService alarmSendService;
 
     @Operation(summary = "알람 전송", description = "사용자가 설정한 시간에 맞추어 알람을 전송합니다.")
-    @PostMapping("/{alarmId}/send")
+    @PostMapping("/{alarm_id}/send")
     public ResponseEntity<ApiResponse<AlarmFcmMessageDto>> sendAlarm(@PathVariable Long alarmId) {
         try {
             AlarmFcmMessageDto dto = alarmSendService.sendAlarm(alarmId);
