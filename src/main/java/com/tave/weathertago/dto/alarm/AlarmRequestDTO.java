@@ -18,4 +18,15 @@ public class AlarmRequestDTO {
         private AlarmDay alarmDay;
         private LocalTime alarmTime;
     }
+
+    @Getter
+    @Builder
+    public static class AlarmUpdateRequestDTO {
+        private Long alarmId;
+        private String pushToken;
+        private LocalTime referenceTime;
+        private Station stationName;
+        private AlarmDay alarmDay;
+        private LocalTime alarmTime;
+    }
 }

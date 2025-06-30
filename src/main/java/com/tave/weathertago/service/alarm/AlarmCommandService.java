@@ -4,10 +4,8 @@ import com.tave.weathertago.dto.alarm.AlarmFcmMessageDto;
 import com.tave.weathertago.dto.alarm.AlarmRequestDTO;
 
 public interface AlarmCommandService {
-    void sendAlarm(AlarmFcmMessageDto dto);
-
-    Long createAlarm(Long userId, AlarmRequestDTO.AlarmCreateRequestDTO dto);
-    void updateAlarm(Long alarmId, AlarmRequestDTO.AlarmCreateRequestDTO dto);
-    void sendAlarm();
+    Long createAlarm(AlarmRequestDTO.AlarmCreateRequestDTO dto);
+    void updateAlarm(AlarmRequestDTO.AlarmUpdateRequestDTO dto);
+    AlarmFcmMessageDto sendAlarm(Long alarmId);
     void deleteAlarm(Long alarmId);
 }

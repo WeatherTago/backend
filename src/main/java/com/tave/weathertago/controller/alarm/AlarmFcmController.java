@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class AlarmFcmController {
     private final AlarmCommandService alarmFcmService;
 
-    @PostMapping("/send")
-    public ResponseEntity<String> sendAlarm(@RequestBody AlarmFcmMessageDto dto) {
-        alarmFcmService.sendAlarm(dto);
-        return ResponseEntity.ok("알림 전송 완료");
-    }
+//    @PostMapping("/send")
+//    public ResponseEntity<String> sendAlarm(@RequestBody AlarmFcmMessageDto dto) {
+//        alarmFcmService.sendAlarm(dto);
+//        return ResponseEntity.ok("알림 전송 완료");
+//    }
 }
