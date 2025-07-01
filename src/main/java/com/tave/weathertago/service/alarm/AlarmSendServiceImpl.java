@@ -10,11 +10,17 @@ import com.tave.weathertago.dto.alarm.AlarmFcmMessageDto;
 import com.tave.weathertago.repository.AlarmRepository;
 import com.tave.weathertago.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -25,6 +31,7 @@ public class AlarmSendServiceImpl implements AlarmSendService {
     private final AlarmRepository alarmRepository;
     private final UserRepository userRepository;
     private final FirebaseMessaging firebaseMessaging;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Override
     public AlarmFcmMessageDto sendAlarm(Long alarmId){
@@ -35,11 +42,50 @@ public class AlarmSendServiceImpl implements AlarmSendService {
         // 2. FCM 메시지 생성
         // alarmDay에 따라 알림 대상(오늘/내일) 결정
         String alarmDayStr;
+        LocalDate weatherDate;
+
+        String refTimeStr = String.valueOf(alarm.getReferenceTime()); // 예: "14:30:00"
+        LocalTime localTime = LocalTime.parse(refTimeStr, DateTimeFormatter.ofPattern("HH:mm"));
+        LocalDateTime refDateTime = LocalDate.now().atTime(localTime);
+
         switch (alarm.getAlarmDay()) {
-            case TODAY -> alarmDayStr = "오늘";
-            case YESTERDAY -> alarmDayStr = "내일";
-            default -> alarmDayStr = "오늘";
+            case TODAY -> {
+                alarmDayStr = "오늘";
+                weatherDate = refDateTime.toLocalDate(); // 예: "2025-06-30"
+            }
+            case YESTERDAY -> {
+                alarmDayStr = "내일";
+                weatherDate = refDateTime.toLocalDate().plusDays(1); // 예: "2025-07-01"
+            }
+            default -> {
+                alarmDayStr = "오늘";
+                weatherDate = refDateTime.toLocalDate();
+            }
         }
+
+        // Redis에서 해당 날짜의 날씨 정보 조회
+        String weatherKey = String.format("weather:%sT%02d:00:00",
+                weatherDate,
+                refDateTime.getHour()
+        );
+        HashOperations<String, String, String> hashOps = redisTemplate.opsForHash();
+        // 예: weather:2025-06-30T07:00:00
+        String tmp = hashOps.get(weatherKey, "TMP");
+        String reh = hashOps.get(weatherKey, "REH");
+        String pcp = hashOps.get(weatherKey, "PCP");
+        String wsd = hashOps.get(weatherKey, "WSD");
+        String sno = hashOps.get(weatherKey, "SNO");
+        String vec = hashOps.get(weatherKey, "VEC");
+
+        String weatherInfo;
+        if (tmp != null && reh != null && pcp != null && wsd != null && sno != null && vec != null) {
+            weatherInfo = String.format("기온: %s°C, 습도: %s%%, 강수량: %smm, 풍속: %sm/s, 적설: %scm, 풍향: %s°",
+                    tmp, reh, pcp, wsd, sno, vec);
+        } else {
+            weatherInfo = "날씨 정보 없음";
+        }
+
+        System.out.println("날씨 정보" + weatherInfo);
 
         // 혼잡도/날씨 mock 데이터
         // String congestionMock = "여유"; // 예: "여유", "보통", "혼잡"
@@ -57,7 +103,7 @@ public class AlarmSendServiceImpl implements AlarmSendService {
                 alarmDayStr,
                 alarm.getReferenceTime(),
                 congestionMock,
-                weatherMock
+                weatherInfo
         );
 
         // 3. FCM 메시지 빌드

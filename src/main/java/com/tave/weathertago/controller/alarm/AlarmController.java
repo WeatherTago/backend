@@ -38,7 +38,7 @@ public class AlarmController {
     // 알람 삭제
     @Operation(summary = "알람 삭제", description = "알람을 삭제합니다.")
     @DeleteMapping("/{alarm_id}")
-    public ResponseEntity<ApiResponse<Void>> deleteAlarm(@PathVariable Long alarmId) {
+    public ResponseEntity<ApiResponse<Void>> deleteAlarm(@PathVariable("alarm_id") Long alarmId) {
         alarmCommandService.deleteAlarm(alarmId);
         return ResponseEntity.ok(ApiResponse.onSuccess(null));
     }
