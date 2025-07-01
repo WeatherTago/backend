@@ -19,9 +19,7 @@ jobs:
         uses: Ilshidur/action-discord@master
         with:
           args:
-            '🚀 CD - Dev workflow 실행됨
-            👉 Triggered by: **${{ github.actor }}**
-            🔀 Branch: **${{ github.ref }}** '
+            '🚀 CD - Dev workflow 실행됨  Triggered by: **${{ github.actor }}**'
 
       # 코드 체크아웃
       - name: Checkout repository
