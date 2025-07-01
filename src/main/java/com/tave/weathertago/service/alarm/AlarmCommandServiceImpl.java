@@ -54,6 +54,12 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
 
     @Override
     public void updateAlarm(AlarmRequestDTO.AlarmUpdateRequestDTO dto){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String kakaoId =  authentication.getName();
+
+        User user = userRepository.findByKakaoId(kakaoId)
+                .orElseThrow(()->new UserHandler(ErrorStatus.USER_NOT_FOUND));
+
         Alarm alarm = alarmRepository.findById(dto.getAlarmId())
                 .orElseThrow(() -> new RuntimeException("Alarm not found"));
 
@@ -77,6 +83,12 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
 
     @Override
     public void deleteAlarm(Long alarmId){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String kakaoId =  authentication.getName();
+
+        User user = userRepository.findByKakaoId(kakaoId)
+                .orElseThrow(()->new UserHandler(ErrorStatus.USER_NOT_FOUND));
+
 
         Alarm alarm = alarmRepository.findById(alarmId)
                 .orElseThrow(() -> new RuntimeException("Alarm not found"));

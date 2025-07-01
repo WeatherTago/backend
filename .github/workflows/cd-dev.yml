@@ -18,7 +18,10 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@master
         with:
-          args: '🚀 CD - Dev workflow 실행됨'
+          args:
+            '🚀 CD - Dev workflow 실행됨
+            👉 Triggered by: **${{ github.actor }}**
+            🔀 Branch: **${{ github.ref }}** '
 
       # 코드 체크아웃
       - name: Checkout repository
