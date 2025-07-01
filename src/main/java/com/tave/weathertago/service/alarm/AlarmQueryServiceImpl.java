@@ -27,6 +27,12 @@ public class AlarmQueryServiceImpl implements AlarmQueryService {
     
     @Override
     public Optional<AlarmResponseDTO.AlarmDetailDTO> getAlarmDetail(Long alarmId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String kakaoId =  authentication.getName();
+
+        User user = userRepository.findByKakaoId(kakaoId)
+                .orElseThrow(()->new UserHandler(ErrorStatus.USER_NOT_FOUND));
+
         return alarmRepository.findByAlarmId(alarmId)
                 .map(AlarmConverter::toAlarmDetailDTO);
     }
