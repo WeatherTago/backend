@@ -1,11 +1,11 @@
-package com.tave.weathertago.service.Station;
+package com.tave.weathertago.service.station;
 
 import com.tave.weathertago.apiPayload.code.status.ErrorStatus;
 import com.tave.weathertago.apiPayload.exception.handler.StationHandler;
 import com.tave.weathertago.converter.SubwayPathConverter;
 import com.tave.weathertago.domain.Station;
-import com.tave.weathertago.dto.Station.SubwayPathDTO;
-import com.tave.weathertago.dto.Station.SubwayPathResponseDTO;
+import com.tave.weathertago.dto.station.SubwayPathDTO;
+import com.tave.weathertago.dto.station.SubwayPathResponseDTO;
 import com.tave.weathertago.infrastructure.SubwayOpenApiClient;
 import com.tave.weathertago.repository.StationRepository;
 import lombok.RequiredArgsConstructor;

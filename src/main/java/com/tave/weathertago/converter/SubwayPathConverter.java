@@ -8,27 +8,28 @@ import java.util.List;
 
 
 public class SubwayPathConverter {
-
     public static SubwayPathDTO from(SubwayPathResponseDTO response) {
         if (response == null || response.getMsgBody() == null || response.getMsgBody().getItemList().isEmpty()) {
             throw new RuntimeException("API 응답이 비어있습니다.");
         }
 
-        SubwayPathResponseDTO.Item item = response.getMsgBody().getItemList().get(0);
-
         List<SubwayPathDTO.SubwayStepDto> steps = new ArrayList<>();
-        for (SubwayPathResponseDTO.PathList path : item.getPathList()) {
+        for (SubwayPathResponseDTO.Item item : response.getMsgBody().getItemList()) {
             steps.add(SubwayPathDTO.SubwayStepDto.builder()
-                    .line(path.getRouteNm())
-                    .startStation(path.getFname())
-                    .endStation(path.getTname())
+                    .line(item.getRouteNm())
+                    .startStation(item.getFname())
+                    .endStation(item.getTname())
                     .build());
         }
 
+        // 첫 번째 item 기준으로 totalTime, totalDistance 설정
+        SubwayPathResponseDTO.Item first = response.getMsgBody().getItemList().get(0);
+
         return SubwayPathDTO.builder()
-                .totalTime(item.getTime())
-                .totalDistance(item.getDistance())
+                .totalTime(first.getTime())
+                .totalDistance(first.getDistance())
                 .steps(steps)
                 .build();
     }
+
 }

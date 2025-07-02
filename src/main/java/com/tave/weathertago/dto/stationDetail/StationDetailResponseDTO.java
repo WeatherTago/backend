@@ -1,4 +1,4 @@
-package com.tave.weathertago.dto.stationDetail;
+package com.tave.weathertago.dto.StationDetail;
 
 import com.tave.weathertago.dto.TimeTableDTO;
 import com.tave.weathertago.dto.WeatherDTO;
@@ -9,7 +9,6 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/*
 public class StationDetailResponseDTO {
 
     @Builder
@@ -24,4 +23,3 @@ public class StationDetailResponseDTO {
         LocalDateTime createdAt;
     }
 }
- */

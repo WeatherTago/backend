@@ -48,11 +48,12 @@ public class StationRestController {
     }
 
     @GetMapping("/search")
-    public ApiResponse<List<StationResponseDTO.JoinResultDTO>> getStationsByName(
+    public ApiResponse<StationResponseDTO.JoinResultDTO> getStationByNameAndLine(
             @RequestParam("name") String name,
-            @RequestParam("time") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime time
+            @RequestParam("line") String line,
+            @RequestParam("time") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime queryTime
     ) {
-        List<StationResponseDTO.JoinResultDTO> result = stationQueryService.getStationsByName(name, time);
+        StationResponseDTO.JoinResultDTO result = stationQueryService.getStationByNameAndLine(name, line, queryTime);
         return ApiResponse.onSuccess(result);
     }
 }
