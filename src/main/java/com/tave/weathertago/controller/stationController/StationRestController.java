@@ -1,14 +1,17 @@
 package com.tave.weathertago.controller.stationController;
 
 import com.tave.weathertago.apiPayload.ApiResponse;
+
 import com.tave.weathertago.dto.station.StationResponseDTO;
 import com.tave.weathertago.infrastructure.csv.StationCsvImporter;
 import com.tave.weathertago.service.station.StationQueryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -16,7 +19,6 @@ import java.util.List;
 @RequestMapping("/api/station")
 public class StationRestController {
 
-    private final StationCommandService stationCommandService;
 
     private final StationQueryService stationQueryService;
 
@@ -46,12 +48,11 @@ public class StationRestController {
     }
 
     @GetMapping("/search")
-    public ApiResponse<List<StationResponseDTO.JoinResultDTO>> getStationsByName(@RequestParam("name") String name) {
-        List<Station> stations = stationQueryService.getStationsByName(name);
-        List<StationResponseDTO.JoinResultDTO> result = stations.stream()
-                .map(StationConverter::toJoinResultDTO)
-                .toList();
-
+    public ApiResponse<List<StationResponseDTO.JoinResultDTO>> getStationsByName(
+            @RequestParam("name") String name,
+            @RequestParam("time") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime time
+    ) {
+        List<StationResponseDTO.JoinResultDTO> result = stationQueryService.getStationsByName(name, time);
         return ApiResponse.onSuccess(result);
     }
 }
