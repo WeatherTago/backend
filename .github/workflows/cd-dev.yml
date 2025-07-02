@@ -95,3 +95,12 @@ jobs:
           ACTIONS_RUNNER_DEBUG: true
 
 
+      - name: Discord Notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args:
+            '😎 배포 완료됨 ✨'
+
+
