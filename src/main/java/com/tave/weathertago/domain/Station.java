@@ -4,6 +4,9 @@ import com.tave.weathertago.domain.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(
         name = "station",
@@ -32,6 +35,10 @@ public class Station extends BaseEntity {
     private Double latitude;
 
     private Double longitude;
+
+    @ManyToMany(mappedBy = "stations")
+    private List<Favorite> favorites = new ArrayList<>();
+
 
     // 위치 좌표를 한 번에 갱신하는 메서드
     public void updateLocation(Double latitude, Double longitude) {
