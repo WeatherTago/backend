@@ -1,4 +1,4 @@
-package com.tave.weathertago.dto.Station;
+package com.tave.weathertago.dto.station;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

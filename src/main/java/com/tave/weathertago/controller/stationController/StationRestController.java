@@ -1,19 +1,15 @@
-package com.tave.weathertago.controller;
+package com.tave.weathertago.controller.stationController;
 
 import com.tave.weathertago.apiPayload.ApiResponse;
-import com.tave.weathertago.converter.StationConverter;
-import com.tave.weathertago.domain.Station;
-import com.tave.weathertago.dto.Station.StationResponseDTO;
+import com.tave.weathertago.dto.station.StationResponseDTO;
 import com.tave.weathertago.infrastructure.csv.StationCsvImporter;
-import com.tave.weathertago.service.Station.StationCommandService;
-import com.tave.weathertago.service.Station.StationQueryService;
+import com.tave.weathertago.service.station.StationQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor

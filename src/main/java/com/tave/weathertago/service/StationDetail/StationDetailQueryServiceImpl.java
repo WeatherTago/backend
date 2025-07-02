@@ -1,21 +1,6 @@
 package com.tave.weathertago.service.StationDetail;
 
-import com.tave.weathertago.apiPayload.code.status.ErrorStatus;
-import com.tave.weathertago.apiPayload.exception.handler.StationHandler;
-import com.tave.weathertago.converter.StationDetailConverter;
-import com.tave.weathertago.domain.Station;
-import com.tave.weathertago.dto.StationDetail.StationDetailResponseDTO;
-import com.tave.weathertago.dto.TimeTableDTO;
-import com.tave.weathertago.dto.WeatherDTO;
-import com.tave.weathertago.infrastructure.TimetableApiClient;
-import com.tave.weathertago.infrastructure.WeatherApiClient;
-import com.tave.weathertago.repository.StationRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.util.List;
-
+/*
 @Service
 @RequiredArgsConstructor
 public class StationDetailQueryServiceImpl implements StationDetailQueryService {
@@ -30,10 +15,10 @@ public class StationDetailQueryServiceImpl implements StationDetailQueryService 
                 .orElseThrow(() -> new StationHandler(ErrorStatus.STATION_NOT_FOUND));
 
         // 날씨 호출
-        /*
+
         WeatherDTO weather = weatherApiClient.getWeather(name);
 
-         */
+
         WeatherDTO weather = new WeatherDTO("23°C", "맑음");
 
 
@@ -56,4 +41,7 @@ public class StationDetailQueryServiceImpl implements StationDetailQueryService 
         };
     }
 }
+
+ */
+
 

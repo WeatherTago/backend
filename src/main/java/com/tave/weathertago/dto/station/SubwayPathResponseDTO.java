@@ -1,11 +1,10 @@
-package com.tave.weathertago.dto.Station;
+package com.tave.weathertago.dto.station;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -23,8 +22,8 @@ public class SubwayPathResponseDTO {
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class MsgHeader {
-        private String headerMsg;
         private String headerCd;
+        private String headerMsg;
         private int itemCount;
     }
 
@@ -39,12 +38,19 @@ public class SubwayPathResponseDTO {
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Item {
-        private String routeNm;
-        private String fname;
-        private String tname;
-        private String fid;
-        private String tid;
-        private String distance;
         private String time;
+        private String distance;
+
+        @JacksonXmlElementWrapper(useWrapping = false)
+        @JacksonXmlProperty(localName = "pathList")
+        private List<PathList> pathList;
+    }
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PathList {
+        private String routeNm;  // 2호선 등
+        private String fname;    // 출발역
+        private String tname;    // 도착역
     }
 }

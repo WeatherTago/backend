@@ -1,4 +1,4 @@
-package com.tave.weathertago.service.Station;
+package com.tave.weathertago.service.station;
 
 public interface StationCommandService {
     void initializeStations();

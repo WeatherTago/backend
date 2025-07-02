@@ -30,6 +30,10 @@ public enum ErrorStatus implements BaseErrorCode {
     STATION_NAME_NOT_FOUND(HttpStatus.BAD_REQUEST, "STATION4002", "해당 역을 찾을 수 없습니다."),
     STATION_LINE_NOT_FOUND(HttpStatus.BAD_REQUEST, "STATION4003", "해당 호선을 찾을 수 없습니다."),
 
+    // 즐겨찾기 관련 애러
+    FAVORITE_NOT_FOUND(HttpStatus.BAD_REQUEST, "STATION4004", "즐겨찾기를 찾을 수 없습니다."),
+
+    // 경로 관련 에러
     PATH_NOT_FOUND(HttpStatus.BAD_REQUEST, "STATION4005", "해당 경로를 찾을 수 없습니다."),
 
     //csv읽기 실패
