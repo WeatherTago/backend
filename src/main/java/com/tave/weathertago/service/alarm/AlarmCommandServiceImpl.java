@@ -3,42 +3,98 @@ package com.tave.weathertago.service.alarm;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
-import com.tave.weathertago.dto.fcm.AlarmFcmMessageDto;
+import com.tave.weathertago.apiPayload.code.status.ErrorStatus;
+import com.tave.weathertago.apiPayload.exception.handler.UserHandler;
+import com.tave.weathertago.converter.AlarmConverter;
+import com.tave.weathertago.domain.Alarm;
+import com.tave.weathertago.domain.Station;
+import com.tave.weathertago.domain.User;
+import com.tave.weathertago.dto.alarm.AlarmFcmMessageDto;
+import com.tave.weathertago.dto.alarm.AlarmRequestDTO;
+import com.tave.weathertago.dto.alarm.AlarmResponseDTO;
+import com.tave.weathertago.repository.AlarmRepository;
+import com.tave.weathertago.repository.StationRepository;
+import com.tave.weathertago.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class AlarmCommandServiceImpl implements AlarmCommandService {
 
-        @Override
-        public void sendAlarm (AlarmFcmMessageDto dto){
-        // 알림 제목/본문 예시
-        String title = "지하철 알림";
-        String body = dto.getContent();
+    private final AlarmRepository alarmRepository;
+    private final UserRepository userRepository;
 
-        // FCM 메시지 생성
-        Message message = Message.builder()
-                .setToken(dto.getPushToken())
-                .putData("time", dto.getTime() != null ? dto.getTime().toString() : "")
-                .putData("day", dto.getDay() != null ? dto.getDay() : "")
-                .putData("content", dto.getContent() != null ? dto.getContent() : "")
-                .putData("station", dto.getStation() != null ? dto.getStation() : "")
-                .putData("weather", dto.getWeather() != null ? dto.getWeather() : "")
-                .putData("title", title)
-                .putData("body", body)
-                .setNotification(Notification.builder()
-                    .setTitle(title)
-                    .setBody(body)
-                    .build())
+    @Override
+    public Optional<AlarmResponseDTO.AlarmDetailDTO> createAlarm(AlarmRequestDTO.AlarmCreateRequestDTO dto) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String kakaoId =  authentication.getName();
+
+        User user = userRepository.findByKakaoId(kakaoId)
+                .orElseThrow(()->new UserHandler(ErrorStatus.USER_NOT_FOUND));
+
+        Alarm alarm = Alarm.builder()
+                .userId(user)
+                .pushToken(dto.getPushToken())
+                .referenceTime(dto.getReferenceTime())
+                .stationName(dto.getStationName())
+                .alarmDay(dto.getAlarmDay())
+                .alarmTime(dto.getAlarmTime())
                 .build();
 
-        try {
-            String response = FirebaseMessaging.getInstance().send(message);
-            System.out.println("Successfully sent message: " + response);
-        } catch (Exception e) {
-            e.printStackTrace();
+        Alarm savedAlarm = alarmRepository.save(alarm);
+
+        return Optional.of(AlarmConverter.toAlarmDetailDTO(savedAlarm));
+    }
+
+
+    @Override
+    public void updateAlarm(AlarmRequestDTO.AlarmUpdateRequestDTO dto){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String kakaoId =  authentication.getName();
+
+        User user = userRepository.findByKakaoId(kakaoId)
+                .orElseThrow(()->new UserHandler(ErrorStatus.USER_NOT_FOUND));
+
+        Alarm alarm = alarmRepository.findById(dto.getAlarmId())
+                .orElseThrow(() -> new RuntimeException("Alarm not found"));
+
+        if (dto.getPushToken() != null) {
+            alarm.setPushToken(dto.getPushToken());
         }
+        if (dto.getReferenceTime() != null) {
+            alarm.setReferenceTime(dto.getReferenceTime());
+        }
+        if (dto.getStationName() != null) {
+            alarm.setStationName(dto.getStationName());
+        }
+        if (dto.getAlarmDay() != null) {
+            alarm.setAlarmDay(dto.getAlarmDay());
+        }
+        if (dto.getAlarmTime() != null) {
+            alarm.setAlarmTime(dto.getAlarmTime());
+        }
+        alarmRepository.save(alarm);
     }
+
+    @Override
+    public void deleteAlarm(Long alarmId){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String kakaoId =  authentication.getName();
+
+        User user = userRepository.findByKakaoId(kakaoId)
+                .orElseThrow(()->new UserHandler(ErrorStatus.USER_NOT_FOUND));
+
+
+        Alarm alarm = alarmRepository.findById(alarmId)
+                .orElseThrow(() -> new RuntimeException("Alarm not found"));
+
+        alarmRepository.delete(alarm);
     }
+
+}
 

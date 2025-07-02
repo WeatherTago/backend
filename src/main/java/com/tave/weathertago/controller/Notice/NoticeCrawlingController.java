@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "notice web crawling", description = "공지사항 크롤링 API")
+@Tag(name = "Notice web crawling", description = "공지사항 크롤링 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/notice")
