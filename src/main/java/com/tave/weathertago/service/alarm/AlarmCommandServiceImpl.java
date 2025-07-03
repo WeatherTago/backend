@@ -42,6 +42,8 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
                 .pushToken(dto.getPushToken())
                 .referenceTime(dto.getReferenceTime())
                 .stationName(dto.getStationName())
+                .stationLine(dto.getStationLine())
+                .direction(dto.getDirection())
                 .alarmDay(dto.getAlarmDay())
                 .alarmTime(dto.getAlarmTime())
                 .build();
@@ -72,6 +74,12 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
         if (dto.getStationName() != null) {
             alarm.setStationName(dto.getStationName());
         }
+        if (dto.getStationLine() != null) {
+            alarm.setStationLine(dto.getStationLine());
+        }
+        if (dto.getDirection() != null) {
+            alarm.setDirection(dto.getDirection());
+        }
         if (dto.getAlarmDay() != null) {
             alarm.setAlarmDay(dto.getAlarmDay());
         }
@@ -88,7 +96,6 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
 
         User user = userRepository.findByKakaoId(kakaoId)
                 .orElseThrow(()->new UserHandler(ErrorStatus.USER_NOT_FOUND));
-
 
         Alarm alarm = alarmRepository.findById(alarmId)
                 .orElseThrow(() -> new RuntimeException("Alarm not found"));

@@ -1,6 +1,7 @@
 package com.tave.weathertago.dto.alarm;
 
 import com.tave.weathertago.domain.AlarmDay;
+import com.tave.weathertago.domain.Direction;
 import com.tave.weathertago.domain.Station;
 import com.tave.weathertago.domain.User;
 import com.tave.weathertago.dto.CongestionDTO;
@@ -18,10 +19,13 @@ public class AlarmResponseDTO {
     public static class AlarmDetailDTO {
         private Long alarmId;
         private String pushToken;
+
         private LocalTime referenceTime;
         private String stationName;
+        private String stationLine;
+        private Direction direction;
+
         private AlarmDay alarmDay;
         private LocalTime alarmTime;
-
     }
 }
