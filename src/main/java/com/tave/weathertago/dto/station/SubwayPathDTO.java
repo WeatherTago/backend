@@ -1,7 +1,9 @@
-package com.tave.weathertago.dto.Station;
+package com.tave.weathertago.dto.station;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -14,6 +16,8 @@ public class SubwayPathDTO {
 
     @Builder
     @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class SubwayStepDto {
         private String line;         // 호선 이름 (예: 2호선)
         private String startStation; // 탑승역

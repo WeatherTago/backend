@@ -1,4 +1,4 @@
-package com.tave.weathertago.service.Station;
+package com.tave.weathertago.service.station;
 
 import com.tave.weathertago.infrastructure.csv.StationCsvImporter;
 import com.tave.weathertago.repository.StationRepository;
@@ -14,7 +14,6 @@ import java.io.InputStream;
 @RequiredArgsConstructor
 public class StationCommandServiceImpl implements StationCommandService {
 
-    private final StationRepository stationRepository;
     private final StationCsvImporter stationCsvImporter;
 
     @Override

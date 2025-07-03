@@ -1,13 +1,13 @@
 package com.tave.weathertago.converter;
 
 import com.tave.weathertago.domain.Station;
-import com.tave.weathertago.dto.StationDetail.StationDetailResponseDTO;
 import com.tave.weathertago.dto.TimeTableDTO;
 import com.tave.weathertago.dto.WeatherDTO;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+/*
 public class StationDetailConverter {
 
     public static StationDetailResponseDTO.Response toResponse(
@@ -26,3 +26,5 @@ public class StationDetailConverter {
                 .build();
     }
 }
+
+ */
