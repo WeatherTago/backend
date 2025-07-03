@@ -39,6 +39,7 @@ jobs:
           mkdir -p ./src/main/resources
           echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
           echo "${{ secrets.FIREBASE_JSON }}" | base64 -d > ./src/main/resources/weathertago-firebase-adminsdk-fbsvc-4885ca4b1e.json
+          echo "${{ secrets.APPLICATION_API_KEY_PROPERTIES }}" > ./src/main/resources/application-API-KEY.properties
 
       # Gradle Build
       - name: Build with Gradle

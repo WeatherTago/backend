@@ -37,9 +37,14 @@ public enum ErrorStatus implements BaseErrorCode {
     PATH_NOT_FOUND(HttpStatus.BAD_REQUEST, "STATION4005", "해당 경로를 찾을 수 없습니다."),
 
     //csv읽기 실패
-    FILE_READ_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "STATION5002", "CSV 파일을 읽는 중 오류가 발생했습니다.");
+    FILE_READ_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "STATION5002", "CSV 파일을 읽는 중 오류가 발생했습니다."),
 
-
+    // 날씨 관련 에러
+    WEATHER_API_RESPONSE_EMPTY(HttpStatus.BAD_GATEWAY, "WEATHER4001", "기상청 응답이 비어 있습니다."),
+    WEATHER_API_FAIL(HttpStatus.BAD_GATEWAY, "WEATHER4002", "기상청 API 요청에 실패했습니다."),
+    WEATHER_API_PARSE_ERROR(HttpStatus.BAD_GATEWAY, "WEATHER4003", "기상청 응답 파싱에 실패했습니다."),
+    WEATHER_API_INVALID_STRUCTURE(HttpStatus.BAD_GATEWAY, "WEATHER4004", "기상청 응답 구조가 잘못되었습니다."),
+    WEATHER_CACHE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "WEATHER5001", "날씨 정보를 Redis에 캐싱하는 중 오류가 발생했습니다.");
 
 
     private final HttpStatus httpStatus;

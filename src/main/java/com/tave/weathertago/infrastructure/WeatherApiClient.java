@@ -1,7 +1,206 @@
 package com.tave.weathertago.infrastructure;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tave.weathertago.apiPayload.code.status.ErrorStatus;
+import com.tave.weathertago.apiPayload.exception.handler.WeatherHandler;
+import com.tave.weathertago.domain.Station;
+import com.tave.weathertago.dto.weather.WeatherApiResponseDTO;
+import com.tave.weathertago.dto.weather.WeatherResponseDTO;
+import com.tave.weathertago.repository.StationRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+
+@Slf4j
 @Component
+@RequiredArgsConstructor
 public class WeatherApiClient {
+
+    private final StationRepository stationRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final RestClient restClient;
+    private final ObjectMapper objectMapper;
+
+    @Value("${weather.api.key}")
+    private String serviceKey;
+
+    private static final String API_BASE_URL = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst";
+    private static final Duration TTL = Duration.ofHours(3);
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HHmm");
+    private static final DateTimeFormatter DATETIME_KEY_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+    public void getAndCacheWeather(String stationName, String line) {
+        Station station = stationRepository.findByNameAndLine(stationName, line)
+                .orElseThrow(() -> new WeatherHandler(ErrorStatus.STATION_NOT_FOUND));
+
+        LocalDateTime baseTime = calculateBaseTime(LocalDateTime.now());
+        log.info("🗓️ BaseTime: {}, {}", baseTime.format(DATE_FMT), baseTime.format(TIME_FMT));
+
+        URI uri = buildRequestUri(station, baseTime);
+        log.info("🌐 API Request: {}", uri.toString().replace(serviceKey, "***"));
+
+        String responseBody = sendApiRequest(uri);
+        WeatherApiResponseDTO apiResponse = parseWeatherResponse(responseBody);
+        processApiResponse(station, apiResponse);
+    }
+
+    private URI buildRequestUri(Station station, LocalDateTime baseTime) {
+        String encodedKey = URLEncoder.encode(serviceKey, StandardCharsets.UTF_8);
+        return UriComponentsBuilder.fromUriString(API_BASE_URL)
+                .queryParam("serviceKey", encodedKey)
+                .queryParam("pageNo", 1)
+                .queryParam("numOfRows", 1000)
+                .queryParam("dataType", "JSON")
+                .queryParam("base_date", baseTime.format(DATE_FMT))
+                .queryParam("base_time", baseTime.format(TIME_FMT))
+                .queryParam("nx", station.getNx())
+                .queryParam("ny", station.getNy())
+                .build(true)
+                .toUri();
+    }
+
+    private String sendApiRequest(URI uri) {
+        try {
+            ResponseEntity<String> responseEntity = restClient.get()
+                    .uri(uri)
+                    .retrieve()
+                    .toEntity(String.class);
+
+            String body = responseEntity.getBody();
+            if (body == null || body.isEmpty()) {
+                throw new WeatherHandler(ErrorStatus.WEATHER_API_RESPONSE_EMPTY);
+            }
+
+            log.info("📄 Raw Response (일부): {}", body.substring(0, Math.min(200, body.length())));
+            return body;
+
+        } catch (Exception e) {
+            throw new WeatherHandler(ErrorStatus.WEATHER_API_FAIL);
+        }
+    }
+
+    private WeatherApiResponseDTO parseWeatherResponse(String body) {
+        try {
+            return objectMapper.readValue(body, WeatherApiResponseDTO.class);
+        } catch (Exception e) {
+            log.error("❌ JSON 파싱 실패", e);
+            throw new WeatherHandler(ErrorStatus.WEATHER_API_PARSE_ERROR);
+        }
+    }
+
+    private void processApiResponse(Station station, WeatherApiResponseDTO apiResponse) {
+        if (apiResponse == null ||
+                apiResponse.getResponse() == null ||
+                apiResponse.getResponse().getBody() == null ||
+                apiResponse.getResponse().getBody().getItems() == null ||
+                apiResponse.getResponse().getBody().getItems().getItem() == null) {
+            throw new WeatherHandler(ErrorStatus.WEATHER_API_INVALID_STRUCTURE);
+        }
+
+        String resultCode = apiResponse.getResponse().getHeader().getResultCode();
+        if (!"00".equals(resultCode)) {
+            throw new WeatherHandler(ErrorStatus.WEATHER_API_FAIL);
+        }
+
+        Map<String, Map<String, String>> grouped = new HashMap<>();
+        for (WeatherApiResponseDTO.Item item : apiResponse.getResponse().getBody().getItems().getItem()) {
+            String key = item.getFcstDate() + item.getFcstTime();
+            grouped.computeIfAbsent(key, k -> new HashMap<>())
+                    .put(item.getCategory(), item.getFcstValue());
+        }
+
+        Map<String, WeatherResponseDTO> cacheMap = new HashMap<>();
+        LocalDateTime now = LocalDateTime.now();
+
+        for (Map.Entry<String, Map<String, String>> entry : grouped.entrySet()) {
+            LocalDateTime fcstTime = LocalDateTime.parse(entry.getKey(), DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
+
+            if (fcstTime.getHour() >= 1 && fcstTime.getHour() <= 4) continue;
+            if (fcstTime.toLocalDate().isAfter(now.toLocalDate().plusDays(2))) continue;
+
+            Map<String, String> cat = entry.getValue();
+            WeatherResponseDTO dto = WeatherResponseDTO.builder()
+                    .tmp(parse("TMP", cat.get("TMP")))
+                    .reh(parse("REH", cat.get("REH")))
+                    .pcp(parse("PCP", cat.get("PCP")))
+                    .wsd(parse("WSD", cat.get("WSD")))
+                    .sno(parse("SNO", cat.get("SNO")))
+                    .vec(parse("VEC", cat.get("VEC")))
+                    .build();
+
+            String redisKey = makeRedisKey(station.getNx(), station.getNy(), fcstTime);
+            cacheMap.put(redisKey, dto);
+        }
+
+        bulkSaveToRedis(cacheMap);
+        log.info("✅ Cached {} items via pipeline", cacheMap.size());
+    }
+
+    private void bulkSaveToRedis(Map<String, WeatherResponseDTO> dataMap) {
+        RedisSerializer<String> keySerializer = redisTemplate.getStringSerializer();
+        RedisSerializer<Object> valueSerializer = (RedisSerializer<Object>) redisTemplate.getValueSerializer();
+
+        redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+            for (Map.Entry<String, WeatherResponseDTO> entry : dataMap.entrySet()) {
+                byte[] key = keySerializer.serialize(entry.getKey());
+                byte[] value = valueSerializer.serialize(entry.getValue());
+                connection.set(key, value);
+                connection.expire(key, TTL.getSeconds());
+            }
+            return null;
+        });
+    }
+
+    private double parse(String category, String val) {
+        if (val == null) return 0.0;
+        try {
+            return switch (category) {
+                case "PCP" -> val.contains("mm") ? Double.parseDouble(val.replace("mm", "")) : 0.0;
+                case "SNO" -> val.contains("cm") ? Double.parseDouble(val.replace("cm", "")) : 0.0;
+                default -> Double.parseDouble(val);
+            };
+        } catch (NumberFormatException e) {
+            log.warn("❌ 파싱 실패: {}={}", category, val);
+            return 0.0;
+        }
+    }
+
+    private String makeRedisKey(Integer nx, Integer ny, LocalDateTime time) {
+        return "weather:" + nx + ":" + ny + ":" + time.format(DATETIME_KEY_FMT);
+    }
+
+    private LocalDateTime calculateBaseTime(LocalDateTime now) {
+        int[][] timeSlots = {
+                {2, 10}, {5, 10}, {8, 10}, {11, 10},
+                {14, 10}, {17, 10}, {20, 10}, {23, 10}
+        };
+
+        for (int i = 0; i < timeSlots.length; i++) {
+            int hour = timeSlots[i][0];
+            int minute = timeSlots[i][1];
+            LocalDateTime availableTime = now.withHour(hour).withMinute(minute);
+            if (now.isBefore(availableTime)) {
+                return (i == 0) ? now.minusDays(1).withHour(23).withMinute(0) :
+                        now.withHour(timeSlots[i - 1][0]).withMinute(0);
+            }
+        }
+        return now.withHour(23).withMinute(0);
+    }
 }

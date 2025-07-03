@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 HELP.md
 .gradle
 build/
@@ -61,8 +61,8 @@ out/
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
->>>>>>> 9e40f0e5b9502409740bbe0a7dc31a31f63338bd
 
+*.properties
 application.*
+application-API-KEY.properties
 weathertago-firebase-adminsdk-fbsvc-4885ca4b1e.json
-
