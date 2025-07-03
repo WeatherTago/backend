@@ -37,6 +37,15 @@ public class Alarm extends BaseEntity {
     @Column(nullable = false)
     private String stationName;
 
+    // 역 호선 (즐겨찾기 테이블에 있는 역 불러오기)
+    @Column(nullable = false)
+    private String stationLine;
+
+    // 상행 또는 하행
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Direction direction;
+
     // 알람 보내는 시점: 당일, 하루 전
     @Enumerated(EnumType.STRING) // Enum 값을 문자열로 저장
     @Column(nullable = false)

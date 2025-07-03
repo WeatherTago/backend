@@ -15,6 +15,8 @@ public class AlarmConverter {
                 .pushToken(alarm.getPushToken())
                 .referenceTime(alarm.getReferenceTime())
                 .stationName(alarm.getStationName())
+                .stationLine(alarm.getStationLine())
+                .direction(alarm.getDirection())
                 .alarmDay(alarm.getAlarmDay())
                 .alarmTime(alarm.getAlarmTime())
                 // .weather(weatherDTO) // 필요 시 추가
