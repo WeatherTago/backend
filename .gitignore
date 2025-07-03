@@ -64,5 +64,5 @@ replay_pid*
 
 *.properties
 application.*
+application-API-KEY.properties
 weathertago-firebase-adminsdk-fbsvc-4885ca4b1e.json
-
