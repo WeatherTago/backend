@@ -33,10 +33,6 @@ public class Station extends BaseEntity {
 
     private Double longitude;
 
-    private Integer nx;
-
-    private Integer ny;
-
     // 위치 좌표를 한 번에 갱신하는 메서드
     public void updateLocation(Double latitude, Double longitude) {
         this.latitude = latitude;

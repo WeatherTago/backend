@@ -3,6 +3,7 @@ package com.tave.weathertago.domain;
 import com.tave.weathertago.domain.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalTime;
 
@@ -21,7 +22,7 @@ public class Alarm extends BaseEntity {
     // user 테이블에서 가져오기
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private User userId;
 
     private String pushToken;
 
@@ -29,13 +30,21 @@ public class Alarm extends BaseEntity {
     // alarm.setReferenceTime(LocalTime.of(8, 30)); // 오전 8시 30분
     // MySQL: 08:30:00
     @Column(nullable = false)
+    @DateTimeFormat(pattern = "HH:mm:ss")
     private LocalTime referenceTime;
 
     // 역 이름 (즐겨찾기 테이블에 있는 역 불러오기)
-    // 임시로 station에서 가져오게 함
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "station_name", referencedColumnName = "name", nullable = false)
-    private Station station;
+    @Column(nullable = false)
+    private String stationName;
+
+    // 역 호선 (즐겨찾기 테이블에 있는 역 불러오기)
+    @Column(nullable = false)
+    private String stationLine;
+
+    // 상행 또는 하행
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Direction direction;
 
     // 알람 보내는 시점: 당일, 하루 전
     @Enumerated(EnumType.STRING) // Enum 값을 문자열로 저장
@@ -44,6 +53,7 @@ public class Alarm extends BaseEntity {
 
     // 알람 보내는 시간 (HH:mm 형식)
     @Column(nullable = false)
+    @DateTimeFormat(pattern = "HH:mm:ss")
     private LocalTime alarmTime;
 
 }

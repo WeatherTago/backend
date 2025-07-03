@@ -1,13 +1,20 @@
-package com.tave.weathertago.service.Station;
+package com.tave.weathertago.service.station;
 
 import com.tave.weathertago.apiPayload.code.status.ErrorStatus;
 import com.tave.weathertago.apiPayload.exception.handler.StationHandler;
+import com.tave.weathertago.converter.StationConverter;
 import com.tave.weathertago.domain.Station;
+import com.tave.weathertago.dto.CongestionDTO;
+import com.tave.weathertago.dto.station.StationResponseDTO;
+import com.tave.weathertago.dto.WeatherDTO;
 import com.tave.weathertago.repository.StationRepository;
-import jakarta.persistence.EntityNotFoundException;
+import com.tave.weathertago.service.congestion.CongestionQueryService;
+import com.tave.weathertago.service.weather.WeatherQueryService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -15,28 +22,27 @@ import java.util.List;
 public class StationQueryServiceImpl implements StationQueryService {
 
     private final StationRepository stationRepository;
+    private final WeatherQueryService weatherQueryService;
+    private final CongestionQueryService congestionQueryService;
+
 
     @Override
-    public List<Station> getStationsByName(String name) {
-        List<Station> result = stationRepository.findAllByName(name);
+    @Transactional
+    public StationResponseDTO.JoinResultDTO getStationByNameAndLine(String name, String line, LocalDateTime time) {
+        Station station = stationRepository.findByNameAndLine(name, line)
+                .orElseThrow(() -> new StationHandler(ErrorStatus.STATION_NAME_NOT_FOUND));
 
-        if (result.isEmpty()) {
-            throw new StationHandler(ErrorStatus.STATION_NAME_NOT_FOUND);
-        }
+        WeatherDTO weather = weatherQueryService.getWeather(station.getLatitude(), station.getLongitude(), time);
+        CongestionDTO congestion = congestionQueryService.getCongestion(station.getStationCode(), time);
 
-        return result;
+        return StationConverter.toJoinResultDTO(station, weather, congestion);
     }
 
-    @Override
-    public List<Station> getAllStations() {
-        return stationRepository.findAll();
-    }
-
-
+    /*
     /**
      * 역 이름 + 호선으로 정확히 일치하는 역 코드 조회
      * - DB에 동일한 name + line 조합이 여러 개 있으면 예외 발생
-     */
+
     public String getStationCodeByNameAndLine(String name, String line) {
         // 먼저 이름만으로 조회해서 역이 존재하는지 확인
         List<Station> byName = stationRepository.findAllByName(name);
@@ -59,5 +65,6 @@ public class StationQueryServiceImpl implements StationQueryService {
 
         return results.get(0).getStationCode();
     }
+    */
 
 }

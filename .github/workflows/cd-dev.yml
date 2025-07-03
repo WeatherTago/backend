@@ -18,7 +18,8 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@master
         with:
-          args: '🚀 CD - Dev workflow 실행됨'
+          args:
+            '🚀 CD - Dev workflow 실행됨  Triggered by: **${{ github.actor }}**'
 
       # 코드 체크아웃
       - name: Checkout repository
@@ -86,12 +87,21 @@ jobs:
             cd backend
             git pull
             echo "TAG=${{ needs.build.outputs.docker_image_tag }}" > .env
-            sudo docker-compose stop
-            sudo docker-compose rm -f     
+            sudo docker-compose stop weathertago-app
+            sudo docker-compose rm -f weathertago-app    
             sudo docker rmi ${{ secrets.DOCKER_HUB_USERNAME }}/weathertago:$TAG || true         
-            sudo docker-compose pull
-            sudo docker-compose up -d
+            sudo docker-compose pull weathertago-app
+            sudo docker-compose up -d weathertago-app --no-deps
         env:
           ACTIONS_RUNNER_DEBUG: true
+
+
+      - name: Discord Notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args:
+            '😎 배포 완료됨 ✨ Triggered by: **${{ github.actor }}**'
 
 

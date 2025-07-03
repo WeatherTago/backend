@@ -1,7 +1,13 @@
 package com.tave.weathertago.service.alarm;
 
-import com.tave.weathertago.dto.fcm.AlarmFcmMessageDto;
+import com.tave.weathertago.dto.alarm.AlarmFcmMessageDto;
+import com.tave.weathertago.dto.alarm.AlarmRequestDTO;
+import com.tave.weathertago.dto.alarm.AlarmResponseDTO;
+
+import java.util.Optional;
 
 public interface AlarmCommandService {
-    void sendAlarm(AlarmFcmMessageDto dto);
+    Optional <AlarmResponseDTO.AlarmDetailDTO> createAlarm(AlarmRequestDTO.AlarmCreateRequestDTO dto);
+    void updateAlarm(AlarmRequestDTO.AlarmUpdateRequestDTO dto);
+    void deleteAlarm(Long alarmId);
 }
