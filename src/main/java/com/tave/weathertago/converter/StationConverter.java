@@ -40,4 +40,12 @@ public class StationConverter {
                 .longitude(stationDTO.getLongitude())
                 .build();
     }
+
+    public static StationResponseDTO.SimpleStationDTO toSimpleDTO(Station station) {
+        return StationResponseDTO.SimpleStationDTO.builder()
+                .stationId(station.getId())
+                .stationName(station.getName())
+                .stationLine(station.getLine())
+                .build();
+    }
 }

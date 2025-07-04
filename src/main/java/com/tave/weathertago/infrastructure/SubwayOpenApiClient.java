@@ -3,6 +3,7 @@ package com.tave.weathertago.infrastructure;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.tave.weathertago.dto.station.SubwayPathResponseDTO;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -16,9 +17,10 @@ public class SubwayOpenApiClient {
     // ✅ API 기본 주소
     private static final String BASE_URL = "http://ws.bus.go.kr/api/rest/pathinfo/getPathInfoBySubway";
 
+
+    @Value("${subwaypath.api.key}")
+    private String serviceKey;
     // ✅ 인코딩된 상태의 서비스 키 (절대로 encode() 다시 하지 마세요!)
-    private static final String ENCODED_SERVICE_KEY =
-            "6b%2FTLLy0PjWv3vypOnlMKxGZWiVXT7OJsXByNiAgwFuxGAOYT9htOtqDJRIe2H7oBI9YSKPtiHAWiI%2BA6LPrqQ%3D%3D";
 
     public SubwayOpenApiClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -29,7 +31,7 @@ public class SubwayOpenApiClient {
             // ✅ 전체 인코딩된 URL 문자열 생성
             String fullUrl = String.format(
                     "%s?ServiceKey=%s&startX=%f&startY=%f&endX=%f&endY=%f",
-                    BASE_URL, ENCODED_SERVICE_KEY, startX, startY, endX, endY
+                    BASE_URL, serviceKey, startX, startY, endX, endY
             );
 
             // ✅ URI 객체로 직접 생성 → RestTemplate이 인코딩을 추가로 하지 않게 됨
