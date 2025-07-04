@@ -16,8 +16,11 @@ public class SubwayOpenApiClient {
 
     private static final String BASE_URL = "http://ws.bus.go.kr/api/rest/pathinfo/getPathInfoBySubway";
 
+
     @Value("${subwaypath.api.key}")
     private String serviceKey;
+
+
 
     public SubwayOpenApiClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -25,18 +28,19 @@ public class SubwayOpenApiClient {
 
     public SubwayPathResponseDTO getPathInfo(double startX, double startY, double endX, double endY) {
         try {
-            // ✅ URL을 직접 String으로 구성 (이중 인코딩 방지)
-            String fullUrl = BASE_URL +
-                    "?ServiceKey=" + serviceKey +
-                    "&startX=" + startX +
-                    "&startY=" + startY +
-                    "&endX=" + endX +
-                    "&endY=" + endY;
+            // ✅ 전체 인코딩된 URL 문자열 생성
+            String fullUrl = String.format(
+                    "%s?ServiceKey=%s&startX=%f&startY=%f&endX=%f&endY=%f",
+                    BASE_URL, serviceKey, startX, startY, endX, endY
+            );
 
-            System.out.println("📡 호출 URL: " + fullUrl);
+            // ✅ URI 객체로 직접 생성 → RestTemplate이 인코딩을 추가로 하지 않게 됨
+            URI uri = new URI(fullUrl);
 
-            // ✅ getForObject(String url, ...) 사용
-            String xml = restTemplate.getForObject(fullUrl, String.class);
+            System.out.println("📡 호출 URI: " + uri);
+
+            String xml = restTemplate.getForObject(uri, String.class);
+
             System.out.println("🧾 응답 원문: " + xml);
 
             // ✅ HTML 오류 응답 방지용 검사
@@ -65,4 +69,3 @@ public class SubwayOpenApiClient {
         }
     }
 }
-

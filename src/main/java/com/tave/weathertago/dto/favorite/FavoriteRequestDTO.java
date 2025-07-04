@@ -8,6 +8,5 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class FavoriteRequestDTO {
-    private String stationName;
-    private String stationLine;
+    private Long stationId;
 }

@@ -38,6 +38,18 @@ public class StationQueryServiceImpl implements StationQueryService {
         return StationConverter.toJoinResultDTO(station, weather, congestion);
     }
 
+    @Override
+    @Transactional
+    public StationResponseDTO.JoinResultDTO getStationById(Long stationId, LocalDateTime time) {
+        Station station = stationRepository.findById(stationId)
+                .orElseThrow(() -> new StationHandler(ErrorStatus.STATION_NAME_NOT_FOUND));
+
+        WeatherDTO weather = weatherQueryService.getWeather(station.getLatitude(), station.getLongitude(), time);
+        CongestionDTO congestion = congestionQueryService.getCongestion(station.getStationCode(), time);
+
+        return StationConverter.toJoinResultDTO(station, weather, congestion);
+    }
+
     /*
     /**
      * 역 이름 + 호선으로 정확히 일치하는 역 코드 조회
