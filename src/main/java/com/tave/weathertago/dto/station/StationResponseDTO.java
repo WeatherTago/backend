@@ -28,7 +28,7 @@ public class StationResponseDTO {
     @Builder
     public static class SimpleStationDTO {
         private Long stationId;
-        private String name;
-        private String line;
+        private String stationName;
+        private String stationLine;
     }
 }

@@ -44,8 +44,8 @@ public class StationConverter {
     public static StationResponseDTO.SimpleStationDTO toSimpleDTO(Station station) {
         return StationResponseDTO.SimpleStationDTO.builder()
                 .stationId(station.getId())
-                .name(station.getName())
-                .line(station.getLine())
+                .stationName(station.getName())
+                .stationLine(station.getLine())
                 .build();
     }
 }

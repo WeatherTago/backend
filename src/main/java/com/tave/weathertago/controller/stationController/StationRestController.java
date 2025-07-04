@@ -57,7 +57,7 @@ public class StationRestController {
         return ApiResponse.onSuccess(result);
     }
 
-    @GetMapping("/stations/simple")
+    @GetMapping("/info")
     public ApiResponse<List<StationResponseDTO.SimpleStationDTO>> getAllSimpleStations() {
         List<StationResponseDTO.SimpleStationDTO> result = stationQueryService.getAllSimpleStations();
         return ApiResponse.onSuccess(result);
