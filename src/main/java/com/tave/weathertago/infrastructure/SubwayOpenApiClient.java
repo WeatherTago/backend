@@ -3,6 +3,7 @@ package com.tave.weathertago.infrastructure;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.tave.weathertago.dto.station.SubwayPathResponseDTO;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -13,12 +14,10 @@ public class SubwayOpenApiClient {
 
     private final RestTemplate restTemplate;
 
-    // ✅ API 기본 주소
     private static final String BASE_URL = "http://ws.bus.go.kr/api/rest/pathinfo/getPathInfoBySubway";
 
-    // ✅ 인코딩된 상태의 서비스 키 (절대로 encode() 다시 하지 마세요!)
-    private static final String ENCODED_SERVICE_KEY =
-            "6b%2FTLLy0PjWv3vypOnlMKxGZWiVXT7OJsXByNiAgwFuxGAOYT9htOtqDJRIe2H7oBI9YSKPtiHAWiI%2BA6LPrqQ%3D%3D";
+    @Value("${subwaypath.api.key}")
+    private String serviceKey;
 
     public SubwayOpenApiClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -26,19 +25,24 @@ public class SubwayOpenApiClient {
 
     public SubwayPathResponseDTO getPathInfo(double startX, double startY, double endX, double endY) {
         try {
-            // ✅ 전체 인코딩된 URL 문자열 생성
-            String fullUrl = String.format(
-                    "%s?ServiceKey=%s&startX=%f&startY=%f&endX=%f&endY=%f",
-                    BASE_URL, ENCODED_SERVICE_KEY, startX, startY, endX, endY
-            );
+            // ✅ URL을 직접 String으로 구성 (이중 인코딩 방지)
+            String fullUrl = BASE_URL +
+                    "?ServiceKey=" + serviceKey +
+                    "&startX=" + startX +
+                    "&startY=" + startY +
+                    "&endX=" + endX +
+                    "&endY=" + endY;
 
-            // ✅ URI 객체로 직접 생성 → RestTemplate이 인코딩을 추가로 하지 않게 됨
-            URI uri = new URI(fullUrl);
+            System.out.println("📡 호출 URL: " + fullUrl);
 
-            System.out.println("📡 호출 URI: " + uri);
-
-            String xml = restTemplate.getForObject(uri, String.class);
+            // ✅ getForObject(String url, ...) 사용
+            String xml = restTemplate.getForObject(fullUrl, String.class);
             System.out.println("🧾 응답 원문: " + xml);
+
+            // ✅ HTML 오류 응답 방지용 검사
+            if (xml != null && xml.contains("<html")) {
+                throw new RuntimeException("HTML 페이지가 반환됨. 인증키 또는 파라미터 확인 필요.");
+            }
 
             XmlMapper xmlMapper = new XmlMapper();
             SubwayPathResponseDTO dto = xmlMapper.readValue(xml, SubwayPathResponseDTO.class);
@@ -61,3 +65,4 @@ public class SubwayOpenApiClient {
         }
     }
 }
+

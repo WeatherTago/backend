@@ -5,31 +5,48 @@ import com.tave.weathertago.dto.station.SubwayPathResponseDTO;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 public class SubwayPathConverter {
-    public static SubwayPathDTO from(SubwayPathResponseDTO response) {
+
+    public static Optional<SubwayPathDTO> from(SubwayPathResponseDTO response) {
         if (response == null || response.getMsgBody() == null || response.getMsgBody().getItemList().isEmpty()) {
-            throw new RuntimeException("API 응답이 비어있습니다.");
+            return Optional.empty();
         }
 
+        SubwayPathResponseDTO.Item firstItem = response.getMsgBody().getItemList().get(0);
         List<SubwayPathDTO.SubwayStepDto> steps = new ArrayList<>();
-        for (SubwayPathResponseDTO.Item item : response.getMsgBody().getItemList()) {
+
+        for (SubwayPathResponseDTO.Path path : firstItem.getPathList()) {
+            SubwayPathDTO.StationInfo start = SubwayPathDTO.StationInfo.builder()
+                    .stationId(path.getFid())
+                    .stationName(path.getFname())
+                    .line(path.getRouteNm())
+                    .build();
+
+            SubwayPathDTO.StationInfo end = SubwayPathDTO.StationInfo.builder()
+                    .stationId(path.getTid())
+                    .stationName(path.getTname())
+                    .line(path.getRouteNm())
+                    .build();
+
+            List<SubwayPathDTO.StationInfo> stations = new ArrayList<>();
+            stations.add(start);
+            stations.add(end);
+
             steps.add(SubwayPathDTO.SubwayStepDto.builder()
-                    .line(item.getRouteNm())
-                    .startStation(item.getFname())
-                    .endStation(item.getTname())
+                    .line(path.getRouteNm())
+                    .startStation(start)
+                    .endStation(end)
+                    .stations(stations)
                     .build());
         }
 
-        // 첫 번째 item 기준으로 totalTime, totalDistance 설정
-        SubwayPathResponseDTO.Item first = response.getMsgBody().getItemList().get(0);
-
-        return SubwayPathDTO.builder()
-                .totalTime(first.getTime())
-                .totalDistance(first.getDistance())
+        return Optional.of(SubwayPathDTO.builder()
+                .totalTime(firstItem.getTime())
+                .totalDistance(firstItem.getDistance())
                 .steps(steps)
-                .build();
+                .build());
     }
-
 }

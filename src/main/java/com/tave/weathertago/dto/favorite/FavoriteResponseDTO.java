@@ -21,6 +21,7 @@ public class FavoriteResponseDTO {
         @AllArgsConstructor
         @NoArgsConstructor
         public static class StationDTO {
+            private Long stationId;
             private String stationName;
             private String stationLine;
         }
