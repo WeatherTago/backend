@@ -56,4 +56,10 @@ public class StationRestController {
         StationResponseDTO.JoinResultDTO result = stationQueryService.getStationByNameAndLine(name, line, queryTime);
         return ApiResponse.onSuccess(result);
     }
+
+    @GetMapping("/stations/simple")
+    public ApiResponse<List<StationResponseDTO.SimpleStationDTO>> getAllSimpleStations() {
+        List<StationResponseDTO.SimpleStationDTO> result = stationQueryService.getAllSimpleStations();
+        return ApiResponse.onSuccess(result);
+    }
 }
