@@ -48,9 +48,8 @@ public class FavoriteCommandServiceImpl implements FavoriteCommandService {
                 ));
 
         // 4. 요청으로부터 역 정보 조회
-        Station station = stationRepository.findByNameAndLine(
-                requestDTO.getStationName(),
-                requestDTO.getStationLine()
+        Station station = stationRepository.findById(
+                requestDTO.getStationId()
         ).orElseThrow(() -> new StationHandler(ErrorStatus.STATION_NAME_NOT_FOUND));
 
         // 5. 중복 여부 확인 후 역 추가
@@ -69,9 +68,8 @@ public class FavoriteCommandServiceImpl implements FavoriteCommandService {
         Favorite favorite = favoriteRepository.findByUser_KakaoId(kakaoId)
                 .orElseThrow(() -> new FavoriteHandler(ErrorStatus.FAVORITE_NOT_FOUND));
 
-        Station station = stationRepository.findByNameAndLine(
-                requestDTO.getStationName(),
-                requestDTO.getStationLine()
+        Station station = stationRepository.findById(
+        requestDTO.getStationId()
         ).orElseThrow(() -> new StationHandler(ErrorStatus.STATION_NAME_NOT_FOUND));
 
         favorite.getStations().remove(station);
