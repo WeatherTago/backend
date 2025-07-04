@@ -62,4 +62,5 @@ public class StationRestController {
         List<StationResponseDTO.SimpleStationDTO> result = stationQueryService.getAllSimpleStations();
         return ApiResponse.onSuccess(result);
     }
+
 }

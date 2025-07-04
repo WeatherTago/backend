@@ -10,9 +10,9 @@ public interface StationQueryService {
 
     StationResponseDTO.JoinResultDTO getStationById(Long stationId, LocalDateTime time);
 
-
     List<StationResponseDTO.SimpleStationDTO> getAllSimpleStations();
-    /*
-    String getStationCodeByNameAndLine(String name, String line);
-     */
+
+
 }
+
+

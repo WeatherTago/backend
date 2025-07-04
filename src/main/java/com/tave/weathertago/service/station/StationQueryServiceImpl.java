@@ -38,6 +38,7 @@ public class StationQueryServiceImpl implements StationQueryService {
         return StationConverter.toJoinResultDTO(station, weather, congestion);
     }
 
+
     @Override
     @Transactional
     public StationResponseDTO.JoinResultDTO getStationById(Long stationId, LocalDateTime time) {
@@ -87,4 +88,3 @@ public class StationQueryServiceImpl implements StationQueryService {
     }
     */
 
-}
