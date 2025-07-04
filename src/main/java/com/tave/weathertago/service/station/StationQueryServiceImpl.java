@@ -38,6 +38,17 @@ public class StationQueryServiceImpl implements StationQueryService {
         return StationConverter.toJoinResultDTO(station, weather, congestion);
     }
 
+
+    @Override
+    @Transactional
+    public List<StationResponseDTO.SimpleStationDTO> getAllSimpleStations() {
+        return stationRepository.findAll().stream()
+                .map(StationConverter::toSimpleDTO)
+                .toList();
+    }
+
+}
+
     /*
     /**
      * 역 이름 + 호선으로 정확히 일치하는 역 코드 조회
@@ -67,4 +78,3 @@ public class StationQueryServiceImpl implements StationQueryService {
     }
     */
 
-}
