@@ -11,6 +11,8 @@ import com.tave.weathertago.repository.StationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class SubwayPathQueryServiceImpl implements SubwayPathQueryService {
@@ -19,10 +21,10 @@ public class SubwayPathQueryServiceImpl implements SubwayPathQueryService {
     private final SubwayOpenApiClient openApiClient;
 
     @Override
-    public SubwayPathDTO findPath(String start, String end) {
-        Station startStation = stationRepository.findFirstByName(start)
+    public SubwayPathDTO findPath(Long startStationId,  Long endStationId, LocalDateTime queryTime) {
+        Station startStation = stationRepository.findById(startStationId)
                 .orElseThrow(() -> new StationHandler(ErrorStatus.STATION_NAME_NOT_FOUND));
-        Station endStation = stationRepository.findFirstByName(end)
+        Station endStation = stationRepository.findById(endStationId)
                 .orElseThrow(() -> new StationHandler(ErrorStatus.STATION_NAME_NOT_FOUND));
 
         SubwayPathResponseDTO response = openApiClient.getPathInfo(
