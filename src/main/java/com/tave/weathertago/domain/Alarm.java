@@ -26,6 +26,11 @@ public class Alarm extends BaseEntity {
 
     private String pushToken;
 
+    // 매일, 월화수목금토일
+    @Enumerated(EnumType.STRING)
+//    @Column(nullable = false)
+    private AlarmPeriod alarmPeriod;
+
     // 혼잡도 계산할 시간 (HH:mm 형식)
     // alarm.setReferenceTime(LocalTime.of(8, 30)); // 오전 8시 30분
     // MySQL: 08:30:00
