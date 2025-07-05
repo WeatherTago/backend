@@ -28,6 +28,7 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
 
     private final AlarmRepository alarmRepository;
     private final UserRepository userRepository;
+    private final StationRepository stationRepository;
 
     @Override
     public Optional<AlarmResponseDTO.AlarmDetailDTO> createAlarm(AlarmRequestDTO.AlarmCreateRequestDTO dto) {
@@ -37,15 +38,17 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
         User user = userRepository.findByKakaoId(kakaoId)
                 .orElseThrow(()->new UserHandler(ErrorStatus.USER_NOT_FOUND));
 
+        Station station = stationRepository.getReferenceById(dto.getStationId());
+
         Alarm alarm = Alarm.builder()
                 .userId(user)
                 .pushToken(dto.getPushToken())
                 .referenceTime(dto.getReferenceTime())
-                .stationName(dto.getStationName())
-                .stationLine(dto.getStationLine())
+                .stationId(station)
                 .direction(dto.getDirection())
                 .alarmDay(dto.getAlarmDay())
                 .alarmTime(dto.getAlarmTime())
+                .alarmPeriod(dto.getAlarmPeriod())
                 .build();
 
         Alarm savedAlarm = alarmRepository.save(alarm);
@@ -65,17 +68,16 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
         Alarm alarm = alarmRepository.findById(dto.getAlarmId())
                 .orElseThrow(() -> new RuntimeException("Alarm not found"));
 
+        Station station = stationRepository.getReferenceById(dto.getStationId());
+
         if (dto.getPushToken() != null) {
             alarm.setPushToken(dto.getPushToken());
         }
         if (dto.getReferenceTime() != null) {
             alarm.setReferenceTime(dto.getReferenceTime());
         }
-        if (dto.getStationName() != null) {
-            alarm.setStationName(dto.getStationName());
-        }
-        if (dto.getStationLine() != null) {
-            alarm.setStationLine(dto.getStationLine());
+        if (dto.getStationId() != null) {
+            alarm.setStationId(station);
         }
         if (dto.getDirection() != null) {
             alarm.setDirection(dto.getDirection());
@@ -85,6 +87,9 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
         }
         if (dto.getAlarmTime() != null) {
             alarm.setAlarmTime(dto.getAlarmTime());
+        }
+        if (dto.getAlarmPeriod() != null) {
+            alarm.setAlarmPeriod(dto.getAlarmPeriod());
         }
         alarmRepository.save(alarm);
     }

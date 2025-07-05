@@ -26,6 +26,10 @@ public class Alarm extends BaseEntity {
 
     private String pushToken;
 
+    // 매일, 월화수목금토일
+    @Enumerated(EnumType.STRING) @Column(nullable = false)
+    private AlarmPeriod alarmPeriod;
+
     // 혼잡도 계산할 시간 (HH:mm 형식)
     // alarm.setReferenceTime(LocalTime.of(8, 30)); // 오전 8시 30분
     // MySQL: 08:30:00
@@ -33,13 +37,10 @@ public class Alarm extends BaseEntity {
     @DateTimeFormat(pattern = "HH:mm:ss")
     private LocalTime referenceTime;
 
-    // 역 이름 (즐겨찾기 테이블에 있는 역 불러오기)
-    @Column(nullable = false)
-    private String stationName;
-
-    // 역 호선 (즐겨찾기 테이블에 있는 역 불러오기)
-    @Column(nullable = false)
-    private String stationLine;
+    // station 테이블에서 가져온 station_id
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "station_id", nullable = false)
+    private Station stationId;
 
     // 상행 또는 하행
     @Enumerated(EnumType.STRING)

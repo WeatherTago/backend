@@ -41,11 +41,7 @@ public class AlarmSendServiceImpl implements AlarmSendService {
 
         // 2. FCM 메시지 생성
         // alarmDay에 따라 알림 대상(오늘/내일) 결정
-        String stationName = "강남";
-        String line = "2";
-        String weatherKey = String.format("weather:%s:%s", stationName, line);
-
-        String alarmDayStr;
+        String alarmDayStr="";
         LocalDate weatherDate;
 
         String refTimeStr = String.valueOf(alarm.getReferenceTime()); // 예: "14:30:00"
@@ -61,33 +57,12 @@ public class AlarmSendServiceImpl implements AlarmSendService {
                 alarmDayStr = "내일";
                 weatherDate = refDateTime.toLocalDate().plusDays(1);
             }
-            default -> {
-                alarmDayStr = "오늘";
-                weatherDate = refDateTime.toLocalDate();
-            }
         }
 
         // 4. Redis에서 해당 해시에서 datetime이 일치하는지 체크
-        HashOperations<String, String, String> hashOps = redisTemplate.opsForHash();
-        String datetime = hashOps.get(weatherKey, "datetime");
-        String tmp = hashOps.get(weatherKey, "TMP");
-        String reh = hashOps.get(weatherKey, "REH");
-        String pcp = hashOps.get(weatherKey, "PCP");
-        String wsd = hashOps.get(weatherKey, "WSD");
-        String sno = hashOps.get(weatherKey, "SNO");
-        String vec = hashOps.get(weatherKey, "VEC");
 
-        // 날짜가 일치하는지 확인 (없으면 "날씨 정보 없음")
-        String weatherInfo;
-        if (datetime != null && datetime.startsWith(weatherDate.toString()) &&
-                tmp != null && reh != null && pcp != null && wsd != null && sno != null && vec != null) {
-            weatherInfo = String.format("기온: %s°C, 습도: %s%%, 강수량: %smm, 풍속: %sm/s, 적설: %scm, 풍향: %s°",
-                    tmp, reh, pcp, wsd, sno, vec);
-        } else {
-            weatherInfo = "날씨 정보 없음";
-        }
 
-        log.info("날씨 정보: {}", weatherInfo);
+        String weatherInfo="";
 
         // 혼잡도/날씨 mock 데이터
         // String congestionMock = "여유"; // 예: "여유", "보통", "혼잡"
@@ -95,7 +70,7 @@ public class AlarmSendServiceImpl implements AlarmSendService {
         String weatherMock = "맑음, 25°C"; // 예: "맑음, 25°C"
 
         // 제목
-        String title = "[Weathertago] " + alarm.getStationName() + " "  + alarm.getStationLine() + " "  + alarm.getDirection()+ " " + alarm.getAlarmTime() + " 혼잡도 알림";
+        String title = "[Weathertago] " + alarm.getStationId().getName() + " "  + alarm.getStationId().getLine() + " "  + alarm.getDirection()+ " " + alarm.getAlarmTime() + " 혼잡도 알림";
 
         // 본문
         String body = String.format(
