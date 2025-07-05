@@ -39,7 +39,6 @@ public class SubwayPathConverter {
                     .line(path.getRouteNm())
                     .startStation(start)
                     .endStation(end)
-                    .stations(stations)
                     .build());
         }
 
