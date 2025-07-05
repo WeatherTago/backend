@@ -26,6 +26,7 @@ public class StationQueryServiceImpl implements StationQueryService {
     private final CongestionQueryService congestionQueryService;
 
 
+    /*
     @Override
     @Transactional
     public StationResponseDTO.JoinResultDTO getStationByNameAndLine(String name, String line, LocalDateTime time) {
@@ -37,6 +38,8 @@ public class StationQueryServiceImpl implements StationQueryService {
 
         return StationConverter.toJoinResultDTO(station, weather, congestion);
     }
+
+     */
 
     @Override
     @Transactional
