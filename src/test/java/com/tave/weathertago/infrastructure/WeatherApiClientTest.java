@@ -1,18 +1,8 @@
 package com.tave.weathertago.infrastructure;
 
-import com.tave.weathertago.dto.weather.WeatherResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.RedisTemplate;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 @SpringBootTest
@@ -24,7 +14,7 @@ public class WeatherApiClientTest {
     @Test
     void 날씨_API_실행_테스트() {
         // given
-        String stationName = "이대";
+        String stationName = "강남";
         String line = "2호선";
 
         // when

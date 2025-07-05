@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -56,18 +57,29 @@ public class AiPredictionClient {
             throw new WeatherHandler(ErrorStatus.WEATHER_API_RESPONSE_EMPTY);
         }
 
-        PredictionRequestDTO request = PredictionConverter.toPredictionRequest(line, stationName, datetime, weather);
+        PredictionRequestDTO request = PredictionRequestDTO.builder()
+                .line(line)
+                .station_name(stationName)
+                .datetime(datetime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                .TMP(weather.getTmp())
+                .REH(weather.getReh())
+                .PCP(weather.getPcp())
+                .WSD(weather.getWsd())
+                .SNO(weather.getSno())
+                .VEC(weather.getVec())
+                .build();
 
         try {
-            String json = objectMapper.writeValueAsString(request);
+            // 로그 확인용
+            String requestJson = objectMapper.writeValueAsString(request);
+            log.info("📤 AI 서버 POST 요청 전송\nURL: {}\nPayload: {}", aiServerUrl, requestJson);
 
-            String responseBody = restClient.post()
+            AiServerResponseDTO aiResponse = restClient.post()
                     .uri(aiServerUrl)
-                    .body(json)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(request)
                     .retrieve()
-                    .body(String.class);
-
-            AiServerResponseDTO aiResponse = objectMapper.readValue(responseBody, AiServerResponseDTO.class);
+                    .body(AiServerResponseDTO.class);
 
             if (!"ok".equalsIgnoreCase(aiResponse.getStatus())) {
                 throw new WeatherHandler(ErrorStatus.AI_PREDICTION_FAIL);
