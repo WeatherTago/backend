@@ -1,6 +1,7 @@
 package com.tave.weathertago.dto.alarm;
 
 import com.tave.weathertago.domain.AlarmDay;
+import com.tave.weathertago.domain.AlarmPeriod;
 import com.tave.weathertago.domain.Direction;
 import com.tave.weathertago.domain.Station;
 import lombok.Builder;
@@ -15,11 +16,11 @@ public class AlarmRequestDTO {
     public static class AlarmCreateRequestDTO {
         private String pushToken;
 
-        private LocalTime referenceTime;
-        private String stationName;
-        private String stationLine;
+        private Long stationId;
         private Direction direction;
 
+        private LocalTime referenceTime;
+        private AlarmPeriod alarmPeriod;
         private AlarmDay alarmDay;
         private LocalTime alarmTime;
     }
@@ -30,11 +31,11 @@ public class AlarmRequestDTO {
         private Long alarmId;
         private String pushToken;
 
-        private LocalTime referenceTime;
-        private String stationName;
-        private String stationLine;
+        private Long stationId;
         private Direction direction;
 
+        private LocalTime referenceTime;
+        private AlarmPeriod alarmPeriod;
         private AlarmDay alarmDay;
         private LocalTime alarmTime;
     }

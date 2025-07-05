@@ -95,7 +95,7 @@ public class AlarmSendServiceImpl implements AlarmSendService {
         String weatherMock = "맑음, 25°C"; // 예: "맑음, 25°C"
 
         // 제목
-        String title = "[Weathertago] " + alarm.getStationName() + " "  + alarm.getStationLine() + " "  + alarm.getDirection()+ " " + alarm.getAlarmTime() + " 혼잡도 알림";
+        String title = "[Weathertago] " + alarm.getStationId().getName() + " "  + alarm.getStationId().getLine() + " "  + alarm.getDirection()+ " " + alarm.getAlarmTime() + " 혼잡도 알림";
 
         // 본문
         String body = String.format(

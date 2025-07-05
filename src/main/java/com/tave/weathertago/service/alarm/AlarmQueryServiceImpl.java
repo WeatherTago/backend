@@ -8,6 +8,7 @@ import com.tave.weathertago.domain.Alarm;
 import com.tave.weathertago.domain.User;
 import com.tave.weathertago.dto.alarm.AlarmResponseDTO;
 import com.tave.weathertago.repository.AlarmRepository;
+import com.tave.weathertago.repository.StationRepository;
 import com.tave.weathertago.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
