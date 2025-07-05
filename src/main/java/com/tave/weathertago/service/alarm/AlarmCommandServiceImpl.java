@@ -68,7 +68,6 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
         Alarm alarm = alarmRepository.findById(dto.getAlarmId())
                 .orElseThrow(() -> new RuntimeException("Alarm not found"));
 
-        Station station = stationRepository.getReferenceById(dto.getStationId());
 
         if (dto.getPushToken() != null) {
             alarm.setPushToken(dto.getPushToken());
@@ -77,6 +76,7 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
             alarm.setReferenceTime(dto.getReferenceTime());
         }
         if (dto.getStationId() != null) {
+            Station station = stationRepository.getReferenceById(dto.getStationId());
             alarm.setStationId(station);
         }
         if (dto.getDirection() != null) {
