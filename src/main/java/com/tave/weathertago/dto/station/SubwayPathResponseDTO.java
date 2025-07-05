@@ -10,10 +10,8 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-@JacksonXmlRootElement(localName = "ServiceResult")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SubwayPathResponseDTO {
-
     @JacksonXmlProperty(localName = "msgHeader")
     private MsgHeader msgHeader;
 
@@ -25,7 +23,6 @@ public class SubwayPathResponseDTO {
     public static class MsgHeader {
         private String headerMsg;
         private String headerCd;
-        private int itemCount;
     }
 
     @Data
@@ -39,12 +36,33 @@ public class SubwayPathResponseDTO {
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Item {
-        private String routeNm;
-        private String fname;
-        private String tname;
-        private String fid;
-        private String tid;
+        @JacksonXmlProperty(localName = "distance")
         private String distance;
+
+        @JacksonXmlProperty(localName = "time")
         private String time;
+
+        @JacksonXmlElementWrapper(useWrapping = false)
+        @JacksonXmlProperty(localName = "pathList")
+        private List<Path> pathList;
+    }
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Path {
+        @JacksonXmlProperty(localName = "fid")
+        private String fid;
+
+        @JacksonXmlProperty(localName = "fname")
+        private String fname;
+
+        @JacksonXmlProperty(localName = "tid")
+        private String tid;
+
+        @JacksonXmlProperty(localName = "tname")
+        private String tname;
+
+        @JacksonXmlProperty(localName = "routeNm")
+        private String routeNm;
     }
 }

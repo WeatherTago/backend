@@ -13,6 +13,7 @@ public class FavoriteConverter {
     //FavoriteResultDTO안에 있는 StationDTO 변환
     public static FavoriteResponseDTO.FavoriteResultDTO.StationDTO toStationDTO(Station station){
         return FavoriteResponseDTO.FavoriteResultDTO.StationDTO.builder()
+                .stationId(station.getId())
                 .stationName(station.getName())
                 .stationLine(station.getLine())
                 .build();

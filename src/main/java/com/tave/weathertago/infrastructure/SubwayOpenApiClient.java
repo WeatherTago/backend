@@ -14,13 +14,13 @@ public class SubwayOpenApiClient {
 
     private final RestTemplate restTemplate;
 
-    // ✅ API 기본 주소
     private static final String BASE_URL = "http://ws.bus.go.kr/api/rest/pathinfo/getPathInfoBySubway";
 
 
     @Value("${subwaypath.api.key}")
     private String serviceKey;
-    // ✅ 인코딩된 상태의 서비스 키 (절대로 encode() 다시 하지 마세요!)
+
+
 
     public SubwayOpenApiClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -40,7 +40,13 @@ public class SubwayOpenApiClient {
             System.out.println("📡 호출 URI: " + uri);
 
             String xml = restTemplate.getForObject(uri, String.class);
+
             System.out.println("🧾 응답 원문: " + xml);
+
+            // ✅ HTML 오류 응답 방지용 검사
+            if (xml != null && xml.contains("<html")) {
+                throw new RuntimeException("HTML 페이지가 반환됨. 인증키 또는 파라미터 확인 필요.");
+            }
 
             XmlMapper xmlMapper = new XmlMapper();
             SubwayPathResponseDTO dto = xmlMapper.readValue(xml, SubwayPathResponseDTO.class);

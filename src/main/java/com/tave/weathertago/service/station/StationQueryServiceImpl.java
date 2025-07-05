@@ -26,6 +26,7 @@ public class StationQueryServiceImpl implements StationQueryService {
     private final CongestionQueryService congestionQueryService;
 
 
+    /*
     @Override
     @Transactional
     public StationResponseDTO.JoinResultDTO getStationByNameAndLine(String name, String line, LocalDateTime time) {
@@ -38,6 +39,19 @@ public class StationQueryServiceImpl implements StationQueryService {
         return StationConverter.toJoinResultDTO(station, weather, congestion);
     }
 
+     */
+
+    @Override
+    @Transactional
+    public StationResponseDTO.JoinResultDTO getStationById(Long stationId, LocalDateTime time) {
+        Station station = stationRepository.findById(stationId)
+                .orElseThrow(() -> new StationHandler(ErrorStatus.STATION_NAME_NOT_FOUND));
+
+        WeatherDTO weather = weatherQueryService.getWeather(station.getLatitude(), station.getLongitude(), time);
+        CongestionDTO congestion = congestionQueryService.getCongestion(station.getStationCode(), time);
+
+        return StationConverter.toJoinResultDTO(station, weather, congestion);
+    }
 
     @Override
     @Transactional
@@ -46,8 +60,6 @@ public class StationQueryServiceImpl implements StationQueryService {
                 .map(StationConverter::toSimpleDTO)
                 .toList();
     }
-
-}
 
     /*
     /**
@@ -78,3 +90,4 @@ public class StationQueryServiceImpl implements StationQueryService {
     }
     */
 
+}

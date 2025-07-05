@@ -48,12 +48,11 @@ public class FavoriteRestController {
 
     //즐겨찾기 내 특정 역 상세 조회
     @GetMapping("/detail")
-    public ResponseEntity<ApiResponse<StationResponseDTO.JoinResultDTO>> getStationDetailByNameAndLine(
-            @RequestParam("name") String stationName,
-            @RequestParam("line") String stationLine,
+    public ResponseEntity<ApiResponse<StationResponseDTO.JoinResultDTO>> getStationDetailById(
+            @RequestParam("stationId") Long stationId,
             @RequestParam("time") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime time) {
 
-        StationResponseDTO.JoinResultDTO stationDetail = stationQueryService.getStationByNameAndLine(stationName, stationLine, time);
+        StationResponseDTO.JoinResultDTO stationDetail = stationQueryService.getStationById(stationId, time);
         return ResponseEntity.ok(ApiResponse.onSuccess(stationDetail));
     }
 }

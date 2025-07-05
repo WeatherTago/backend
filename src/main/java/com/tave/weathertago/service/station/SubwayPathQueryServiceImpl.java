@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class SubwayPathQueryServiceImpl implements  SubwayPathQueryService {
+public class SubwayPathQueryServiceImpl implements SubwayPathQueryService {
 
     private final StationRepository stationRepository;
     private final SubwayOpenApiClient openApiClient;
@@ -33,6 +33,7 @@ public class SubwayPathQueryServiceImpl implements  SubwayPathQueryService {
                 endStation.getLongitude(), endStation.getLatitude()
         );
 
-        return SubwayPathConverter.from(response);
+        return SubwayPathConverter.from(response)
+                .orElseThrow(() -> new StationHandler(ErrorStatus.NO_SUBWAY_ROUTE_FOUND));
     }
 }
