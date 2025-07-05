@@ -25,15 +25,15 @@ public class SubwayPathQueryServiceImpl implements SubwayPathQueryService {
         Station endStation = stationRepository.findFirstByName(end)
                 .orElseThrow(() -> new StationHandler(ErrorStatus.STATION_NAME_NOT_FOUND));
 
-        System.out.println("출발역 좌표: " + startStation.getLatitude() + ", " + startStation.getLongitude());
-        System.out.println("도착역 좌표: " + endStation.getLatitude() + ", " + endStation.getLongitude());
-
         SubwayPathResponseDTO response = openApiClient.getPathInfo(
                 startStation.getLongitude(), startStation.getLatitude(),
                 endStation.getLongitude(), endStation.getLatitude()
         );
 
-        return SubwayPathConverter.from(response)
+        System.out.println("출발역 좌표: " + startStation.getLatitude() + ", " + startStation.getLongitude());
+        System.out.println("도착역 좌표: " + endStation.getLatitude() + ", " + endStation.getLongitude());
+
+        return SubwayPathConverter.from(response, stationRepository)
                 .orElseThrow(() -> new StationHandler(ErrorStatus.NO_SUBWAY_ROUTE_FOUND));
     }
 }

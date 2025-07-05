@@ -1,5 +1,6 @@
 package com.tave.weathertago.dto.station;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,6 +23,9 @@ public class SubwayPathDTO {
         private String line;                   // 대표 호선 (예: 2호선)
         private StationInfo startStation;      // 탑승역 정보 (ID, 이름, 호선)
         private StationInfo endStation;        // 하차역 정보 (ID, 이름, 호선)
+
+        @JsonProperty("allStations")
+        private List<StationInfo> allStations;
     }
 
     @Builder
