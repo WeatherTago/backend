@@ -34,7 +34,7 @@ public class NoticeRestController {
 
     @Operation(summary = "특정 공지사항 조회", description = "특정 공지사항을 id로 조회합니다.")
     @GetMapping("/{notice_id}")
-    public ApiResponse<NoticeResponseDTO.NoticeDetail> getNotice(@PathVariable("noticeId") Long noticeId) {
+    public ApiResponse<NoticeResponseDTO.NoticeDetail> getNotice(@PathVariable("notice_id") Long noticeId) {
         NoticeResponseDTO.NoticeDetail noticeDetail = noticeQueryService.getNoticesByNoticeId(noticeId);
         return ApiResponse.onSuccess(noticeDetail);
     }
