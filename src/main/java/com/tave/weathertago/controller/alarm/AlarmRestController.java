@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Tag(name = "Alarm", description = "알람 API")
+@Tag(name = "Alarm", description = "알림 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users/me/alarms")
@@ -23,18 +23,17 @@ public class AlarmRestController {
     private final AlarmQueryService alarmQueryService;
 
     @GetMapping("")
-    @Operation(summary = "모든 알람 조회", description = "사용자의 모든 알람을 조회합니다.")
+    @Operation(summary = "모든 알림 조회", description = "사용자의 모든 알림을 조회합니다.")
     public ResponseEntity<ApiResponse<List<AlarmResponseDTO.AlarmDetailDTO>>> getAlarms() {
         List<AlarmResponseDTO.AlarmDetailDTO> alarms = alarmQueryService.getAlarms();
         return ResponseEntity.ok(ApiResponse.onSuccess(alarms));
     }
 
     @GetMapping("/{alarm_id}")
-    @Operation(summary = "특정 알람 조회", description = "사용자의 특정 알람을 조회합니다.")
+    @Operation(summary = "특정 알림 조회", description = "사용자의 특정 알림을 조회합니다.")
     public ResponseEntity<ApiResponse<AlarmResponseDTO.AlarmDetailDTO>> getAlarmDetail(@PathVariable("alarm_id") Long alarmId) {
-        return alarmQueryService.getAlarmDetail(alarmId)
-                .map(alarmDetailDTO -> ResponseEntity.ok(ApiResponse.onSuccess(alarmDetailDTO)))
-                .orElse(ResponseEntity.notFound().build());
+        AlarmResponseDTO.AlarmDetailDTO alarmDetailDTO = alarmQueryService.getAlarmDetail(alarmId);
+        return ResponseEntity.ok(ApiResponse.onSuccess(alarmDetailDTO));
     }
 
 

@@ -3,6 +3,8 @@ package com.tave.weathertago.service.alarm;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
+import com.tave.weathertago.apiPayload.code.status.ErrorStatus;
+import com.tave.weathertago.apiPayload.exception.handler.AlarmHandler;
 import com.tave.weathertago.converter.AlarmConverter;
 import com.tave.weathertago.domain.Alarm;
 import com.tave.weathertago.domain.AlarmDay;
@@ -37,7 +39,7 @@ public class AlarmSendServiceImpl implements AlarmSendService {
     public AlarmFcmMessageDto sendAlarm(Long alarmId){
         // 1. 알람 정보 조회
         Alarm alarm = alarmRepository.findById(alarmId)
-                .orElseThrow(() -> new RuntimeException("Alarm not found"));
+                .orElseThrow(() -> new AlarmHandler(ErrorStatus.ALARM_NOT_FOUND));
 
         // 2. FCM 메시지 생성
         // alarmDay에 따라 알림 대상(오늘/내일) 결정
@@ -56,6 +58,9 @@ public class AlarmSendServiceImpl implements AlarmSendService {
             case YESTERDAY -> {
                 alarmDayStr = "내일";
                 weatherDate = refDateTime.toLocalDate().plusDays(1);
+            }
+            default -> {
+                throw new AlarmHandler(ErrorStatus.ALARM_INVALID_INPUT);
             }
         }
 
@@ -103,7 +108,7 @@ public class AlarmSendServiceImpl implements AlarmSendService {
 
         } catch (Exception e) {
             log.error("FCM 메시지 전송 실패: {}", e.getMessage());
-            throw new RuntimeException("FCM 메시지 전송 실패", e);
+            throw new AlarmHandler(ErrorStatus.ALARM_SEND_FAIL);
         }
 
     }
