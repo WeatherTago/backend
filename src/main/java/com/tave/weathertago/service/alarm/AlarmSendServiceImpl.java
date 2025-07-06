@@ -8,6 +8,7 @@ import com.tave.weathertago.apiPayload.exception.handler.AlarmHandler;
 import com.tave.weathertago.converter.AlarmConverter;
 import com.tave.weathertago.domain.Alarm;
 import com.tave.weathertago.domain.AlarmDay;
+import com.tave.weathertago.domain.AlarmPeriod;
 import com.tave.weathertago.dto.alarm.AlarmFcmMessageDto;
 import com.tave.weathertago.repository.AlarmRepository;
 import com.tave.weathertago.repository.UserRepository;
@@ -18,6 +19,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -46,7 +48,7 @@ public class AlarmSendServiceImpl implements AlarmSendService {
         String alarmDayStr="";
         LocalDate weatherDate;
 
-        String refTimeStr = String.valueOf(alarm.getReferenceTime()); // 예: "14:30:00"
+        String refTimeStr = String.valueOf(alarm.getReferenceTime()); // 예: "14:30"
         LocalTime localTime = LocalTime.parse(refTimeStr, DateTimeFormatter.ofPattern("HH:mm"));
         LocalDateTime refDateTime = LocalDate.now().atTime(localTime);
 
@@ -67,15 +69,13 @@ public class AlarmSendServiceImpl implements AlarmSendService {
         // 4. Redis에서 해당 해시에서 datetime이 일치하는지 체크
 
 
-        String weatherInfo="";
-
         // 혼잡도/날씨 mock 데이터
         // String congestionMock = "여유"; // 예: "여유", "보통", "혼잡"
         int congestionMock = 62; // 혼잡도 퍼센트(예: 62%)
         String weatherMock = "맑음, 25°C"; // 예: "맑음, 25°C"
 
         // 제목
-        String title = "[Weathertago] " + alarm.getStationId().getName() + " "  + alarm.getStationId().getLine() + " "  + alarm.getDirection()+ " " + alarm.getAlarmTime() + " 혼잡도 알림";
+        String title = "[Weathertago] " + alarm.getStationId().getName() + " "  + alarm.getStationId().getLine() + " "  + alarm.getDirection().getDescription()+ " " + alarm.getAlarmTime() + " 혼잡도 알림";
 
         // 본문
         String body = String.format(
@@ -85,7 +85,7 @@ public class AlarmSendServiceImpl implements AlarmSendService {
                 alarmDayStr,
                 alarm.getReferenceTime(),
                 congestionMock,
-                weatherInfo
+                weatherMock
         );
 
         // 3. FCM 메시지 빌드
@@ -117,26 +117,50 @@ public class AlarmSendServiceImpl implements AlarmSendService {
 //    @Scheduled(cron = "0 * * * * *") // 매 분 0초마다
 //    public void autoSendAlarms() {
 //        LocalTime now = LocalTime.now().withSecond(0).withNano(0); // 현재 시각 (초, 나노초 0으로)
-//        // 오늘/내일 기준 알람 모두 조회
-//        List<Alarm> todayAlarms = alarmRepository.findAllByAlarmDayAndAlarmTime(AlarmDay.TODAY, now);
-//        List<Alarm> yesterdayAlarms = alarmRepository.findAllByAlarmDayAndAlarmTime(AlarmDay.YESTERDAY, now);
+//        DayOfWeek today = LocalDate.now().getDayOfWeek(); // 오늘 요일
 //
-//        // referenceTime 기준 오늘 알람 전송
-//        todayAlarms.forEach(alarm -> {
-//            try {
-//                sendAlarm(alarm.getAlarmId());
-//            } catch (Exception e) {
-//                log.error("오늘 알람 전송 실패: {}", e.getMessage());
-//            }
+//        // 1. 매일 알림
+//        List<Alarm> everydayTodayAlarms = alarmRepository.findAllByAlarmPeriodAndAlarmDayAndAlarmTime(
+//                AlarmPeriod.EVERYDAY, AlarmDay.TODAY, now);
+//        List<Alarm> everydayYesterdayAlarms = alarmRepository.findAllByAlarmPeriodAndAlarmDayAndAlarmTime(
+//                AlarmPeriod.EVERYDAY, AlarmDay.YESTERDAY, now);
+//
+//        // 2. 요일별 알림 (월~일)
+//        AlarmPeriod todayPeriod = switch (today) {
+//            case MONDAY -> AlarmPeriod.MONDAY;
+//            case TUESDAY -> AlarmPeriod.TUESDAY;
+//            case WEDNESDAY -> AlarmPeriod.WEDNESDAY;
+//            case THURSDAY -> AlarmPeriod.THURSDAY;
+//            case FRIDAY -> AlarmPeriod.FRIDAY;
+//            case SATURDAY -> AlarmPeriod.SATURDAY;
+//            case SUNDAY -> AlarmPeriod.SUNDAY;
+//        };
+//
+//        List<Alarm> weekdayTodayAlarms = alarmRepository.findAllByAlarmPeriodAndAlarmDayAndAlarmTime(
+//                todayPeriod, AlarmDay.TODAY, now);
+//        List<Alarm> weekdayYesterdayAlarms = alarmRepository.findAllByAlarmPeriodAndAlarmDayAndAlarmTime(
+//                todayPeriod, AlarmDay.YESTERDAY, now);
+//
+//
+//
+//        // 알람 전송 (매일)
+//        everydayTodayAlarms.forEach(alarm -> {
+//            try { sendAlarm(alarm.getAlarmId()); }
+//            catch (Exception e) { log.error("매일-당일 알람 전송 실패: {}", e.getMessage()); }
+//        });
+//        everydayYesterdayAlarms.forEach(alarm -> {
+//            try { sendAlarm(alarm.getAlarmId()); }
+//            catch (Exception e) { log.error("매일-전날 알람 전송 실패: {}", e.getMessage()); }
 //        });
 //
-//        // referenceTime 기준 전날 알람 전송
-//        yesterdayAlarms.forEach(alarm -> {
-//            try {
-//                sendAlarm(alarm.getAlarmId());
-//            } catch (Exception e) {
-//                log.error("전날 알람 전송 실패: {}", e.getMessage());
-//            }
+//        // 알람 전송 (요일별)
+//        weekdayTodayAlarms.forEach(alarm -> {
+//            try { sendAlarm(alarm.getAlarmId()); }
+//            catch (Exception e) { log.error("요일별-당일 알람 전송 실패: {}", e.getMessage()); }
+//        });
+//        weekdayYesterdayAlarms.forEach(alarm -> {
+//            try { sendAlarm(alarm.getAlarmId()); }
+//            catch (Exception e) { log.error("요일별-전날 알람 전송 실패: {}", e.getMessage()); }
 //        });
 //    }
 }
