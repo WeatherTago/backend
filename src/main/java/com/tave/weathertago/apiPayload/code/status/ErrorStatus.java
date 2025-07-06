@@ -50,7 +50,16 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 공지사항 관련 에러
     NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE4041", "공지사항을 찾을 수 없습니다."),
-    NOTICE_CRAWLING_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "NOTICE5001", "공지사항 크롤링에 실패했습니다.");
+    NOTICE_CRAWLING_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "NOTICE5001", "공지사항 크롤링에 실패했습니다."),
+
+    // 알림 관련 에러
+    ALARM_INVALID_INPUT(HttpStatus.BAD_REQUEST, "NOTICE4001", "잘못된 요청입니다."),
+    ALARM_FORBIDDEN(HttpStatus.FORBIDDEN, "NOTICE4031", "권한이 없습니다."),
+    ALARM_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE4041", "알림을 찾을 수 없습니다."),
+    ALARM_CREATE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "NOTICE5001", "알림 생성에 실패했습니다."),
+    ALARM_UPDATE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "NOTICE5002", "알림 수정에 실패했습니다."),
+    ALARM_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "NOTICE5003", "알림 삭제에 실패했습니다."),
+    ALARM_SEND_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "NOTICE5004", "알림(Firebase) 전송에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

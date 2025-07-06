@@ -47,12 +47,12 @@ public class Alarm extends BaseEntity {
     @Column(nullable = false)
     private Direction direction;
 
-    // 알람 보내는 시점: 당일, 하루 전
+    // 알림 보내는 시점: 당일, 하루 전
     @Enumerated(EnumType.STRING) // Enum 값을 문자열로 저장
     @Column(nullable = false)
     private AlarmDay alarmDay;
 
-    // 알람 보내는 시간 (HH:mm 형식)
+    // 알림 보내는 시간 (HH:mm 형식)
     @Column(nullable = false)
     @DateTimeFormat(pattern = "HH:mm:ss")
     private LocalTime alarmTime;
