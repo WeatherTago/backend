@@ -46,8 +46,11 @@ public enum ErrorStatus implements BaseErrorCode {
     WEATHER_API_FAIL(HttpStatus.BAD_GATEWAY, "WEATHER4002", "기상청 API 요청에 실패했습니다."),
     WEATHER_API_PARSE_ERROR(HttpStatus.BAD_GATEWAY, "WEATHER4003", "기상청 응답 파싱에 실패했습니다."),
     WEATHER_API_INVALID_STRUCTURE(HttpStatus.BAD_GATEWAY, "WEATHER4004", "기상청 응답 구조가 잘못되었습니다."),
-    WEATHER_CACHE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "WEATHER5001", "날씨 정보를 Redis에 캐싱하는 중 오류가 발생했습니다.");
+    WEATHER_CACHE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "WEATHER5001", "날씨 정보를 Redis에 캐싱하는 중 오류가 발생했습니다."),
 
+    // 공지사항 관련 에러
+    NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE4041", "공지사항을 찾을 수 없습니다."),
+    NOTICE_CRAWLING_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "NOTICE5001", "공지사항 크롤링에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

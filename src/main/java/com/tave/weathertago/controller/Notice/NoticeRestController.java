@@ -28,18 +28,14 @@ public class NoticeRestController {
     @Operation(summary = "공지사항 전체 조회", description = "DB에 저장된 모든 공지사항을 최신순으로 조회합니다.")
     @GetMapping("")
     public ApiResponse<List<NoticeResponseDTO.NoticeDetail>> getNotices() {
-        List<Notice> notices=noticeQueryService.getAllNotices();
-        List<NoticeResponseDTO.NoticeDetail> noticeDetails = notices.stream()
-                .map(NoticeConverter::toNoticeDetail)
-                .toList();
+        List<NoticeResponseDTO.NoticeDetail> noticeDetails = noticeQueryService.getAllNotices();
         return ApiResponse.onSuccess(noticeDetails);
     }
 
     @Operation(summary = "특정 공지사항 조회", description = "특정 공지사항을 id로 조회합니다.")
     @GetMapping("/{notice_id}")
     public ApiResponse<NoticeResponseDTO.NoticeDetail> getNotice(@PathVariable("noticeId") Long noticeId) {
-        Optional<Notice> notice = noticeQueryService.getNoticesByNoticeId(noticeId);
-        NoticeResponseDTO.NoticeDetail noticeDetail = NoticeConverter.toNoticeDetail(notice.orElse(null));
+        NoticeResponseDTO.NoticeDetail noticeDetail = noticeQueryService.getNoticesByNoticeId(noticeId);
         return ApiResponse.onSuccess(noticeDetail);
     }
 }
