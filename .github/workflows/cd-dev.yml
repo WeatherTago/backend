@@ -71,6 +71,9 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Set IMAGE env
+        run: echo "IMAGE=${{ steps.build-image.outputs.image }}" >> $GITHUB_ENV
           
       - name: Update ECS task definition with new image
         id: task-def
