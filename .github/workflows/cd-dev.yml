@@ -6,12 +6,20 @@ on:
     branches:
       - dev
 
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+  ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
+  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
+  ECS_TASK_DEFINITION: ${{ secrets.ECS_TASK_DEFINITION }}
+  CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
+
 jobs:
   build:
-    name: build
+    name: Build & Push to ECR
     runs-on: ubuntu-latest
     outputs:
-      docker_image_tag: ${{ steps.set_tag.outputs.docker_image_tag }}
+      image: ${{ steps.build-image.outputs.image }}
     steps:
       - name: Discord Notification
         env:
@@ -24,8 +32,6 @@ jobs:
       # 코드 체크아웃
       - name: Checkout repository
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
 
       # JDK 설치
       - name: Set up JDK 17
@@ -47,61 +53,63 @@ jobs:
           sudo chmod +x ./gradlew
           sudo ./gradlew clean build
 
-      # 날짜 기반 태그 생성
-      - name: Set Docker image tag
-        id: set_tag
-        run: echo "docker_image_tag=$(date +'%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
-
-      - name: Export Docker tag
-        id: export_tag
-        run: echo "docker_image_tag=$(echo '${{ steps.meta.outputs.tags }}' | cut -d ':' -f2)" >> $GITHUB_OUTPUT
-
-      # DockerHub 로그인
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      # DockerHub Push
-      - name: Build and Push Docker image
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build --no-cache -t ${{ secrets.DOCKER_HUB_USERNAME }}/weathertago:${{ steps.set_tag.outputs.docker_image_tag }} .
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/weathertago:${{ steps.set_tag.outputs.docker_image_tag }}
-
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          
 
   deploy:
-    name: Deploy
+    name: Deploy to ECS
     runs-on: ubuntu-latest
     needs: build
 
     steps:
-      # AWS 배포
-      - name: SSH to EC2 and deploy
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd backend
-            git pull
-            echo "TAG=${{ needs.build.outputs.docker_image_tag }}" > .env
-            sudo docker-compose stop weathertago-app
-            sudo docker-compose rm -f weathertago-app    
-            sudo docker rmi ${{ secrets.DOCKER_HUB_USERNAME }}/weathertago:$TAG || true         
-            sudo docker-compose pull weathertago-app
-            sudo docker-compose up -d weathertago-app --no-deps
-        env:
-          ACTIONS_RUNNER_DEBUG: true
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update ECS task definition with new image
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ needs.build.outputs.image }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
 
       - name: Discord Notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         uses: Ilshidur/action-discord@master
         with:
-          args:
-            '😎 배포 완료됨 ✨ Triggered by: **${{ github.actor }}**'
-
-
+          args: '😎 배포 완료됨 Triggered by: **${{ github.actor }}**'
