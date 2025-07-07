@@ -66,3 +66,4 @@ replay_pid*
 application.*
 application-API-KEY.properties
 weathertago-firebase-adminsdk-fbsvc-4885ca4b1e.json
+weathertago-ecs-task-definition-revision2.json
