@@ -51,6 +51,7 @@ jobs:
           sudo chmod +x ./gradlew
           sudo ./gradlew clean build
 
+      # AWS 인증 정보 설정
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -58,10 +59,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      # ECR 로그인
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      # Docker 이미지 빌드 및 ECR로 Push, 이미지 태그 추출
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
@@ -95,6 +98,21 @@ jobs:
           task-definition: task-definition.json
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ env.IMAGE }}
+
+#      - name: Stop running ECS tasks (before deploy)
+#        run: |
+#          TASK_ARN_LIST=$(aws ecs list-tasks \
+#            --cluster ${{ env.ECS_CLUSTER }} \
+#            --service-name ${{ env.ECS_SERVICE }} \
+#            --desired-status RUNNING \
+#            --output text --query 'taskArns[]')
+#          if [ -n "$TASK_ARN_LIST" ]; then
+#            for TASK_ARN in $TASK_ARN_LIST; do
+#              aws ecs stop-task --cluster ${{ env.ECS_CLUSTER }} --task $TASK_ARN --reason "Stopped by Github Actions before deployment"
+#            done
+#          else
+#              echo "No running tasks to stop."
+#          fi
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
