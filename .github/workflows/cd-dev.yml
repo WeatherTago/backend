@@ -74,12 +74,19 @@ jobs:
 
       - name: Set IMAGE env
         run: echo "IMAGE=${{ steps.build-image.outputs.image }}" >> $GITHUB_ENV
-          
+
+      - name: Download Task Definition Template
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition ${{ env.ECS_TASK_DEFINITION }} \
+            --query taskDefinition \
+            > task-definition.json      
+
       - name: Update ECS task definition with new image
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          task-definition: task-definition.json
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ env.IMAGE }}
 
