@@ -80,7 +80,13 @@ jobs:
           aws ecs describe-task-definition \
             --task-definition ${{ env.ECS_TASK_DEFINITION }} \
             --query taskDefinition \
-            > task-definition.json      
+            > task-definition.json    
+
+      - name: Clean up task definition
+        run: |
+          jq 'del(.enableFaultInjection, .registeredAt, .registeredBy, .status, .revision, .taskDefinitionArn, .compatibilities, .requiresAttributes)' task-definition.json > task-definition-clean.json
+          mv task-definition-clean.json task-definition.json
+
 
       - name: Update ECS task definition with new image
         id: task-def
