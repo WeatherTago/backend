@@ -19,7 +19,7 @@ public class AlarmController {
     private final AlarmCommandService alarmCommandService;
 
     // 알림 생성
-    @Operation(summary = "알림 생성", description = "알림을 생성합니다.")
+    @Operation(summary = "알림 생성", description = "알림을 생성하고 알림 id를 반환합니다.")
     @PostMapping("")
     public ResponseEntity<ApiResponse<AlarmResponseDTO.AlarmDetailDTO>> createAlarm(@RequestBody AlarmRequestDTO.AlarmCreateRequestDTO dto) {
         return alarmCommandService.createAlarm(dto)
