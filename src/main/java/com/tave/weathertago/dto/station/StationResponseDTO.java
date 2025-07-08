@@ -1,7 +1,7 @@
 package com.tave.weathertago.dto.station;
 
 import com.tave.weathertago.dto.CongestionDTO;
-import com.tave.weathertago.dto.WeatherDTO;
+import com.tave.weathertago.dto.weather.WeatherResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,7 +19,7 @@ public class StationResponseDTO {
         String name;
         String line;
         String stationCode;
-        WeatherDTO weather;
+        WeatherResponseDTO weather;
         CongestionDTO congestion;
         LocalDateTime createdAt;
     }

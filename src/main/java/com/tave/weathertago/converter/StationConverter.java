@@ -4,13 +4,13 @@ import com.tave.weathertago.domain.Station;
 import com.tave.weathertago.dto.CongestionDTO;
 import com.tave.weathertago.dto.station.StationDTO;
 import com.tave.weathertago.dto.station.StationResponseDTO;
-import com.tave.weathertago.dto.WeatherDTO;
+import com.tave.weathertago.dto.weather.WeatherResponseDTO;
 
 import java.time.LocalDateTime;
 
 public class StationConverter {
 
-    public static StationResponseDTO.JoinResultDTO toJoinResultDTO(Station station, WeatherDTO weather, CongestionDTO congestion) {
+    public static StationResponseDTO.JoinResultDTO toJoinResultDTO(Station station, WeatherResponseDTO weather, CongestionDTO congestion) {
 
         return StationResponseDTO.JoinResultDTO.builder()
                 .stationId(station.getId())
@@ -18,12 +18,7 @@ public class StationConverter {
                 .line(station.getLine())
                 .stationCode(station.getStationCode())
                 .weather(weather)
-                .congestion(
-                        new CongestionDTO(
-                                station.getCongestionLevel(),
-                                station.getCongestionRate()
-                        )
-                )
+                .congestion(congestion)
                 .createdAt(LocalDateTime.now())
                 .build();
     }
@@ -34,8 +29,6 @@ public class StationConverter {
                 .name(stationDTO.getName())
                 .line(stationDTO.getLine())
                 .stationCode(stationDTO.getStationCode())
-                .congestionLevel(stationDTO.getCongestionLevel())
-                .congestionRate(stationDTO.getCongestionRate())
                 .latitude(stationDTO.getLatitude())
                 .longitude(stationDTO.getLongitude())
                 .build();

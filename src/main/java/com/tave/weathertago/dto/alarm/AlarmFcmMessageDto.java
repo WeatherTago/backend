@@ -1,12 +1,8 @@
 package com.tave.weathertago.dto.alarm;
 
-import com.tave.weathertago.dto.CongestionDTO;
-import com.tave.weathertago.dto.WeatherDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Builder
