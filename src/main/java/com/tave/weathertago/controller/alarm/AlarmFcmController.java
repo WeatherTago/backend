@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Alarm auto send", description = "알림 전송 API (아직 X)")
+@Tag(name = "Alarm auto send", description = "알림 전송 API 아직 X")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users/me/alarms")
