@@ -13,8 +13,6 @@ services:
       - "8080:8080"
 #    env_file:
 #      - .env
-    depends_on:
-      - redis
     networks:
       - weathertago-network
     restart: always # 컨테이너가 종료되면 항상 재시작
