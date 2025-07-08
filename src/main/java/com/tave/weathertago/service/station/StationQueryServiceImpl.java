@@ -6,7 +6,7 @@ import com.tave.weathertago.converter.StationConverter;
 import com.tave.weathertago.domain.Station;
 import com.tave.weathertago.dto.CongestionDTO;
 import com.tave.weathertago.dto.station.StationResponseDTO;
-import com.tave.weathertago.dto.WeatherDTO;
+import com.tave.weathertago.dto.weather.WeatherResponseDTO;
 import com.tave.weathertago.repository.StationRepository;
 import com.tave.weathertago.service.congestion.CongestionQueryService;
 import com.tave.weathertago.service.weather.WeatherQueryService;
@@ -47,7 +47,7 @@ public class StationQueryServiceImpl implements StationQueryService {
         Station station = stationRepository.findById(stationId)
                 .orElseThrow(() -> new StationHandler(ErrorStatus.STATION_NAME_NOT_FOUND));
 
-        WeatherDTO weather = weatherQueryService.getWeather(station.getLatitude(), station.getLongitude(), time);
+        WeatherResponseDTO weather = weatherQueryService.getWeather(station.getLatitude(), station.getLongitude(), time);
         CongestionDTO congestion = congestionQueryService.getCongestion(station.getStationCode(), time);
 
         return StationConverter.toJoinResultDTO(station, weather, congestion);

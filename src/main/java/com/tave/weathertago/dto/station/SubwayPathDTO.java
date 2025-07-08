@@ -3,6 +3,7 @@ package com.tave.weathertago.dto.station;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tave.weathertago.dto.CongestionDTO;
+import com.tave.weathertago.dto.weather.WeatherResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -41,6 +42,7 @@ public class SubwayPathDTO {
 
         @JsonInclude(JsonInclude.Include.NON_NULL)
         private CongestionDTO congestion; // 출발/도착/환승역만 포함
+
     }
 }
 

@@ -78,8 +78,6 @@ public class SubwayPathConverter {
         CongestionDTO congestion = null;
         if (includeCongestion && station != null) {
             congestion = CongestionDTO.builder()
-                    .level(station.getCongestionLevel())
-                    .rate(station.getCongestionRate())
                     .build();
         }
 
