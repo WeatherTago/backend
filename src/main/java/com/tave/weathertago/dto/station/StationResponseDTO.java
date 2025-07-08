@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 public class StationResponseDTO {
 
@@ -21,11 +22,20 @@ public class StationResponseDTO {
         String name;
         String line;
         String stationCode;
+        String direction;
         WeatherResponseDTO weather;
-        CongestionDTO congestion;
+        Map<String, DirectionalStationDTO> congestionByDirection;
         @Schema(type = "string", format = "date-time", example = "2025-07-08T22:40:00")
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
         LocalDateTime createdAt;
+    }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    public static class DirectionalStationDTO{
+        Long stationId;
+        CongestionDTO congestion;
     }
 
     @Data

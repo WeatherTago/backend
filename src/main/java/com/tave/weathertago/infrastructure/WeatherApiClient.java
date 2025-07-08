@@ -48,7 +48,7 @@ public class WeatherApiClient {
 
     public void getAndCacheWeather(String stationName, String line) {
         Station station = stationRepository.findByNameAndLine(stationName, line)
-                .orElseThrow(() -> new WeatherHandler(ErrorStatus.STATION_NOT_FOUND));
+                .orElseThrow(() -> new WeatherHandler(ErrorStatus.STATION_ID_NOT_FOUND));
 
         LocalDateTime baseTime = calculateBaseTime(LocalDateTime.now());
         log.info("🗓️ BaseTime: {}, {}", baseTime.format(DATE_FMT), baseTime.format(TIME_FMT));
