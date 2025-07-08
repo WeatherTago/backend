@@ -1,4 +1,4 @@
-name: CD - Dev
+name: CD - Dev - FAST
 
 on:
   workflow_dispatch:
