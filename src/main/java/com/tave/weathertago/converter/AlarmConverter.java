@@ -16,7 +16,7 @@ public class AlarmConverter {
                 .stationId(alarm.getStationId().getId())
                 .stationName(alarm.getStationId().getName())
                 .stationLine(alarm.getStationId().getLine())
-                .direction(alarm.getDirection())
+                .direction(alarm.getStationId().getDirection())
                 .referenceTime(alarm.getReferenceTime())
                 .alarmPeriod((alarm.getAlarmPeriod()))
                 .alarmDay(alarm.getAlarmDay())

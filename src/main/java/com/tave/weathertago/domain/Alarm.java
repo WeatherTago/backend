@@ -42,11 +42,6 @@ public class Alarm extends BaseEntity {
     @JoinColumn(name = "station_id", nullable = false)
     private Station stationId;
 
-    // 상행 또는 하행
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Direction direction;
-
     // 알림 보내는 시점: 당일, 하루 전
     @Enumerated(EnumType.STRING) // Enum 값을 문자열로 저장
     @Column(nullable = false)

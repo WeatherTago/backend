@@ -17,7 +17,7 @@ public class AlarmResponseDTO {
         private Long stationId;
         private String stationName;
         private String stationLine;
-        private Direction direction;
+        private String direction;
 
         private LocalTime referenceTime;
         private AlarmPeriod alarmPeriod;

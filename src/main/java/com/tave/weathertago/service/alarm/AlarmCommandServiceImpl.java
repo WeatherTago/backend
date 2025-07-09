@@ -47,7 +47,6 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
                     .pushToken(dto.getPushToken())
                     .referenceTime(dto.getReferenceTime())
                     .stationId(station)
-                    .direction(dto.getDirection())
                     .alarmDay(dto.getAlarmDay())
                     .alarmTime(dto.getAlarmTime())
                     .alarmPeriod(dto.getAlarmPeriod())
@@ -89,9 +88,6 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
             if (dto.getStationId() != null) {
                 Station station = stationRepository.getReferenceById(dto.getStationId());
                 alarm.setStationId(station);
-            }
-            if (dto.getDirection() != null) {
-                alarm.setDirection(dto.getDirection());
             }
             if (dto.getAlarmDay() != null) {
                 alarm.setAlarmDay(dto.getAlarmDay());
