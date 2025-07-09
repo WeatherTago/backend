@@ -5,8 +5,8 @@ public enum Direction {
     DOWN(1, "하행"),
 
     // 2호선
-    INNER_LOOP(2, "내선순환"),
-    OUTER_LOOP(3, "외선순환");
+    INNER(2, "내선"),
+    OUTER(3, "외선");
 
     private final int code;
     private final String description;

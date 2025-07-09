@@ -17,7 +17,6 @@ public class AlarmRequestDTO {
         private String pushToken;
 
         private Long stationId;
-        private Direction direction;
 
         private LocalTime referenceTime;
         private AlarmPeriod alarmPeriod;
@@ -32,7 +31,6 @@ public class AlarmRequestDTO {
         private String pushToken;
 
         private Long stationId;
-        private Direction direction;
 
         private LocalTime referenceTime;
         private AlarmPeriod alarmPeriod;
