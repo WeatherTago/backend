@@ -12,7 +12,6 @@ public class AlarmResponseDTO {
     @Builder
     public static class AlarmDetailDTO {
         private Long alarmId;
-        private String pushToken;
 
         private Long stationId;
         private String stationName;

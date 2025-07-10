@@ -14,8 +14,6 @@ public class AlarmRequestDTO {
     @Getter
     @Builder
     public static class AlarmCreateRequestDTO {
-        private String pushToken;
-
         private Long stationId;
 
         private LocalTime referenceTime;
@@ -28,7 +26,6 @@ public class AlarmRequestDTO {
     @Builder
     public static class AlarmUpdateRequestDTO {
         private Long alarmId;
-        private String pushToken;
 
         private Long stationId;
 
