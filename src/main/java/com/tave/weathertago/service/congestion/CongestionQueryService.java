@@ -11,5 +11,5 @@ public interface CongestionQueryService {
     PredictionWithWeatherResponseDTO getCongestionWithWeather(Long stationId, String direction, LocalDateTime datetime);
 
     // 혼잡도만 반환
-    PredictionResponseDTO getCongestionOnly(Long stationId, String direction, LocalDateTime datetime);
+    PredictionResponseDTO getCongestion(Long stationId, String direction, LocalDateTime datetime);
 }

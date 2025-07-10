@@ -44,7 +44,7 @@ public class CongestionQueryServiceImpl implements CongestionQueryService {
     }
 
     @Override
-    public PredictionResponseDTO getCongestionOnly(Long stationId, String direction, LocalDateTime datetime) {
+    public PredictionResponseDTO getCongestion(Long stationId, String direction, LocalDateTime datetime) {
         Station station = getStationOrThrow(stationId);
         return getOrPredictCongestion(station, direction, datetime);
     }
