@@ -124,7 +124,7 @@ public class NoticeCrawlingServiceImpl implements NoticeCrawlingService {
                 .build();
     }
 
-    // 6시간마다 크롤링 실행 (cron: 초 분 시 일 월 요일)  ->  프론트에서 진행!
+    // 6시간마다 크롤링 실행 (cron: 초 분 시 일 월 요일)
     @Scheduled(cron = "0 0 0/6 * * *", zone = "Asia/Seoul")
     public void scheduledCrawlAndSaveNotices() {
         System.out.println("스케줄러에 의해 공지사항 크롤링 시작: " + java.time.LocalDateTime.now());
