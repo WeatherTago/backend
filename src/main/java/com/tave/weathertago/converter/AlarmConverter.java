@@ -12,11 +12,12 @@ public class AlarmConverter {
     public static AlarmResponseDTO.AlarmDetailDTO toAlarmDetailDTO(Alarm alarm) {
         return AlarmResponseDTO.AlarmDetailDTO.builder()
                 .alarmId(alarm.getAlarmId())
-                .pushToken(alarm.getPushToken())
+                .stationId(alarm.getStationId().getId())
+                .stationName(alarm.getStationId().getName())
+                .stationLine(alarm.getStationId().getLine())
+                .direction(alarm.getStationId().getDirection())
                 .referenceTime(alarm.getReferenceTime())
-                .stationName(alarm.getStationName())
-                .stationLine(alarm.getStationLine())
-                .direction(alarm.getDirection())
+                .alarmPeriod((alarm.getAlarmPeriod()))
                 .alarmDay(alarm.getAlarmDay())
                 .alarmTime(alarm.getAlarmTime())
                 // .weather(weatherDTO) // 필요 시 추가
@@ -24,9 +25,8 @@ public class AlarmConverter {
                 .build();
     }
 
-    public static AlarmFcmMessageDto toAlarmFcmMessageDto(Alarm alarm, String title, String body) {
+    public static AlarmFcmMessageDto toAlarmFcmMessageDto(String title, String body) {
         return AlarmFcmMessageDto.builder()
-                .pushToken(alarm.getPushToken())
                 .title(title)
                 .body(body)
                 .build();

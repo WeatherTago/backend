@@ -1,13 +1,16 @@
 package com.tave.weathertago.dto.station;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.tave.weathertago.dto.CongestionDTO;
-import com.tave.weathertago.dto.WeatherDTO;
+import com.tave.weathertago.dto.weather.WeatherResponseDTO;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 public class StationResponseDTO {
 
@@ -19,9 +22,20 @@ public class StationResponseDTO {
         String name;
         String line;
         String stationCode;
-        WeatherDTO weather;
-        CongestionDTO congestion;
+        String direction;
+        WeatherResponseDTO weather;
+        Map<String, DirectionalStationDTO> congestionByDirection;
+        @Schema(type = "string", format = "date-time", example = "2025-07-08T22:40:00")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
         LocalDateTime createdAt;
+    }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    public static class DirectionalStationDTO{
+        Long stationId;
+        CongestionDTO congestion;
     }
 
     @Data

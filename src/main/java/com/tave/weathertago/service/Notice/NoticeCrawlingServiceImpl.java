@@ -1,5 +1,8 @@
 package com.tave.weathertago.service.Notice;
 
+import com.tave.weathertago.apiPayload.code.status.ErrorStatus;
+import com.tave.weathertago.apiPayload.exception.handler.NoticeHandler;
+import com.tave.weathertago.converter.NoticeConverter;
 import com.tave.weathertago.domain.Notice;
 import com.tave.weathertago.dto.Notice.NoticeResponseDTO;
 import com.tave.weathertago.repository.NoticeRepository;
@@ -28,6 +31,7 @@ public class NoticeCrawlingServiceImpl implements NoticeCrawlingService {
         int totalCount = 0;
 
         try {
+            // 1. API 호출 및 데이터 파싱
             String listApiUrl = "https://topis.seoul.go.kr/notice/selectNoticeList.do";
             Map<String, String> data = new HashMap<>();
             data.put("pageIndex", "1");
@@ -53,6 +57,7 @@ public class NoticeCrawlingServiceImpl implements NoticeCrawlingService {
             JSONArray rows = json.getJSONArray("rows");
             totalCount = rows.length();
 
+            // 2. JSON → List<JSONObject> 변환 및 정렬
             List<JSONObject> rowList = new ArrayList<>();
             for (int i = 0; i < rows.length(); i++) {
                 rowList.add(rows.getJSONObject(i));
@@ -68,20 +73,13 @@ public class NoticeCrawlingServiceImpl implements NoticeCrawlingService {
             int updatedCount = 0;
             int unchangedCount = 0;
 
+            // 3. 크롤링 데이터와 DB 비교 및 처리
             for (JSONObject row : rowList) {
                 Long noticeId = Long.parseLong(row.getString("bdwrSeq"));
                 String title = row.getString("bdwrTtlNm");
                 String content = row.optString("bdwrCts", "");
                 String createAt = row.optString("createDate", "");
                 String updateAt = row.optString("updateDate", "");
-
-                NoticeResponseDTO.NoticeDetail detail = NoticeResponseDTO.NoticeDetail.builder()
-                        .noticeId(noticeId)
-                        .title(title)
-                        .content(content)
-                        .createdAt(createAt)
-                        .updatedAt(updateAt)
-                        .build();
 
                 Optional<Notice> existing = noticeRepository.findByNoticeId(noticeId);
 
@@ -95,7 +93,7 @@ public class NoticeCrawlingServiceImpl implements NoticeCrawlingService {
                             .updateAt(updateAt)
                             .build();
                     noticeRepository.save(notice);
-                    createdNotices.add(detail);
+                    createdNotices.add(NoticeConverter.toNoticeDetail(notice));
                 } else {
                     Notice notice = existing.get();
                     // 기존 DB의 updateAt과 크롤링한 updateAt이 다를 때만 업데이트
@@ -106,16 +104,16 @@ public class NoticeCrawlingServiceImpl implements NoticeCrawlingService {
                         notice.setCreateAt(createAt);
                         notice.setUpdateAt(updateAt);
                         noticeRepository.save(notice);
-                        updatedNotices.add(detail);
+                        updatedNotices.add(NoticeConverter.toNoticeDetail(notice));
                     } else {
                         // 변경 없음
                         System.out.println("변경 없음: " + title);
-                        unchangedNotices.add(detail);
+                        unchangedNotices.add(NoticeConverter.toNoticeDetail(notice));
                     }
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new NoticeHandler(ErrorStatus.NOTICE_CRAWLING_FAIL);
         }
 
         return NoticeResponseDTO.NoticeCrawlingResult.builder()
@@ -126,10 +124,10 @@ public class NoticeCrawlingServiceImpl implements NoticeCrawlingService {
                 .build();
     }
 
-    // 1시간마다 크롤링 실행 (cron: 초 분 시 일 월 요일)  ->  프론트에서 진행!
-//    @Scheduled(cron = "0 0 0/1 * * *", zone = "Asia/Seoul")
-//    public void scheduledCrawlAndSaveNotices() {
-//        System.out.println("스케줄러에 의해 공지사항 크롤링 시작: " + java.time.LocalDateTime.now());
-//        crawlAndSaveNotices();
-//    }
+    // 6시간마다 크롤링 실행 (cron: 초 분 시 일 월 요일)
+    @Scheduled(cron = "0 0 0/6 * * *", zone = "Asia/Seoul")
+    public void scheduledCrawlAndSaveNotices() {
+        System.out.println("스케줄러에 의해 공지사항 크롤링 시작: " + java.time.LocalDateTime.now());
+        crawlAndSaveNotices();
+    }
 }

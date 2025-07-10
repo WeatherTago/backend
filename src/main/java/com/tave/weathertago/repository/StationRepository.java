@@ -7,13 +7,15 @@ import java.util.List;
 import java.util.Optional;
 
 public interface StationRepository extends JpaRepository<Station,Long> {
-    List<Station> findAllByName(String name);
 
     Optional<Station> findByNameAndLine(String name, String line);
 
+    boolean existsByNameAndLineAndDirection(String name, String line, String direction);
 
-    boolean existsByNameAndLine(String name, String line);
+    Optional<Station> findByStationCode(String stationCode);
 
-    Optional<Station> findFirstByName(String name);
+    List<Station> findByLineAndStationCodeIn(String line, List<String> stationCodes);
+
+    List<Station> findAllByNameAndLine(String name, String line);
 
 }

@@ -10,14 +10,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Alarm auto send", description = "알림 전송 API")
+@Tag(name = "Alarm auto send", description = "알림 전송 API 아직 X")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users/me/alarms")
 public class AlarmFcmController {
     private final AlarmSendService alarmSendService;
 
-    @Operation(summary = "알람 전송", description = "사용자가 설정한 시간에 맞추어 알람을 전송합니다.")
+    @Operation(summary = "알림 전송", description = "사용자가 설정한 시간에 맞추어 알림을 전송합니다.")
     @PostMapping("/{alarm_id}/send")
     public ResponseEntity<ApiResponse<AlarmFcmMessageDto>> sendAlarm(@PathVariable("alarm_id") Long alarmId) {
         try {
