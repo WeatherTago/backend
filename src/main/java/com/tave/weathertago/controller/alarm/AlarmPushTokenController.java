@@ -19,7 +19,7 @@ public class AlarmPushTokenController {
     private final AlarmPushTokenService alarmPushTokenService;
 
     // PushToken 추가
-    @Operation(summary = "PushToken 추가", description = "로그인 시 사용자 ID에 해당하는 PushToken을 추가합니다.")
+    @Operation(summary = "pushToken 추가", description = "로그인 시 사용자 ID에 해당하는 PushToken을 추가합니다.")
     @PostMapping("")
     public ResponseEntity<ApiResponse<Void>> addPushToken(
             @RequestParam String pushToken) {
@@ -28,7 +28,7 @@ public class AlarmPushTokenController {
     }
 
     // PushToken 삭제 (로그아웃 시)
-    @Operation(summary = "PushToken 삭제", description = "로그아웃 시 사용자 ID에 해당하는 PushToken을 삭제합니다.")
+    @Operation(summary = "pushToken 삭제", description = "로그아웃 시 사용자 ID에 해당하는 PushToken을 삭제합니다.")
     @DeleteMapping("")
     public ResponseEntity<ApiResponse<Void>> removePushToken(
             @RequestParam String pushToken) {
@@ -37,7 +37,7 @@ public class AlarmPushTokenController {
     }
 
     // 해당 사용자의 모든 PushToken 조회
-    @Operation(summary = "PushToken 전체 조회", description = "사용자 ID에 해당하는 모든 기기의 PushToken을 조회합니다.")
+    @Operation(summary = "pushToken 전체 조회", description = "사용자 ID에 해당하는 모든 기기의 PushToken을 조회합니다.")
     @GetMapping("")
     public ResponseEntity<ApiResponse<Set<String>>> getPushTokens() {
         Set<String> tokens = alarmPushTokenService.getPushTokens();
@@ -45,7 +45,7 @@ public class AlarmPushTokenController {
     }
 
     // 모든 PushToken 삭제 (회원탈퇴 등)
-    @Operation(summary = "PushToken 전체 삭제", description = "회원 탈퇴 시 사용자 ID에 해당하는 모든 기기의 PushToken을 삭제합니다.")
+    @Operation(summary = "pushToken 전체 삭제", description = "회원 탈퇴 시 사용자 ID에 해당하는 모든 기기의 PushToken을 삭제합니다.")
     @DeleteMapping("/all")
     public ResponseEntity<ApiResponse<Void>> removeAllPushTokens() {
         alarmPushTokenService.removeAllPushTokens();

@@ -44,7 +44,6 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
 
             Alarm alarm = Alarm.builder()
                     .userId(user)
-                    .pushToken(dto.getPushToken())
                     .referenceTime(dto.getReferenceTime())
                     .stationId(station)
                     .alarmDay(dto.getAlarmDay())
@@ -77,10 +76,6 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
             // 권한 체크 (본인 알림만 수정 가능)
             if (!alarm.getUserId().getId().equals(user.getId())) {
                 throw new AlarmHandler(ErrorStatus.ALARM_FORBIDDEN);
-            }
-
-            if (dto.getPushToken() != null) {
-                alarm.setPushToken(dto.getPushToken());
             }
             if (dto.getReferenceTime() != null) {
                 alarm.setReferenceTime(dto.getReferenceTime());

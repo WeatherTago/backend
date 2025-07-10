@@ -24,8 +24,6 @@ public class Alarm extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User userId;
 
-    private String pushToken;
-
     // 매일, 월화수목금토일
     @Enumerated(EnumType.STRING) @Column(nullable = false)
     private AlarmPeriod alarmPeriod;

@@ -26,6 +26,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +37,8 @@ public class AlarmSendServiceImpl implements AlarmSendService {
     private final UserRepository userRepository;
     private final FirebaseMessaging firebaseMessaging;
     private final RedisTemplate<String, String> redisTemplate;
+
+    private static final String REDIS_KEY_PREFIX = "pushtoken:";
 
     @Override
     public AlarmFcmMessageDto sendAlarm(Long alarmId){
@@ -91,28 +94,42 @@ public class AlarmSendServiceImpl implements AlarmSendService {
         log.info(title);
         log.info(body);
 
-        // 3. FCM 메시지 빌드
-        Message message = Message.builder()
-                .setToken(alarm.getPushToken())
-                .setNotification(Notification.builder()
-                        .setTitle(title)
-                        .setBody(body)
-                        .build())
-                .build();
 
+        String userId = String.valueOf(alarm.getUserId().getId());
+        String redisKey = REDIS_KEY_PREFIX + userId;
+        Set<String> pushTokens = redisTemplate.opsForSet().members(redisKey);
 
-        try {
-            // 4. FCM 메시지 전송
-            String response = firebaseMessaging.send(message);
-            log.info("FCM 메시지 전송 성공: {}", response);
-
-            // 5. 전송 결과 DTO 반환
-            return AlarmConverter.toAlarmFcmMessageDto(alarm, title, body);
-
-        } catch (Exception e) {
-            log.error("FCM 메시지 전송 실패: {}", e.getMessage());
+        if (pushTokens == null || pushTokens.isEmpty()) {
+            log.warn("푸시 토큰이 없습니다: userId={}", userId);
             throw new AlarmHandler(ErrorStatus.ALARM_SEND_FAIL);
         }
+
+        // 4. 각 PushToken에 대해 FCM 메시지 빌드 및 발송
+        boolean sent = false;
+        for (String token : pushTokens) {
+            try {
+                Message message = Message.builder()
+                        .setToken(token)
+                        .setNotification(Notification.builder()
+                                .setTitle(title)
+                                .setBody(body)
+                                .build())
+                        .build();
+
+                String response = firebaseMessaging.send(message);
+                log.info("FCM 메시지 전송 성공: token={}, response={}", token, response);
+                sent = true;
+            } catch (Exception e) {
+                log.error("FCM 메시지 전송 실패: token={}, error={}", token, e.getMessage());
+                // 필요시, 실패한 토큰을 Redis에서 삭제하는 로직 추가 가능
+            }
+        }
+
+        if (!sent) {
+            throw new AlarmHandler(ErrorStatus.ALARM_SEND_FAIL);
+        }
+        // 5. 전송 결과 DTO 반환
+        return AlarmConverter.toAlarmFcmMessageDto(title, body);
 
     }
 
