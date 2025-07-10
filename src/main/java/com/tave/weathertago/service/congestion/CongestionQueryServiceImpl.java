@@ -31,8 +31,9 @@ public class CongestionQueryServiceImpl implements CongestionQueryService {
     private static final DateTimeFormatter DATETIME_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     @Override
-    public PredictionWithWeatherResponseDTO getCongestionWithWeather(Long stationId, String direction, LocalDateTime datetime) {
+    public PredictionWithWeatherResponseDTO getCongestionWithWeather(Long stationId, String directionKor, LocalDateTime datetime) {
         Station station = getStationOrThrow(stationId);
+        int direction = convertDirectionToInt(directionKor);
 
         PredictionResponseDTO prediction = getOrPredictCongestion(station, direction, datetime);
 
@@ -45,13 +46,15 @@ public class CongestionQueryServiceImpl implements CongestionQueryService {
     }
 
     @Override
-    public PredictionResponseDTO getCongestion(Long stationId, String direction, LocalDateTime datetime) {
+    public PredictionResponseDTO getCongestion(Long stationId, String directionKor, LocalDateTime datetime) {
         Station station = getStationOrThrow(stationId);
+        int direction = convertDirectionToInt(directionKor);
+
         return getOrPredictCongestion(station, direction, datetime);
     }
 
     // 내부 공통 메서드들
-    private PredictionResponseDTO getOrPredictCongestion(Station station, String direction, LocalDateTime datetime) {
+    private PredictionResponseDTO getOrPredictCongestion(Station station, int direction, LocalDateTime datetime) {
         String key = makeCongestionRedisKey(station.getId(), direction, datetime);
         Object cached = redisTemplate.opsForValue().get(key);
 
@@ -82,18 +85,21 @@ public class CongestionQueryServiceImpl implements CongestionQueryService {
                 .orElseThrow(() -> new CongestionHandler(ErrorStatus.STATION_ID_NOT_FOUND));
     }
 
-    private String makeCongestionRedisKey(Long stationId, String directionKor, LocalDateTime datetime) {
-        int direction = switch (directionKor) {
+    private String makeCongestionRedisKey(Long stationId, int direction, LocalDateTime datetime) {
+        return "congestion:" + stationId + ":" + direction + ":" + datetime.format(DATETIME_FMT);
+    }
+
+    private String makeWeatherRedisKey(Integer nx, Integer ny, LocalDateTime datetime) {
+        return "weather:" + nx + ":" + ny + ":" + datetime.format(DATETIME_FMT);
+    }
+
+    private int convertDirectionToInt(String directionKor) {
+        return switch (directionKor) {
             case "상선" -> 0;
             case "하선" -> 1;
             case "내선" -> 2;
             case "외선" -> 3;
             default -> throw new CongestionHandler(ErrorStatus.INVALID_DIRECTION);
         };
-        return "congestion:" + stationId + ":" + direction + ":" + datetime.format(DATETIME_FMT);
-    }
-
-    private String makeWeatherRedisKey(Integer nx, Integer ny, LocalDateTime datetime) {
-        return "weather:" + nx + ":" + ny + ":" + datetime.format(DATETIME_FMT);
     }
 }

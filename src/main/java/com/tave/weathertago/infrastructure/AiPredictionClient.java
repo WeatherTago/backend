@@ -28,7 +28,6 @@ import java.time.format.DateTimeFormatter;
 public class AiPredictionClient {
 
     private final RedisTemplate<String, Object> redisTemplate;
-    private final WeatherApiClient weatherApiClient;
     private final StationRepository stationRepository;
     private final RestClient restClient;
 
@@ -38,13 +37,11 @@ public class AiPredictionClient {
     private static final Duration TTL = Duration.ofHours(3);
     private static final DateTimeFormatter DATETIME_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
-    public PredictionResponseDTO predictCongestion(Long stationId, String direction, LocalDateTime datetime, WeatherResponseDTO weather) {
+    public PredictionResponseDTO predictCongestion(Long stationId, int direction, LocalDateTime datetime, WeatherResponseDTO weather) {
         Station station = stationRepository.findById(stationId)
                 .orElseThrow(() -> new StationHandler(ErrorStatus.STATION_ID_NOT_FOUND));
 
-        int directionNum = convertDirection(direction);
-
-        PredictionRequestDTO request = PredictionConverter.toPredictionRequest(station, directionNum, datetime, weather);
+        PredictionRequestDTO request = PredictionConverter.toPredictionRequest(station, direction, datetime, weather);
 
         try {
             AiServerResponseDTO aiResponse = restClient.post()
@@ -60,7 +57,7 @@ public class AiPredictionClient {
 
             PredictionResponseDTO prediction = PredictionConverter.toPredictionResponse(aiResponse);
 
-            String redisKey = makeRedisKey(stationId, directionNum, datetime);
+            String redisKey = makeRedisKey(stationId, direction, datetime);
             redisTemplate.opsForValue().set(redisKey, prediction, TTL);
 
             log.info("✅ 혼잡도 예측 결과 저장: key={}, value={}", redisKey, prediction);
@@ -70,16 +67,6 @@ public class AiPredictionClient {
             log.error("AI 예측 실패", e);
             throw new CongestionHandler(ErrorStatus.AI_PREDICTION_FAIL);
         }
-    }
-
-    private int convertDirection(String directionKor) {
-        return switch (directionKor) {
-            case "상선" -> 0;
-            case "하선" -> 1;
-            case "내선" -> 2;
-            case "외선" -> 3;
-            default -> throw new StationHandler(ErrorStatus.INVALID_DIRECTION);
-        };
     }
 
     private String makeRedisKey(Long stationId, int direction, LocalDateTime datetime) {
