@@ -2,6 +2,7 @@ package com.tave.weathertago.service.congestion;
 
 import com.tave.weathertago.apiPayload.code.status.ErrorStatus;
 import com.tave.weathertago.apiPayload.exception.handler.CongestionHandler;
+import com.tave.weathertago.apiPayload.exception.handler.StationHandler;
 import com.tave.weathertago.domain.Station;
 import com.tave.weathertago.dto.prediction.PredictionResponseDTO;
 import com.tave.weathertago.dto.prediction.PredictionWithWeatherResponseDTO;
@@ -81,7 +82,14 @@ public class CongestionQueryServiceImpl implements CongestionQueryService {
                 .orElseThrow(() -> new CongestionHandler(ErrorStatus.STATION_ID_NOT_FOUND));
     }
 
-    private String makeCongestionRedisKey(Long stationId, String direction, LocalDateTime datetime) {
+    private String makeCongestionRedisKey(Long stationId, String directionKor, LocalDateTime datetime) {
+        int direction = switch (directionKor) {
+            case "상선" -> 0;
+            case "하선" -> 1;
+            case "내선" -> 2;
+            case "외선" -> 3;
+            default -> throw new CongestionHandler(ErrorStatus.INVALID_DIRECTION);
+        };
         return "congestion:" + stationId + ":" + direction + ":" + datetime.format(DATETIME_FMT);
     }
 

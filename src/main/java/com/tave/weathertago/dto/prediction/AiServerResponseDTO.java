@@ -14,6 +14,7 @@ public class AiServerResponseDTO {
     private Result result;
 
     @Getter
+    @NoArgsConstructor
     public static class Result {
         private String line;
         private String station_name;
