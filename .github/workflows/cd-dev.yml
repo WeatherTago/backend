@@ -102,5 +102,5 @@ jobs:
         uses: Ilshidur/action-discord@master
         with:
           args:
-            '😎 배포 완료됨 ✨ Triggered by: **${{ github.actor }}**'
+            '😎 배포 완료됨 Triggered by: **${{ github.actor }}**'
 

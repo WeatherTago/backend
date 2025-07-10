@@ -88,6 +88,9 @@ public class AlarmSendServiceImpl implements AlarmSendService {
                 weatherMock
         );
 
+        log.info(title);
+        log.info(body);
+
         // 3. FCM 메시지 빌드
         Message message = Message.builder()
                 .setToken(alarm.getPushToken())
