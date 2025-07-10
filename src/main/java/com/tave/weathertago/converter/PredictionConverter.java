@@ -1,19 +1,25 @@
 package com.tave.weathertago.converter;
 
 
+import com.tave.weathertago.domain.Station;
+import com.tave.weathertago.dto.prediction.AiServerResponseDTO;
 import com.tave.weathertago.dto.prediction.PredictionRequestDTO;
 import com.tave.weathertago.dto.prediction.PredictionResponseDTO;
 import com.tave.weathertago.dto.weather.WeatherResponseDTO;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class PredictionConverter {
 
-    public static PredictionRequestDTO toPredictionRequest(String line, String stationName, LocalDateTime datetime, WeatherResponseDTO weather) {
+    private static final DateTimeFormatter DATETIME_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+    public static PredictionRequestDTO toPredictionRequest(Station station, int direction, LocalDateTime datetime, WeatherResponseDTO weather) {
         return PredictionRequestDTO.builder()
-                .line(line)
-                .station_name(stationName)
-                .datetime(datetime.toString())
+                .line(station.getLine())
+                .station_name(station.getName())
+                .datetime(datetime.format(DATETIME_FMT))
+                .direction(direction)
                 .TMP(weather.getTmp())
                 .REH(weather.getReh())
                 .PCP(weather.getPcp())
@@ -23,13 +29,10 @@ public class PredictionConverter {
                 .build();
     }
 
-    public static PredictionResponseDTO toPredictionResponse(String line, String stationName, LocalDateTime datetime, String level, double score) {
+    public static PredictionResponseDTO toPredictionResponse(AiServerResponseDTO aiResponse) {
         return PredictionResponseDTO.builder()
-                .line(line)
-                .stationName(stationName)
-                .datetime(datetime)
-                .predictedCongestionLevel(level)
-                .predictedCongestionScore(score)
+                .congestionLevel(aiResponse.getResult().getPredictedCongestionLevel())
+                .congestionScore(aiResponse.getResult().getPredictedCongestionScore())
                 .build();
     }
 }

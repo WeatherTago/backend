@@ -29,6 +29,7 @@ public enum ErrorStatus implements BaseErrorCode {
     STATION_ID_NOT_FOUND(HttpStatus.BAD_REQUEST, "STATION4001", "해당 stationId에 대한 역을 찾을 수 없습니다."),
     STATION_NAME_NOT_FOUND(HttpStatus.BAD_REQUEST, "STATION4002", "해당 역을 찾을 수 없습니다."),
     STATION_LINE_NOT_FOUND(HttpStatus.BAD_REQUEST, "STATION4003", "해당 호선을 찾을 수 없습니다."),
+    INVALID_DIRECTION(HttpStatus.BAD_REQUEST, "STATION4004", "잘못된 direction입니다."),
 
     NO_SUBWAY_ROUTE_FOUND(HttpStatus.BAD_REQUEST, "STATION4006", "해당 경로를 찾을 수 없습니다."),
 
@@ -47,6 +48,9 @@ public enum ErrorStatus implements BaseErrorCode {
     WEATHER_API_PARSE_ERROR(HttpStatus.BAD_GATEWAY, "WEATHER4003", "기상청 응답 파싱에 실패했습니다."),
     WEATHER_API_INVALID_STRUCTURE(HttpStatus.BAD_GATEWAY, "WEATHER4004", "기상청 응답 구조가 잘못되었습니다."),
     WEATHER_CACHE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "WEATHER5001", "날씨 정보를 Redis에 캐싱하는 중 오류가 발생했습니다."),
+
+    // AI 관련 에러
+    AI_PREDICTION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "AI5001", "AI 요청에 실패했습니다."),
 
     // 공지사항 관련 에러
     NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE4041", "공지사항을 찾을 수 없습니다."),

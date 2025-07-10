@@ -1,8 +1,8 @@
 package com.tave.weathertago.infrastructure;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tave.weathertago.apiPayload.code.status.ErrorStatus;
-import com.tave.weathertago.apiPayload.exception.handler.WeatherHandler;
+import com.tave.weathertago.apiPayload.exception.handler.CongestionHandler;
+import com.tave.weathertago.apiPayload.exception.handler.StationHandler;
 import com.tave.weathertago.converter.PredictionConverter;
 import com.tave.weathertago.domain.Station;
 import com.tave.weathertago.dto.prediction.AiServerResponseDTO;
@@ -38,34 +38,13 @@ public class AiPredictionClient {
     private static final Duration TTL = Duration.ofHours(3);
     private static final DateTimeFormatter DATETIME_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
-    public PredictionResponseDTO predictCongestion(String line, String stationName, LocalDateTime datetime) {
-        Station station = stationRepository.findByNameAndLine(stationName, line)
-                .orElseThrow(() -> new WeatherHandler(ErrorStatus.STATION_NOT_FOUND));
+    public PredictionResponseDTO predictCongestion(Long stationId, String direction, LocalDateTime datetime, WeatherResponseDTO weather) {
+        Station station = stationRepository.findById(stationId)
+                .orElseThrow(() -> new StationHandler(ErrorStatus.STATION_ID_NOT_FOUND));
 
-        String weatherKey = makeWeatherKey(station.getNx(), station.getNy(), datetime);
-        Object weatherObj = redisTemplate.opsForValue().get(weatherKey);
+        int directionNum = convertDirection(direction);
 
-        if (weatherObj == null) {
-            log.info("🌧️ 날씨 캐시 없음 → 기상청 API 호출");
-            weatherApiClient.getAndCacheWeather(stationName, line);
-            weatherObj = redisTemplate.opsForValue().get(weatherKey);
-        }
-
-        if (!(weatherObj instanceof WeatherResponseDTO weather)) {
-            throw new WeatherHandler(ErrorStatus.WEATHER_API_RESPONSE_EMPTY);
-        }
-
-        PredictionRequestDTO request = PredictionRequestDTO.builder()
-                .line(line)
-                .station_name(stationName)
-                .datetime(datetime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                .TMP(weather.getTmp())
-                .REH(weather.getReh())
-                .PCP(weather.getPcp())
-                .WSD(weather.getWsd())
-                .SNO(weather.getSno())
-                .VEC(weather.getVec())
-                .build();
+        PredictionRequestDTO request = PredictionConverter.toPredictionRequest(station, directionNum, datetime, weather);
 
         try {
             AiServerResponseDTO aiResponse = restClient.post()
@@ -76,32 +55,35 @@ public class AiPredictionClient {
                     .body(AiServerResponseDTO.class);
 
             if (!"ok".equalsIgnoreCase(aiResponse.getStatus())) {
-                throw new WeatherHandler(ErrorStatus.AI_PREDICTION_FAIL);
+                throw new CongestionHandler(ErrorStatus.AI_PREDICTION_FAIL);
             }
 
-            PredictionResponseDTO prediction = PredictionConverter.toPredictionResponse(
-                    line, stationName, datetime,
-                    aiResponse.getCongestion_level(),
-                    aiResponse.getCongestion_score()
-            );
+            PredictionResponseDTO prediction = PredictionConverter.toPredictionResponse(aiResponse);
 
-            String congestionKey = makeCongestionKey(stationName, line, datetime);
-            redisTemplate.opsForValue().set(congestionKey, prediction, TTL);
-            log.info("📊 혼잡도 예측 완료 및 저장: {}", congestionKey);
+            String redisKey = makeRedisKey(stationId, directionNum, datetime);
+            redisTemplate.opsForValue().set(redisKey, prediction, TTL);
 
+            log.info("✅ 혼잡도 예측 결과 저장: key={}, value={}", redisKey, prediction);
             return prediction;
 
         } catch (Exception e) {
-            log.error("❌ AI 예측 실패", e);
-            throw new WeatherHandler(ErrorStatus.AI_PREDICTION_FAIL);
+            log.error("AI 예측 실패", e);
+            throw new CongestionHandler(ErrorStatus.AI_PREDICTION_FAIL);
         }
     }
 
-    private String makeCongestionKey(String stationName, String line, LocalDateTime datetime) {
-        return "congestion:" + stationName + ":" + line + ":" + datetime.format(DATETIME_FMT);
+    private int convertDirection(String directionKor) {
+        return switch (directionKor) {
+            case "상선" -> 0;
+            case "하선" -> 1;
+            case "내선" -> 2;
+            case "외선" -> 3;
+            default -> throw new StationHandler(ErrorStatus.INVALID_DIRECTION);
+        };
     }
 
-    private String makeWeatherKey(Integer nx, Integer ny, LocalDateTime datetime) {
-        return "weather:" + nx + ":" + ny + ":" + datetime.format(DATETIME_FMT);
+    private String makeRedisKey(Long stationId, int direction, LocalDateTime datetime) {
+        return "congestion:" + stationId + ":" + direction + ":" + datetime.format(DATETIME_FMT);
     }
+
 }

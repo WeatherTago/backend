@@ -8,9 +8,6 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class PredictionResponseDTO {
-    private String line;
-    private String stationName;
-    private LocalDateTime datetime;
-    private String predictedCongestionLevel;
-    private double predictedCongestionScore;
+    private double congestionScore;
+    private String congestionLevel;
 }

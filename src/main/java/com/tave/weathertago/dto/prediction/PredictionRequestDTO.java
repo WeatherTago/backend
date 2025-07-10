@@ -9,6 +9,7 @@ public class PredictionRequestDTO {
     private String line;
     private String station_name;
     private String datetime;
+    private int direction;
     private double TMP;
     private double REH;
     private double PCP;
