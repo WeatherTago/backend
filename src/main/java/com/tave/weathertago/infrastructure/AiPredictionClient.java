@@ -1,6 +1,5 @@
 package com.tave.weathertago.infrastructure;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tave.weathertago.apiPayload.code.status.ErrorStatus;
 import com.tave.weathertago.apiPayload.exception.handler.WeatherHandler;
@@ -32,7 +31,6 @@ public class AiPredictionClient {
     private final WeatherApiClient weatherApiClient;
     private final StationRepository stationRepository;
     private final RestClient restClient;
-    private final ObjectMapper objectMapper;
 
     @Value("${ai.server.url}")
     private String aiServerUrl;
@@ -40,7 +38,7 @@ public class AiPredictionClient {
     private static final Duration TTL = Duration.ofHours(3);
     private static final DateTimeFormatter DATETIME_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
-    public PredictionResponseDTO predict(String line, String stationName, LocalDateTime datetime) {
+    public PredictionResponseDTO predictCongestion(String line, String stationName, LocalDateTime datetime) {
         Station station = stationRepository.findByNameAndLine(stationName, line)
                 .orElseThrow(() -> new WeatherHandler(ErrorStatus.STATION_NOT_FOUND));
 
@@ -70,10 +68,6 @@ public class AiPredictionClient {
                 .build();
 
         try {
-            // 로그 확인용
-            String requestJson = objectMapper.writeValueAsString(request);
-            log.info("📤 AI 서버 POST 요청 전송\nURL: {}\nPayload: {}", aiServerUrl, requestJson);
-
             AiServerResponseDTO aiResponse = restClient.post()
                     .uri(aiServerUrl)
                     .contentType(MediaType.APPLICATION_JSON)

@@ -15,15 +15,15 @@ class AiPredictionClientTest {
 
     @Test
     void 혼잡도_예측_테스트() {
-        String line = "4호선";
-        String stationName = "범계";
+        String line = "2호선";
+        String stationName = "홍대입구";
         LocalDateTime baseTime = LocalDateTime.of(2025, 7, 6, 6, 0);
 
         for (int i = 0; i < 6; i++) {
             LocalDateTime datetime = baseTime.plusHours(i);
             try {
                 long start = System.currentTimeMillis(); // 시작 시간 측정
-                PredictionResponseDTO response = aiPredictionClient.predict(line, stationName, datetime);
+                PredictionResponseDTO response = aiPredictionClient.predictCongestion(line, stationName, datetime);
                 long end = System.currentTimeMillis();   // 종료 시간 측정
                 long elapsed = end - start;              // 경과 시간 (ms)
                 System.out.println("✅ [" + datetime + "] 혼잡도 예측 결과 → Level: "

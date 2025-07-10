@@ -9,4 +9,5 @@ public class AiServerResponseDTO {
     private String status;
     private String congestion_level;
     private double congestion_score;
+    private Double total_time_sec;
 }
