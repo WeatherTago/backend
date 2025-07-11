@@ -1,7 +1,7 @@
 package com.tave.weathertago.dto.station;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.tave.weathertago.dto.CongestionDTO;
+import com.tave.weathertago.dto.prediction.PredictionResponseDTO;
 import com.tave.weathertago.dto.weather.WeatherResponseDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -35,7 +35,7 @@ public class StationResponseDTO {
     @AllArgsConstructor
     public static class DirectionalStationDTO{
         Long stationId;
-        CongestionDTO congestion;
+        private PredictionResponseDTO congestion;
     }
 
     @Data

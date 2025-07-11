@@ -1,7 +1,7 @@
 package com.tave.weathertago.converter;
 
 import com.tave.weathertago.domain.Station;
-import com.tave.weathertago.dto.CongestionDTO;
+import com.tave.weathertago.dto.prediction.PredictionResponseDTO;
 import com.tave.weathertago.dto.station.SubwayPathDTO;
 import com.tave.weathertago.dto.station.SubwayPathResponseDTO;
 import com.tave.weathertago.repository.StationRepository;
@@ -75,9 +75,9 @@ public class SubwayPathConverter {
     private static SubwayPathDTO.StationInfo stationToDto(
             String id, String name, String line, Station station, boolean includeCongestion) {
 
-        CongestionDTO congestion = null;
+        PredictionResponseDTO congestion = null;
         if (includeCongestion && station != null) {
-            congestion = CongestionDTO.builder()
+            congestion = PredictionResponseDTO.builder()
                     .build();
         }
 
