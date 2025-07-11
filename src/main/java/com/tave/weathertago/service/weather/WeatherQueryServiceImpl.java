@@ -27,7 +27,8 @@ public class WeatherQueryServiceImpl implements WeatherQueryService {
 
     @Override
     public WeatherResponseDTO getWeather(Long stationId, LocalDateTime datetime) {
-        Station station = getStationOrThrow(stationId);
+        Station station = stationRepository.findById(stationId)
+                .orElseThrow(() -> new StationHandler(ErrorStatus.STATION_ID_NOT_FOUND));
         String key = makeWeatherRedisKey(station.getNx(), station.getNy(), datetime);
 
         Object cached = redisTemplate.opsForValue().get(key);
@@ -38,11 +39,6 @@ public class WeatherQueryServiceImpl implements WeatherQueryService {
 
         log.info("날씨 Redis 캐시 Miss → 기상청 API 요청");
         return weatherApiClient.getAndCacheWeather(stationId, datetime);
-    }
-
-    private Station getStationOrThrow(Long stationId) {
-        return stationRepository.findById(stationId)
-                .orElseThrow(() -> new StationHandler(ErrorStatus.STATION_ID_NOT_FOUND));
     }
 
     private String makeWeatherRedisKey(Integer nx, Integer ny, LocalDateTime datetime) {

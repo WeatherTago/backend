@@ -52,7 +52,10 @@ public class StationQueryServiceImpl implements StationQueryService {
         Station baseStation = stationRepository.findById(stationId)
                 .orElseThrow(() -> new StationHandler(ErrorStatus.STATION_ID_NOT_FOUND));
 
-        WeatherResponseDTO weather = weatherQueryService.getWeather(baseStation.getLatitude(), baseStation.getLongitude(), time);
+//        원래 코드
+//        WeatherResponseDTO weather = weatherQueryService.getWeather(baseStation.getLatitude(), baseStation.getLongitude(), time);
+
+        WeatherResponseDTO weather = weatherQueryService.getWeather(stationId, time);
 
         List<Station> stations = stationRepository.findAllByNameAndLine(baseStation.getName(), baseStation.getLine());
 
