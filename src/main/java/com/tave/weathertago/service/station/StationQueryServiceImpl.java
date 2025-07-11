@@ -4,7 +4,7 @@ import com.tave.weathertago.apiPayload.code.status.ErrorStatus;
 import com.tave.weathertago.apiPayload.exception.handler.StationHandler;
 import com.tave.weathertago.converter.StationConverter;
 import com.tave.weathertago.domain.Station;
-import com.tave.weathertago.dto.CongestionDTO;
+import com.tave.weathertago.dto.prediction.PredictionResponseDTO;
 import com.tave.weathertago.dto.station.StationResponseDTO;
 import com.tave.weathertago.dto.weather.WeatherResponseDTO;
 import com.tave.weathertago.repository.StationRepository;
@@ -52,9 +52,6 @@ public class StationQueryServiceImpl implements StationQueryService {
         Station baseStation = stationRepository.findById(stationId)
                 .orElseThrow(() -> new StationHandler(ErrorStatus.STATION_ID_NOT_FOUND));
 
-//        원래 코드
-//        WeatherResponseDTO weather = weatherQueryService.getWeather(baseStation.getLatitude(), baseStation.getLongitude(), time);
-
         WeatherResponseDTO weather = weatherQueryService.getWeather(stationId, time);
 
         List<Station> stations = stationRepository.findAllByNameAndLine(baseStation.getName(), baseStation.getLine());
@@ -62,11 +59,11 @@ public class StationQueryServiceImpl implements StationQueryService {
         // 3. 방향별 혼잡도 Map 생성
         Map<String, StationResponseDTO.DirectionalStationDTO> congestionByDirection = new HashMap<>();
 
-//        for (Station s : stations) {
-//            CongestionDTO congestion = congestionQueryService.getCongestion(s.getStationCode(), time);
-//            StationResponseDTO.DirectionalStationDTO dto = StationConverter.toDirectionalStationDTO(s, congestion);
-//            congestionByDirection.put(s.getDirection(), dto);
-//        }
+        for (Station s : stations) {
+            PredictionResponseDTO congestion = congestionQueryService.getCongestion(stationId, time);
+            StationResponseDTO.DirectionalStationDTO dto = StationConverter.toDirectionalStationDTO(s, congestion);
+            congestionByDirection.put(s.getDirection(), dto);
+        }
 
         return StationConverter.toJoinResultDTO(baseStation, weather, congestionByDirection);
     }
@@ -131,3 +128,4 @@ public class StationQueryServiceImpl implements StationQueryService {
     */
 
 }
+

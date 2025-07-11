@@ -1,8 +1,7 @@
 package com.tave.weathertago.converter;
 
 import com.tave.weathertago.domain.Station;
-import com.tave.weathertago.dto.CongestionDTO;
-import com.tave.weathertago.dto.station.StationDTO;
+import com.tave.weathertago.dto.prediction.PredictionResponseDTO;
 import com.tave.weathertago.dto.station.StationResponseDTO;
 import com.tave.weathertago.dto.weather.WeatherResponseDTO;
 
@@ -24,7 +23,7 @@ public class StationConverter {
                 .build();
     }
 
-    public static StationResponseDTO.DirectionalStationDTO toDirectionalStationDTO(Station station, CongestionDTO congestion) {
+    public static StationResponseDTO.DirectionalStationDTO toDirectionalStationDTO(Station station, PredictionResponseDTO congestion) {
 
         return StationResponseDTO.DirectionalStationDTO.builder()
                 .stationId(station.getId())
