@@ -31,9 +31,9 @@ public class CongestionQueryServiceImpl implements CongestionQueryService {
     private static final DateTimeFormatter DATETIME_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     @Override
-    public PredictionWithWeatherResponseDTO getCongestionWithWeather(Long stationId, String directionKor, LocalDateTime datetime) {
+    public PredictionWithWeatherResponseDTO getCongestionWithWeather(Long stationId, LocalDateTime datetime) {
         Station station = getStationOrThrow(stationId);
-        int direction = convertDirectionToInt(directionKor);
+        int direction = convertDirectionToInt(station.getDirection());
 
         PredictionResponseDTO prediction = getOrPredictCongestion(station, direction, datetime);
 
@@ -46,9 +46,9 @@ public class CongestionQueryServiceImpl implements CongestionQueryService {
     }
 
     @Override
-    public PredictionResponseDTO getCongestion(Long stationId, String directionKor, LocalDateTime datetime) {
+    public PredictionResponseDTO getCongestion(Long stationId, LocalDateTime datetime) {
         Station station = getStationOrThrow(stationId);
-        int direction = convertDirectionToInt(directionKor);
+        int direction = convertDirectionToInt(station.getDirection());
 
         return getOrPredictCongestion(station, direction, datetime);
     }
