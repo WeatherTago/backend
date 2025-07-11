@@ -8,8 +8,8 @@ import com.tave.weathertago.dto.prediction.PredictionResponseDTO;
 import com.tave.weathertago.dto.prediction.PredictionWithWeatherResponseDTO;
 import com.tave.weathertago.dto.weather.WeatherResponseDTO;
 import com.tave.weathertago.infrastructure.AiPredictionClient;
-import com.tave.weathertago.infrastructure.WeatherApiClient;
 import com.tave.weathertago.repository.StationRepository;
+import com.tave.weathertago.service.weather.WeatherQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -25,7 +25,7 @@ public class CongestionQueryServiceImpl implements CongestionQueryService {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final AiPredictionClient aiPredictionClient;
-    private final WeatherApiClient weatherApiClient;
+    private final WeatherQueryService weatherQueryService;
     private final StationRepository stationRepository;
 
     private static final DateTimeFormatter DATETIME_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
@@ -33,11 +33,9 @@ public class CongestionQueryServiceImpl implements CongestionQueryService {
     @Override
     public PredictionWithWeatherResponseDTO getCongestionWithWeather(Long stationId, LocalDateTime datetime) {
         Station station = getStationOrThrow(stationId);
-        int direction = convertDirectionToInt(station.getDirection());
 
-        PredictionResponseDTO prediction = getOrPredictCongestion(station, direction, datetime);
-
-        WeatherResponseDTO weather = getOrFetchWeather(station, datetime);
+        PredictionResponseDTO prediction = getOrPredictCongestion(station, datetime);
+        WeatherResponseDTO weather = weatherQueryService.getWeather(stationId, datetime);
 
         return PredictionWithWeatherResponseDTO.builder()
                 .prediction(prediction)
@@ -48,14 +46,15 @@ public class CongestionQueryServiceImpl implements CongestionQueryService {
     @Override
     public PredictionResponseDTO getCongestion(Long stationId, LocalDateTime datetime) {
         Station station = getStationOrThrow(stationId);
-        int direction = convertDirectionToInt(station.getDirection());
 
-        return getOrPredictCongestion(station, direction, datetime);
+        return getOrPredictCongestion(station, datetime);
     }
 
-    // 내부 공통 메서드들
-    private PredictionResponseDTO getOrPredictCongestion(Station station, int direction, LocalDateTime datetime) {
+    // 내부 공통 메서드
+    private PredictionResponseDTO getOrPredictCongestion(Station station, LocalDateTime datetime) {
+        int direction = convertDirectionToInt(station.getDirection());
         String key = makeCongestionRedisKey(station.getId(), direction, datetime);
+
         Object cached = redisTemplate.opsForValue().get(key);
 
         if (cached instanceof PredictionResponseDTO prediction) {
@@ -63,34 +62,18 @@ public class CongestionQueryServiceImpl implements CongestionQueryService {
             return prediction;
         }
 
-        WeatherResponseDTO weather = getOrFetchWeather(station, datetime);
+        log.info("혼잡도 캐시 MISS → key: {}", key);
+        WeatherResponseDTO weather = weatherQueryService.getWeather(station.getId(), datetime);
         return aiPredictionClient.predictCongestion(station.getId(), direction, datetime, weather);
-    }
-
-    private WeatherResponseDTO getOrFetchWeather(Station station, LocalDateTime datetime) {
-        String weatherKey = makeWeatherRedisKey(station.getNx(), station.getNy(), datetime);
-        Object cached = redisTemplate.opsForValue().get(weatherKey);
-
-        if (cached instanceof WeatherResponseDTO weather) {
-            log.info("✅ 날씨 Redis 캐시 Hit: {}", weatherKey);
-            return weather;
-        }
-
-        log.info("날씨 Redis 캐시 Miss → 기상청 API 요청");
-        return weatherApiClient.getAndCacheWeather(station.getId(), datetime);
     }
 
     private Station getStationOrThrow(Long stationId) {
         return stationRepository.findById(stationId)
-                .orElseThrow(() -> new CongestionHandler(ErrorStatus.STATION_ID_NOT_FOUND));
+                .orElseThrow(() -> new StationHandler(ErrorStatus.STATION_ID_NOT_FOUND));
     }
 
     private String makeCongestionRedisKey(Long stationId, int direction, LocalDateTime datetime) {
         return "congestion:" + stationId + ":" + direction + ":" + datetime.format(DATETIME_FMT);
-    }
-
-    private String makeWeatherRedisKey(Integer nx, Integer ny, LocalDateTime datetime) {
-        return "weather:" + nx + ":" + ny + ":" + datetime.format(DATETIME_FMT);
     }
 
     private int convertDirectionToInt(String directionKor) {
