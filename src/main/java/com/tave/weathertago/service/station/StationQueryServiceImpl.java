@@ -59,11 +59,11 @@ public class StationQueryServiceImpl implements StationQueryService {
         // 3. 방향별 혼잡도 Map 생성
         Map<String, StationResponseDTO.DirectionalStationDTO> congestionByDirection = new HashMap<>();
 
-        for (Station s : stations) {
-            CongestionDTO congestion = congestionQueryService.getCongestion(s.getStationCode(), time);
-            StationResponseDTO.DirectionalStationDTO dto = StationConverter.toDirectionalStationDTO(s, congestion);
-            congestionByDirection.put(s.getDirection(), dto);
-        }
+//        for (Station s : stations) {
+//            CongestionDTO congestion = congestionQueryService.getCongestion(s.getStationCode(), time);
+//            StationResponseDTO.DirectionalStationDTO dto = StationConverter.toDirectionalStationDTO(s, congestion);
+//            congestionByDirection.put(s.getDirection(), dto);
+//        }
 
         return StationConverter.toJoinResultDTO(baseStation, weather, congestionByDirection);
     }
