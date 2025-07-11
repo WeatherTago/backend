@@ -10,8 +10,10 @@ import com.tave.weathertago.repository.StationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.connection.RedisStringCommands;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.types.Expiration;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -46,19 +48,21 @@ public class WeatherApiClient {
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HHmm");
     private static final DateTimeFormatter DATETIME_KEY_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
-    public void getAndCacheWeather(String stationName, String line) {
-        Station station = stationRepository.findByNameAndLine(stationName, line)
+    public WeatherResponseDTO getAndCacheWeather(Long stationId, LocalDateTime datetime) {
+        Station station = stationRepository.findById(stationId)
                 .orElseThrow(() -> new WeatherHandler(ErrorStatus.STATION_ID_NOT_FOUND));
 
         LocalDateTime baseTime = calculateBaseTime(LocalDateTime.now());
-        log.info("🗓️ BaseTime: {}, {}", baseTime.format(DATE_FMT), baseTime.format(TIME_FMT));
-
         URI uri = buildRequestUri(station, baseTime);
-        log.info("🌐 API Request: {}", uri.toString().replace(serviceKey, "***"));
 
         String responseBody = sendApiRequest(uri);
         WeatherApiResponseDTO apiResponse = parseWeatherResponse(responseBody);
-        processApiResponse(station, apiResponse);
+        Map<String, WeatherResponseDTO> cacheMap = processApiResponse(station, apiResponse);
+
+        bulkSaveToRedis(cacheMap);
+
+        String redisKey = makeRedisKey(station.getNx(), station.getNy(), datetime);
+        return cacheMap.get(redisKey);
     }
 
     private URI buildRequestUri(Station station, LocalDateTime baseTime) {
@@ -100,12 +104,11 @@ public class WeatherApiClient {
         try {
             return objectMapper.readValue(body, WeatherApiResponseDTO.class);
         } catch (Exception e) {
-            log.error("❌ JSON 파싱 실패", e);
             throw new WeatherHandler(ErrorStatus.WEATHER_API_PARSE_ERROR);
         }
     }
 
-    private void processApiResponse(Station station, WeatherApiResponseDTO apiResponse) {
+    private Map<String, WeatherResponseDTO> processApiResponse(Station station, WeatherApiResponseDTO apiResponse) {
         if (apiResponse == null ||
                 apiResponse.getResponse() == null ||
                 apiResponse.getResponse().getBody() == null ||
@@ -149,8 +152,7 @@ public class WeatherApiClient {
             cacheMap.put(redisKey, dto);
         }
 
-        bulkSaveToRedis(cacheMap);
-        log.info("✅ Cached {} items via pipeline", cacheMap.size());
+        return cacheMap;
     }
 
     private void bulkSaveToRedis(Map<String, WeatherResponseDTO> dataMap) {
@@ -161,8 +163,12 @@ public class WeatherApiClient {
             for (Map.Entry<String, WeatherResponseDTO> entry : dataMap.entrySet()) {
                 byte[] key = keySerializer.serialize(entry.getKey());
                 byte[] value = valueSerializer.serialize(entry.getValue());
-                connection.set(key, value);
-                connection.expire(key, TTL.getSeconds());
+                connection.stringCommands().set(
+                        key,
+                        value,
+                        Expiration.seconds(TTL.getSeconds()),
+                        RedisStringCommands.SetOption.UPSERT
+                );
             }
             return null;
         });
@@ -177,7 +183,6 @@ public class WeatherApiClient {
                 default -> Double.parseDouble(val);
             };
         } catch (NumberFormatException e) {
-            log.warn("❌ 파싱 실패: {}={}", category, val);
             return 0.0;
         }
     }
