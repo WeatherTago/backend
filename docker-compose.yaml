@@ -9,7 +9,7 @@ services:
   weathertago-app:
     image: ysjjw2003/weathertago:${TAG}
     container_name: weathertago-app
-    ports:
+    ports: # 외부까지 연결 / expose : 컨테이너끼리만 연결
       - "8080:8080"
 #    env_file:
 #      - .env

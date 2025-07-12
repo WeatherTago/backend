@@ -13,14 +13,13 @@ public class AlarmResponseDTO {
     public static class AlarmDetailDTO {
         private Long alarmId;
 
-        private Long stationId;
         private String stationName;
         private String stationLine;
         private String direction;
 
-        private LocalTime referenceTime;
+        private String referenceTime;
         private AlarmPeriod alarmPeriod;
         private AlarmDay alarmDay;
-        private LocalTime alarmTime;
+        private String alarmTime;
     }
 }
