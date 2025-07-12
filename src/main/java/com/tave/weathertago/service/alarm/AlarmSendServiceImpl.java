@@ -10,8 +10,12 @@ import com.tave.weathertago.domain.Alarm;
 import com.tave.weathertago.domain.AlarmDay;
 import com.tave.weathertago.domain.AlarmPeriod;
 import com.tave.weathertago.dto.alarm.AlarmFcmMessageDto;
+import com.tave.weathertago.dto.prediction.PredictionResponseDTO;
+import com.tave.weathertago.dto.prediction.PredictionWithWeatherResponseDTO;
+import com.tave.weathertago.dto.weather.WeatherResponseDTO;
 import com.tave.weathertago.repository.AlarmRepository;
 import com.tave.weathertago.repository.UserRepository;
+import com.tave.weathertago.service.congestion.CongestionQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -37,6 +41,8 @@ public class AlarmSendServiceImpl implements AlarmSendService {
     private final UserRepository userRepository;
     private final FirebaseMessaging firebaseMessaging;
     private final RedisTemplate<String, String> redisTemplate;
+    private final CongestionQueryService congestionQueryService;
+
 
     private static final String REDIS_KEY_PREFIX = "pushtoken:";
 
@@ -46,49 +52,59 @@ public class AlarmSendServiceImpl implements AlarmSendService {
         Alarm alarm = alarmRepository.findById(alarmId)
                 .orElseThrow(() -> new AlarmHandler(ErrorStatus.ALARM_NOT_FOUND));
 
-        // 2. FCM 메시지 생성
+        // 2. 알림 날짜 계산
         // alarmDay에 따라 알림 대상(오늘/내일) 결정
-        String alarmDayStr="";
-        LocalDate weatherDate;
-
-        String refTimeStr = String.valueOf(alarm.getReferenceTime()); // 예: "14:30"
-        LocalTime localTime = LocalTime.parse(refTimeStr, DateTimeFormatter.ofPattern("HH:mm"));
-        LocalDateTime refDateTime = LocalDate.now().atTime(localTime);
-
+        String alarmDayStr = "";
+        LocalDateTime refDateTime;
+        LocalTime localTime = alarm.getReferenceTime();
         switch (alarm.getAlarmDay()) {
             case TODAY -> {
                 alarmDayStr = "오늘";
-                weatherDate = refDateTime.toLocalDate();
+                refDateTime = LocalDate.now().atTime(localTime).withSecond(0);
             }
             case YESTERDAY -> {
                 alarmDayStr = "내일";
-                weatherDate = refDateTime.toLocalDate().plusDays(1);
+                refDateTime = LocalDate.now().plusDays(1).atTime(localTime).withSecond(0);
             }
-            default -> {
-                throw new AlarmHandler(ErrorStatus.ALARM_INVALID_INPUT);
-            }
+            default -> throw new AlarmHandler(ErrorStatus.ALARM_INVALID_INPUT);
         }
 
-        // 4. Redis에서 해당 해시에서 datetime이 일치하는지 체크
+
+        // 3. 혼잡도·날씨 정보 조회
+        PredictionWithWeatherResponseDTO result = congestionQueryService.getCongestionWithWeather(
+                alarm.getStationId().getId(), refDateTime
+        );
+        PredictionResponseDTO prediction = result.getPrediction();
+        WeatherResponseDTO weather = result.getWeather();
+
+        // 4. 메시지 제목 생성
+        String title = String.format("[Weathertago] %s %s %s %s 혼잡도 알림",
+                alarm.getStationId().getName(),
+                alarm.getStationId().getLine(),
+                alarm.getStationId().getDirection(),
+                alarm.getAlarmTime()
+        );
+
+        // 5. 혼잡도·날씨 포맷팅
+        String congestionStr = String.format("%s (%.0f%%)",
+                prediction.getCongestionLevel(),
+                prediction.getCongestionScore() * 100
+        );
+        String weatherStr = String.format("기온 %.1f°C, 습도 %.1f%%, 강수량 %.1fmm, 풍속 %.1fm/s, 적설 %.1fcm, 풍향 %.1f°",
+                weather.getTmp(), weather.getReh(), weather.getPcp(),
+                weather.getWsd(), weather.getSno(), weather.getVec()
+        );
 
 
-        // 혼잡도/날씨 mock 데이터
-        // String congestionMock = "여유"; // 예: "여유", "보통", "혼잡"
-        int congestionMock = 62; // 혼잡도 퍼센트(예: 62%)
-        String weatherMock = "맑음, 25°C"; // 예: "맑음, 25°C"
-
-        // 제목
-        String title = "[Weathertago] " + alarm.getStationId().getName() + " "  + alarm.getStationId().getLine() + " "  + alarm.getStationId().getDirection()+ " " + alarm.getAlarmTime() + " 혼잡도 알림";
-
-        // 본문
+        // 6. 메시지 본문 생성
         String body = String.format(
                 "%s %s 기준 혼잡도 및 날씨 정보입니다.\n" +
-                        "혼잡도: %d%%\\n" +
+                        "혼잡도: %s\n" +
                         "날씨: %s",
                 alarmDayStr,
-                alarm.getReferenceTime(),
-                congestionMock,
-                weatherMock
+                alarm.getReferenceTime().format(DateTimeFormatter.ofPattern("HH:mm")),
+                congestionStr,
+                weatherStr
         );
 
         log.info(title);
