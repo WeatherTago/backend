@@ -24,41 +24,6 @@ public class StationResponseDTO {
         String stationCode;
         String direction;
         WeatherResponseDTO weather;
-        @Schema(
-                description = "방향별 혼잡도 정보",
-                example = """
-{
-  "상행": {
-    "stationId": 150,
-    "congestion": {
-      "congestionScore": 42.1,
-      "congestionLevel": "보통"
-    }
-  },
-  "하행": {
-    "stationId": 150,
-    "congestion": {
-      "congestionScore": 67.8,
-      "congestionLevel": "혼잡"
-    }
-  },
-  "내선": {
-    "stationId": 151,
-    "congestion": {
-      "congestionScore": 55.2,
-      "congestionLevel": "보통"
-    }
-  },
-  "외선": {
-    "stationId": 152,
-    "congestion": {
-      "congestionScore": 35.7,
-      "congestionLevel": "여유"
-    }
-  }
-}
-"""
-        )
         Map<String, DirectionalStationDTO> congestionByDirection;
         @Schema(type = "string", format = "date-time", example = "2025-07-08T22:40:00")
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
