@@ -69,6 +69,8 @@ public class AlarmSendServiceImpl implements AlarmSendService {
             default -> throw new AlarmHandler(ErrorStatus.ALARM_INVALID_INPUT);
         }
 
+        log.info(String.valueOf(refDateTime));
+
 
         // 3. 혼잡도·날씨 정보 조회
         PredictionWithWeatherResponseDTO result = congestionQueryService.getCongestionWithWeather(
