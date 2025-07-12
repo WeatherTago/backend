@@ -31,42 +31,37 @@ public class SubwayPathConverter {
 
         for (SubwayPathResponseDTO.Path path : bestItem.getPathList()) {
             String route = path.getRouteNm();
-            String fid = path.getFid();
-            String tid = path.getTid();
-
-            String startCode = fid.substring(0, fid.length() - 1);
-            String endCode = tid.substring(0, tid.length() - 1);
-
+            String fid = path.getFid();  // ex: "10010"
+            String tid = path.getTid();  // ex: "10000"
+            String startCode = fid.substring(0, fid.length() - 1);  // ex: "1001"
+            String endCode = tid.substring(0, tid.length() - 1);    // ex: "1000"
             String direction = Integer.parseInt(fid) < Integer.parseInt(tid) ? "상행" : "하행";
 
-            Station startStation = stationRepository.findByStationCode(startCode).orElse(null);
-            Station endStation = stationRepository.findByStationCode(endCode).orElse(null);
+            // ✅ 정확한 direction 기반 station 찾기
+            Station startStation = stationRepository.findByStationCodeAndLineAndDirection(startCode, route, direction)
+                    .orElse(null);
+            Station endStation = stationRepository.findByStationCodeAndLineAndDirection(endCode, route, direction)
+                    .orElse(null);
 
             SubwayPathDTO.StationInfo startInfo = stationToDto(
-                    fid, path.getFname(), route, startStation, true, direction, queryTime, congestionQueryService
-            );
+                    path.getFname(), route, startStation, true, direction, queryTime, congestionQueryService);
             SubwayPathDTO.StationInfo endInfo = stationToDto(
-                    tid, path.getTname(), route, endStation, true, direction, queryTime, congestionQueryService
-            );
+                    path.getTname(), route, endStation, true, direction, queryTime, congestionQueryService);
 
+            // 중간역들 (stationCode 기준만으로 조회)
             List<String> stationCodesInPath = getIntermediateCodes(startCode, endCode);
             List<Station> stationsInPath = stationRepository.findByLineAndStationCodeIn(route, stationCodesInPath);
 
             Map<String, Station> stationMap = stationsInPath.stream()
-                    .collect(Collectors.toMap(
-                            Station::getStationCode,
-                            s -> s,
-                            (existing, replacement) -> existing // 중복 시 기존 값 유지
-                    ));
+                    .collect(Collectors.toMap(Station::getStationCode, s -> s, (a, b) -> a));  // 중복 코드 처리
 
             List<SubwayPathDTO.StationInfo> allStations = stationCodesInPath.stream()
                     .map(code -> {
                         Station s = stationMap.get(code);
-                        Long dbId = s != null ? s.getId() : null;
                         return SubwayPathDTO.StationInfo.builder()
-                                .stationId(dbId != null ? String.valueOf(dbId) : null)
+                                .stationId(s != null ? String.valueOf(s.getId()) : null)
                                 .stationName(s != null ? s.getName() : "(Unknown)")
-                                .line(s != null ? s.getLine() : route)
+                                .line(route)
                                 .build();
                     })
                     .collect(Collectors.toList());
@@ -87,7 +82,7 @@ public class SubwayPathConverter {
     }
 
     private static SubwayPathDTO.StationInfo stationToDto(
-            String id, String name, String line, Station station,
+            String name, String line, Station station,
             boolean includeCongestion,
             String direction,
             LocalDateTime queryTime, CongestionQueryService congestionQueryService
