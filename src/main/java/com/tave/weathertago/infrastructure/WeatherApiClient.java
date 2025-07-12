@@ -78,6 +78,7 @@ public class WeatherApiClient {
                 .queryParam("ny", station.getNy())
                 .build(true)
                 .toUri();
+
     }
 
     private String sendApiRequest(URI uri) {
@@ -92,6 +93,7 @@ public class WeatherApiClient {
                 throw new WeatherHandler(ErrorStatus.WEATHER_API_RESPONSE_EMPTY);
             }
 
+            log.info("🌐 기상청 API 요청 URI: {}", uri);
             log.info("📄 Raw Response (일부): {}", body.substring(0, Math.min(200, body.length())));
             return body;
 
