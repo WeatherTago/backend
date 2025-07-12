@@ -32,11 +32,11 @@ public class SubwayPathConverter {
         for (SubwayPathResponseDTO.Path path : bestItem.getPathList()) {
             String route = path.getRouteNm();
             String fid = path.getFid();  // 예: "10010"
-            String tid = path.getTid();  // 예: "10000"
+            String tid = path.getTid();  // 예: "03010"
 
-            //복원
-            String startCode = String.valueOf(Integer.parseInt(fid) / 10);  // "03010" → 301
-            String endCode = String.valueOf(Integer.parseInt(tid) / 10);    // "10000" → 1000
+            // ✅ API 코드 → DB 코드로 복원
+            String startCode = restoreStationCodeFromApiCode(fid);  // "03010" → "301"
+            String endCode = restoreStationCodeFromApiCode(tid);    // "10010" → "1001"
 
             String direction;
             if (route.equals("2호선")) {
@@ -45,27 +45,22 @@ public class SubwayPathConverter {
                 direction = Integer.parseInt(fid) < Integer.parseInt(tid) ? "상행" : "하행";
             }
 
-            // ✅ 중간역 코드 먼저 생성
             List<String> stationCodesInPath = getIntermediateCodes(startCode, endCode);
 
-            // ✅ 방향 포함 정확한 출발/도착역 찾기
             Station startStation = stationRepository.findByStationCodeAndLineAndDirection(startCode, route, direction)
                     .orElse(null);
             Station endStation = stationRepository.findByStationCodeAndLineAndDirection(endCode, route, direction)
                     .orElse(null);
 
-            // ✅ 중간역들도 방향 포함 조회
             List<Station> stationsInPath = stationRepository.findByStationCodeInAndLineAndDirection(
                     stationCodesInPath, route, direction
             );
 
-            // ✅ 시작/끝역 정보 DTO 변환
             SubwayPathDTO.StationInfo startInfo = stationToDto(
                     path.getFname(), route, startStation, true, direction, queryTime, congestionQueryService);
             SubwayPathDTO.StationInfo endInfo = stationToDto(
                     path.getTname(), route, endStation, true, direction, queryTime, congestionQueryService);
 
-            // ✅ 중간역은 혼잡도/방향 없이
             Map<String, Station> stationMap = stationsInPath.stream()
                     .collect(Collectors.toMap(Station::getStationCode, s -> s, (a, b) -> a));
 
@@ -115,6 +110,18 @@ public class SubwayPathConverter {
                 .build();
     }
 
+    // ✅ API → DB 코드 복원
+    private static String restoreStationCodeFromApiCode(String apiCode) {
+        if (apiCode.length() != 5) return apiCode;
+        String trimmed = apiCode.substring(0, 4); // 마지막 자리 제거
+        if (trimmed.startsWith("0")) {
+            return String.valueOf(Integer.parseInt(trimmed)); // 앞 0 제거 → 0301 → 301
+        } else {
+            return trimmed; // 1001
+        }
+    }
+
+    // ✅ DB 코드 목록 생성
     private static List<String> getIntermediateCodes(String startCode, String endCode) {
         int start = Integer.parseInt(startCode);
         int end = Integer.parseInt(endCode);
@@ -122,13 +129,14 @@ public class SubwayPathConverter {
         List<String> codes = new ArrayList<>();
         if (start <= end) {
             for (int i = start; i <= end; i++) {
-                codes.add(String.format("%04d", i));
+                codes.add(String.valueOf(i)); // 3자리 or 4자리 그대로 사용
             }
         } else {
             for (int i = start; i >= end; i--) {
-                codes.add(String.format("%04d", i));
+                codes.add(String.valueOf(i));
             }
         }
         return codes;
     }
 }
+
