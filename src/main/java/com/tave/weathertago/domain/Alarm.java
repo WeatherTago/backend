@@ -30,9 +30,9 @@ public class Alarm extends BaseEntity {
 
     // 혼잡도 계산할 시간 (HH:mm 형식)
     // alarm.setReferenceTime(LocalTime.of(8, 30)); // 오전 8시 30분
-    // MySQL: 08:30:00
+    // MySQL: 08:30
     @Column(nullable = false)
-    @DateTimeFormat(pattern = "HH:mm:ss")
+    @DateTimeFormat(pattern = "HH:mm")
     private LocalTime referenceTime;
 
     // station 테이블에서 가져온 station_id
@@ -47,7 +47,7 @@ public class Alarm extends BaseEntity {
 
     // 알림 보내는 시간 (HH:mm 형식)
     @Column(nullable = false)
-    @DateTimeFormat(pattern = "HH:mm:ss")
+    @DateTimeFormat(pattern = "HH:mm")
     private LocalTime alarmTime;
 
 }

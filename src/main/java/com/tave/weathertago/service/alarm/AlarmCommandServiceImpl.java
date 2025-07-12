@@ -20,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 import java.util.Optional;
 
@@ -44,10 +46,10 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
 
             Alarm alarm = Alarm.builder()
                     .userId(user)
-                    .referenceTime(dto.getReferenceTime())
+                    .referenceTime(parseLocalTime(dto.getReferenceTime()))
                     .stationId(station)
                     .alarmDay(dto.getAlarmDay())
-                    .alarmTime(dto.getAlarmTime())
+                    .alarmTime(parseLocalTime(dto.getAlarmTime()))
                     .alarmPeriod(dto.getAlarmPeriod())
                     .build();
 
@@ -78,7 +80,7 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
                 throw new AlarmHandler(ErrorStatus.ALARM_FORBIDDEN);
             }
             if (dto.getReferenceTime() != null) {
-                alarm.setReferenceTime(dto.getReferenceTime());
+                alarm.setReferenceTime(parseLocalTime(dto.getReferenceTime()));
             }
             if (dto.getStationId() != null) {
                 Station station = stationRepository.getReferenceById(dto.getStationId());
@@ -88,7 +90,7 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
                 alarm.setAlarmDay(dto.getAlarmDay());
             }
             if (dto.getAlarmTime() != null) {
-                alarm.setAlarmTime(dto.getAlarmTime());
+                alarm.setAlarmTime(parseLocalTime(dto.getAlarmTime()));
             }
             if (dto.getAlarmPeriod() != null) {
                 alarm.setAlarmPeriod(dto.getAlarmPeriod());
@@ -122,7 +124,10 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
         }
     }
 
-
+    private static LocalTime parseLocalTime(String timeStr) {
+        if (timeStr == null) return null;
+        return LocalTime.parse(timeStr, DateTimeFormatter.ofPattern("HH:mm"));
+    }
 
 
 }

@@ -16,10 +16,10 @@ public class AlarmRequestDTO {
     public static class AlarmCreateRequestDTO {
         private Long stationId;
 
-        private LocalTime referenceTime;
+        private String referenceTime;
         private AlarmPeriod alarmPeriod;
         private AlarmDay alarmDay;
-        private LocalTime alarmTime;
+        private String alarmTime;
     }
 
     @Getter
@@ -29,9 +29,9 @@ public class AlarmRequestDTO {
 
         private Long stationId;
 
-        private LocalTime referenceTime;
+        private String referenceTime;
         private AlarmPeriod alarmPeriod;
         private AlarmDay alarmDay;
-        private LocalTime alarmTime;
+        private String alarmTime;
     }
 }
