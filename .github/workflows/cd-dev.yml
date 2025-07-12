@@ -50,7 +50,9 @@ jobs:
       # 날짜 기반 태그 생성
       - name: Set Docker image tag
         id: set_tag
-        run: echo "docker_image_tag=$(date +'%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
+        run: |
+          export TZ=Asia/Seoul
+          echo "docker_image_tag=$(date +'%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
 
       - name: Export Docker tag
         id: export_tag
