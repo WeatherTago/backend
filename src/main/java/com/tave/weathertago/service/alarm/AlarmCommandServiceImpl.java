@@ -42,7 +42,11 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
             User user = userRepository.findByKakaoId(kakaoId)
                     .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
 
-            Station station = stationRepository.getReferenceById(dto.getStationId());
+            Station station = stationRepository.findByNameAndLineAndDirection(
+                    dto.getStationName(),
+                    dto.getStationLine(),
+                    dto.getDirection()
+            ).orElseThrow(() -> new AlarmHandler(ErrorStatus.STATION_ID_NOT_FOUND));
 
             Alarm alarm = Alarm.builder()
                     .userId(user)
@@ -82,8 +86,13 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
             if (dto.getReferenceTime() != null) {
                 alarm.setReferenceTime(parseLocalTime(dto.getReferenceTime()));
             }
-            if (dto.getStationId() != null) {
-                Station station = stationRepository.getReferenceById(dto.getStationId());
+            // updateAlarm
+            if (dto.getStationName() != null && dto.getStationLine() != null && dto.getDirection() != null) {
+                Station station = stationRepository.findByNameAndLineAndDirection(
+                        dto.getStationName(),
+                        dto.getStationLine(),
+                        dto.getDirection()
+                ).orElseThrow(() -> new AlarmHandler(ErrorStatus.STATION_ID_NOT_FOUND));
                 alarm.setStationId(station);
             }
             if (dto.getAlarmDay() != null) {

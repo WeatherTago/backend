@@ -13,7 +13,6 @@ public class AlarmResponseDTO {
     public static class AlarmDetailDTO {
         private Long alarmId;
 
-        private Long stationId;
         private String stationName;
         private String stationLine;
         private String direction;

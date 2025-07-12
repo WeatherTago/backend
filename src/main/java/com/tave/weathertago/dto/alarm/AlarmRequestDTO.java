@@ -14,7 +14,9 @@ public class AlarmRequestDTO {
     @Getter
     @Builder
     public static class AlarmCreateRequestDTO {
-        private Long stationId;
+        private String stationName;
+        private String stationLine;
+        private String direction;
 
         private String referenceTime;
         private AlarmPeriod alarmPeriod;
@@ -27,7 +29,9 @@ public class AlarmRequestDTO {
     public static class AlarmUpdateRequestDTO {
         private Long alarmId;
 
-        private Long stationId;
+        private String stationName;
+        private String stationLine;
+        private String direction;
 
         private String referenceTime;
         private AlarmPeriod alarmPeriod;

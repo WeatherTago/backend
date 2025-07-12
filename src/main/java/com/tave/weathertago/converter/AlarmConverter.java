@@ -19,7 +19,6 @@ public class AlarmConverter {
 
         return AlarmResponseDTO.AlarmDetailDTO.builder()
                 .alarmId(alarm.getAlarmId())
-                .stationId(alarm.getStationId().getId())
                 .stationName(alarm.getStationId().getName())
                 .stationLine(alarm.getStationId().getLine())
                 .direction(alarm.getStationId().getDirection())
