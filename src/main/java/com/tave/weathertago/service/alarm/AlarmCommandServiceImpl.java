@@ -35,25 +35,26 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
 
     @Override
     public Optional<AlarmResponseDTO.AlarmDetailDTO> createAlarm(AlarmRequestDTO.AlarmCreateRequestDTO dto) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String kakaoId = authentication.getName();
+
+        User user = userRepository.findByKakaoId(kakaoId)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+
+        // 역 이름 검증
+        if (!stationRepository.existsByName(dto.getStationName())) {
+            throw new AlarmHandler(ErrorStatus.STATION_NAME_NOT_FOUND);
+        }
+        // 호선 검증
+        if (!stationRepository.existsByNameAndLine(dto.getStationName(), dto.getStationLine())) {
+            throw new AlarmHandler(ErrorStatus.STATION_LINE_NOT_FOUND);
+        }
+        // 방향 검증
+        if (!stationRepository.existsByNameAndLineAndDirection(dto.getStationName(), dto.getStationLine(), dto.getDirection())) {
+            throw new AlarmHandler(ErrorStatus.INVALID_DIRECTION);
+        }
+
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String kakaoId = authentication.getName();
-
-            User user = userRepository.findByKakaoId(kakaoId)
-                    .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
-
-            // 역 이름 검증
-            if (!stationRepository.existsByName(dto.getStationName())) {
-                throw new AlarmHandler(ErrorStatus.STATION_NAME_NOT_FOUND);
-            }
-            // 호선 검증
-            if (!stationRepository.existsByNameAndLine(dto.getStationName(), dto.getStationLine())) {
-                throw new AlarmHandler(ErrorStatus.STATION_LINE_NOT_FOUND);
-            }
-            // 방향 검증
-            if (!stationRepository.existsByNameAndLineAndDirection(dto.getStationName(), dto.getStationLine(), dto.getDirection())) {
-                throw new AlarmHandler(ErrorStatus.INVALID_DIRECTION);
-            }
 
             Station station = stationRepository.findByNameAndLineAndDirection(
                     dto.getStationName(),
@@ -82,13 +83,26 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
 
     @Override
     public void updateAlarm(AlarmRequestDTO.AlarmUpdateRequestDTO dto){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String kakaoId = authentication.getName();
+
+        User user = userRepository.findByKakaoId(kakaoId)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+
+        // 역 이름 검증
+        if (!stationRepository.existsByName(dto.getStationName())) {
+            throw new AlarmHandler(ErrorStatus.STATION_NAME_NOT_FOUND);
+        }
+        // 호선 검증
+        if (!stationRepository.existsByNameAndLine(dto.getStationName(), dto.getStationLine())) {
+            throw new AlarmHandler(ErrorStatus.STATION_LINE_NOT_FOUND);
+        }
+        // 방향 검증
+        if (!stationRepository.existsByNameAndLineAndDirection(dto.getStationName(), dto.getStationLine(), dto.getDirection())) {
+            throw new AlarmHandler(ErrorStatus.INVALID_DIRECTION);
+        }
+
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String kakaoId = authentication.getName();
-
-            User user = userRepository.findByKakaoId(kakaoId)
-                    .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
-
             Alarm alarm = alarmRepository.findById(dto.getAlarmId())
                     .orElseThrow(() -> new AlarmHandler(ErrorStatus.ALARM_NOT_FOUND));
 
@@ -101,17 +115,6 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
             }
             // updateAlarm
             if (dto.getStationName() != null && dto.getStationLine() != null && dto.getDirection() != null) {
-                if (!stationRepository.existsByName(dto.getStationName())) {
-                    throw new AlarmHandler(ErrorStatus.STATION_NAME_NOT_FOUND);
-                }
-                if (!stationRepository.existsByNameAndLine(dto.getStationName(), dto.getStationLine())) {
-                    throw new AlarmHandler(ErrorStatus.STATION_LINE_NOT_FOUND);
-                }
-                if (!stationRepository.existsByNameAndLineAndDirection(dto.getStationName(), dto.getStationLine(), dto.getDirection())) {
-                    throw new AlarmHandler(ErrorStatus.INVALID_DIRECTION);
-                }
-
-
                 Station station = stationRepository.findByNameAndLineAndDirection(
                         dto.getStationName(),
                         dto.getStationLine(),
@@ -136,13 +139,12 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
 
     @Override
     public void deleteAlarm(Long alarmId){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String kakaoId = authentication.getName();
+
+        User user = userRepository.findByKakaoId(kakaoId)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String kakaoId = authentication.getName();
-
-            User user = userRepository.findByKakaoId(kakaoId)
-                    .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
-
             Alarm alarm = alarmRepository.findById(alarmId)
                     .orElseThrow(() -> new AlarmHandler(ErrorStatus.ALARM_NOT_FOUND));
 
