@@ -60,7 +60,7 @@ public class StationQueryServiceImpl implements StationQueryService {
         Map<String, StationResponseDTO.DirectionalStationDTO> congestionByDirection = new HashMap<>();
 
         for (Station s : stations) {
-            PredictionResponseDTO congestion = congestionQueryService.getCongestion(stationId, time);
+            PredictionResponseDTO congestion = congestionQueryService.getCongestion(s.getId(), time);
             StationResponseDTO.DirectionalStationDTO dto = StationConverter.toDirectionalStationDTO(s, congestion);
             congestionByDirection.put(s.getDirection(), dto);
         }
