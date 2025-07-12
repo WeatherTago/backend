@@ -33,32 +33,42 @@ public class SubwayPathConverter {
             String route = path.getRouteNm();
             String fid = path.getFid();
             String tid = path.getTid();
+
             String startCode = fid.substring(0, fid.length() - 1);
             String endCode = tid.substring(0, tid.length() - 1);
+
+            String direction = Integer.parseInt(fid) < Integer.parseInt(tid) ? "상행" : "하행";
 
             Station startStation = stationRepository.findByStationCode(startCode).orElse(null);
             Station endStation = stationRepository.findByStationCode(endCode).orElse(null);
 
-            // ✅ 출발/도착역은 혼잡도 포함
-            SubwayPathDTO.StationInfo startInfo = stationToDto(fid, path.getFname(), route, startStation, true, queryTime, congestionQueryService);
-            SubwayPathDTO.StationInfo endInfo = stationToDto(tid, path.getTname(), route, endStation, true, queryTime, congestionQueryService);
+            SubwayPathDTO.StationInfo startInfo = stationToDto(
+                    fid, path.getFname(), route, startStation, true, direction, queryTime, congestionQueryService
+            );
+            SubwayPathDTO.StationInfo endInfo = stationToDto(
+                    tid, path.getTname(), route, endStation, true, direction, queryTime, congestionQueryService
+            );
 
-            // 중간역 ID 목록 추출 (역순 포함)
             List<String> stationCodesInPath = getIntermediateCodes(startCode, endCode);
             List<Station> stationsInPath = stationRepository.findByLineAndStationCodeIn(route, stationCodesInPath);
 
-            // 매핑해서 순서 보장
             Map<String, Station> stationMap = stationsInPath.stream()
-                    .collect(Collectors.toMap(Station::getStationCode, s -> s));
+                    .collect(Collectors.toMap(
+                            Station::getStationCode,
+                            s -> s,
+                            (existing, replacement) -> existing // 중복 시 기존 값 유지
+                    ));
 
-            // ✅ 중간역은 혼잡도 없이 변환
             List<SubwayPathDTO.StationInfo> allStations = stationCodesInPath.stream()
                     .map(code -> {
                         Station s = stationMap.get(code);
-                        String id = code + "0";
-                        return stationToDto(id, s != null ? s.getName() : "(Unknown)", route, s, false, queryTime, congestionQueryService);
+                        Long dbId = s != null ? s.getId() : null;
+                        return SubwayPathDTO.StationInfo.builder()
+                                .stationId(dbId != null ? String.valueOf(dbId) : null)
+                                .stationName(s != null ? s.getName() : "(Unknown)")
+                                .line(s != null ? s.getLine() : route)
+                                .build();
                     })
-
                     .collect(Collectors.toList());
 
             steps.add(SubwayPathDTO.SubwayStepDto.builder()
@@ -76,21 +86,22 @@ public class SubwayPathConverter {
                 .build());
     }
 
-    // ✅ 혼잡도 포함 여부를 flag로 제어
     private static SubwayPathDTO.StationInfo stationToDto(
             String id, String name, String line, Station station,
             boolean includeCongestion,
+            String direction,
             LocalDateTime queryTime, CongestionQueryService congestionQueryService
     ) {
         PredictionResponseDTO congestion = null;
         if (includeCongestion && station != null) {
-            congestion = congestionQueryService.getCongestion(station.getId(), queryTime); // ✅ 혼잡도 진짜 조회
+            congestion = congestionQueryService.getCongestion(station.getId(), queryTime);
         }
 
         return SubwayPathDTO.StationInfo.builder()
-                .stationId(id)
+                .stationId(station != null ? String.valueOf(station.getId()) : null)
                 .stationName(station != null ? station.getName() : name)
                 .line(station != null ? station.getLine() : line)
+                .direction(direction)
                 .congestion(congestion)
                 .build();
     }
@@ -112,4 +123,3 @@ public class SubwayPathConverter {
         return codes;
     }
 }
-

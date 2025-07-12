@@ -40,6 +40,9 @@ public class SubwayPathDTO {
         private String line;          // 호선 이름 (예: 2호선)
 
         @JsonInclude(JsonInclude.Include.NON_NULL)
+        private String direction;
+
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         private PredictionResponseDTO congestion; // 출발/도착/환승역만 포함
 
     }
