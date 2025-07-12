@@ -23,11 +23,4 @@ public class User extends BaseEntity {
 
     @Column(nullable = false, length = 255)
     private String email;
-
-    @Column(length = 500)
-    private String refreshToken;
-
-    public void updateRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
 }

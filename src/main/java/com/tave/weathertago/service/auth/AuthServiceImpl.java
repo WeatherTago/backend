@@ -1,6 +1,7 @@
 package com.tave.weathertago.service.auth;
 
 import com.tave.weathertago.apiPayload.code.status.ErrorStatus;
+import com.tave.weathertago.apiPayload.exception.handler.AuthHandler;
 import com.tave.weathertago.apiPayload.exception.handler.UserHandler;
 import com.tave.weathertago.config.security.jwt.JwtTokenProvider;
 import com.tave.weathertago.converter.AuthConverter;
@@ -10,9 +11,12 @@ import com.tave.weathertago.dto.Auth.AuthResponseDTO;
 import com.tave.weathertago.dto.Auth.KakaoUserInfo;
 import com.tave.weathertago.infrastructure.KakaoApiClient;
 import com.tave.weathertago.repository.UserRepository;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +25,7 @@ public class AuthServiceImpl implements AuthService {
     private final KakaoApiClient kakaoApiClient;
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
     @Transactional
@@ -36,7 +41,7 @@ public class AuthServiceImpl implements AuthService {
         // 3. JWT 발급
         String accessJwt = jwtTokenProvider.generateAccessToken(user.getKakaoId());
         String refreshJwt = jwtTokenProvider.generateRefreshToken(user.getKakaoId());
-        user.updateRefreshToken(refreshJwt);
+        saveRefreshToken(user.getId(), refreshJwt);
 
         // 4. 응답 생성
         return AuthConverter.toLoginResultDTO(user.getId(), accessJwt, refreshJwt, isNewUser);
@@ -53,16 +58,26 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByKakaoId(kakaoId)
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
 
-        if (!user.getRefreshToken().equals(request.getRefreshToken())) {
-            throw new UserHandler(ErrorStatus.INVALID_TOKEN);
+        String key = "refresh:" + user.getId();
+        Object cached = redisTemplate.opsForValue().get(key);
+
+        if (!(cached instanceof String storedToken) || !storedToken.equals(request.getRefreshToken())) {
+            throw new AuthHandler(ErrorStatus.INVALID_TOKEN);
         }
 
         String newAccessToken = jwtTokenProvider.generateAccessToken(user.getKakaoId());
         String newRefreshToken = jwtTokenProvider.generateRefreshToken(kakaoId);
 
-        user.updateRefreshToken(newRefreshToken);
+        saveRefreshToken(user.getId(), newRefreshToken);
 
         return AuthConverter.toReissueResultDTO(newAccessToken, newRefreshToken);
+    }
+
+    private void saveRefreshToken(Long userId, String refreshToken) {
+        String key = "refresh:" + userId;
+        long ttl = jwtTokenProvider.getRefreshTokenExpiration();
+
+        redisTemplate.opsForValue().set(key, refreshToken, ttl, TimeUnit.MILLISECONDS);
     }
 
     private User findOrCreateUser(KakaoUserInfo kakaoUserInfo) {

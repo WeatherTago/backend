@@ -106,4 +106,9 @@ public class JwtTokenProvider {
         User principal = new User(kakaoId, "", Collections.emptyList());
         return new UsernamePasswordAuthenticationToken(principal, token, principal.getAuthorities());
     }
+
+    // refresh token 만료 시간 반환
+    public long getRefreshTokenExpiration() {
+        return jwtProperties.getExpiration().getRefresh();
+    }
 }
