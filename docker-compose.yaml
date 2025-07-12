@@ -8,6 +8,8 @@ networks:
 services:
   weathertago-app:
     image: ysjjw2003/weathertago:${TAG}
+    environment:
+      - TZ=Asia/Seoul
     container_name: weathertago-app
     ports: # 외부까지 연결 / expose : 컨테이너끼리만 연결
       - "8080:8080"
