@@ -33,8 +33,11 @@ public class SubwayPathConverter {
             String route = path.getRouteNm();
             String fid = path.getFid();  // 예: "10010"
             String tid = path.getTid();  // 예: "10000"
-            String startCode = fid.substring(0, fid.length() - 1);  // "1001"
-            String endCode = tid.substring(0, tid.length() - 1);    // "1000"
+
+            //복원
+            String startCode = String.valueOf(Integer.parseInt(fid) / 10);  // "03010" → 301
+            String endCode = String.valueOf(Integer.parseInt(tid) / 10);    // "10000" → 1000
+
             String direction;
             if (route.equals("2호선")) {
                 direction = Integer.parseInt(fid) < Integer.parseInt(tid) ? "외선" : "내선";
