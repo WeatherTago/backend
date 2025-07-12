@@ -78,8 +78,8 @@ public class CongestionQueryServiceImpl implements CongestionQueryService {
 
     private int convertDirectionToInt(String directionKor) {
         return switch (directionKor) {
-            case "상선" -> 0;
-            case "하선" -> 1;
+            case "상행" -> 0;
+            case "하행" -> 1;
             case "내선" -> 2;
             case "외선" -> 3;
             default -> throw new CongestionHandler(ErrorStatus.INVALID_DIRECTION);
