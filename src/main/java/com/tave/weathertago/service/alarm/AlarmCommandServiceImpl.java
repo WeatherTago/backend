@@ -42,6 +42,19 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
             User user = userRepository.findByKakaoId(kakaoId)
                     .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
 
+            // 역 이름 검증
+            if (!stationRepository.existsByName(dto.getStationName())) {
+                throw new AlarmHandler(ErrorStatus.STATION_NAME_NOT_FOUND);
+            }
+            // 호선 검증
+            if (!stationRepository.existsByNameAndLine(dto.getStationName(), dto.getStationLine())) {
+                throw new AlarmHandler(ErrorStatus.STATION_LINE_NOT_FOUND);
+            }
+            // 방향 검증
+            if (!stationRepository.existsByNameAndLineAndDirection(dto.getStationName(), dto.getStationLine(), dto.getDirection())) {
+                throw new AlarmHandler(ErrorStatus.INVALID_DIRECTION);
+            }
+
             Station station = stationRepository.findByNameAndLineAndDirection(
                     dto.getStationName(),
                     dto.getStationLine(),
@@ -88,6 +101,17 @@ public class AlarmCommandServiceImpl implements AlarmCommandService {
             }
             // updateAlarm
             if (dto.getStationName() != null && dto.getStationLine() != null && dto.getDirection() != null) {
+                if (!stationRepository.existsByName(dto.getStationName())) {
+                    throw new AlarmHandler(ErrorStatus.STATION_NAME_NOT_FOUND);
+                }
+                if (!stationRepository.existsByNameAndLine(dto.getStationName(), dto.getStationLine())) {
+                    throw new AlarmHandler(ErrorStatus.STATION_LINE_NOT_FOUND);
+                }
+                if (!stationRepository.existsByNameAndLineAndDirection(dto.getStationName(), dto.getStationLine(), dto.getDirection())) {
+                    throw new AlarmHandler(ErrorStatus.INVALID_DIRECTION);
+                }
+
+
                 Station station = stationRepository.findByNameAndLineAndDirection(
                         dto.getStationName(),
                         dto.getStationLine(),
