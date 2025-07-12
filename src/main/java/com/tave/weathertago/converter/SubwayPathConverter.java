@@ -35,7 +35,12 @@ public class SubwayPathConverter {
             String tid = path.getTid();  // 예: "10000"
             String startCode = fid.substring(0, fid.length() - 1);  // "1001"
             String endCode = tid.substring(0, tid.length() - 1);    // "1000"
-            String direction = Integer.parseInt(fid) < Integer.parseInt(tid) ? "상행" : "하행";
+            String direction;
+            if (route.equals("2호선")) {
+                direction = Integer.parseInt(fid) < Integer.parseInt(tid) ? "외선" : "내선";
+            } else {
+                direction = Integer.parseInt(fid) < Integer.parseInt(tid) ? "상행" : "하행";
+            }
 
             // ✅ 중간역 코드 먼저 생성
             List<String> stationCodesInPath = getIntermediateCodes(startCode, endCode);
