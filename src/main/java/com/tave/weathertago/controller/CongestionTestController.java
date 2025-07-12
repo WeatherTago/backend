@@ -47,11 +47,13 @@ public class CongestionTestController {
     @GetMapping("/range")
     public ApiResponse<List<PredictionResponseDTO>> getCongestionRange(
             @RequestParam Long stationId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime baseDateTime
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime baseDateTime,
+            @RequestParam int startHour,
+            @RequestParam int endHour
     ) {
         List<PredictionResponseDTO> results = new ArrayList<>();
 
-        for (int hour = 1; hour <= 9; hour++) {
+        for (int hour = startHour; hour <= endHour; hour++) {
             LocalDateTime datetime = baseDateTime.withHour(hour).withMinute(0).withSecond(0).withNano(0);
             PredictionResponseDTO result = congestionQueryService.getCongestion(stationId, datetime);
             results.add(result);
