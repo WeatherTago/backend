@@ -24,6 +24,8 @@ public class WeatherApiResponseDTO {
     public static class Body {
         private String dataType;
         private Items items;
+        private int pageNo;
+        private int numOfRows;
         private int totalCount;
     }
 
@@ -34,9 +36,13 @@ public class WeatherApiResponseDTO {
 
     @Getter
     public static class Item {
+        private String baseDate;
+        private String baseTime;
         private String category;
         private String fcstDate;
         private String fcstTime;
         private String fcstValue;
+        private int nx;
+        private int ny;
     }
 }
