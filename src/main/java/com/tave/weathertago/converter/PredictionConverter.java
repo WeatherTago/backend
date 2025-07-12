@@ -16,7 +16,7 @@ public class PredictionConverter {
 
     public static PredictionRequestDTO toPredictionRequest(Station station, int direction, LocalDateTime datetime, WeatherResponseDTO weather) {
         return PredictionRequestDTO.builder()
-                .line(station.getLine())
+                .line(station.getLine().replace("호선", ""))
                 .station_name(station.getName())
                 .datetime(datetime.format(DATETIME_FMT))
                 .direction(direction)

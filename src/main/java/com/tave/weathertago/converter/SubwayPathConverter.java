@@ -1,11 +1,13 @@
 package com.tave.weathertago.converter;
 
 import com.tave.weathertago.domain.Station;
-import com.tave.weathertago.dto.CongestionDTO;
+import com.tave.weathertago.dto.prediction.PredictionResponseDTO;
 import com.tave.weathertago.dto.station.SubwayPathDTO;
 import com.tave.weathertago.dto.station.SubwayPathResponseDTO;
 import com.tave.weathertago.repository.StationRepository;
+import com.tave.weathertago.service.congestion.CongestionQueryService;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +18,9 @@ public class SubwayPathConverter {
 
     public static Optional<SubwayPathDTO> from(
             SubwayPathResponseDTO response,
-            StationRepository stationRepository
+            StationRepository stationRepository,
+            CongestionQueryService congestionQueryService,
+            LocalDateTime queryTime
     ) {
         if (response == null || response.getMsgBody() == null || response.getMsgBody().getItemList().isEmpty()) {
             return Optional.empty();
@@ -36,8 +40,8 @@ public class SubwayPathConverter {
             Station endStation = stationRepository.findByStationCode(endCode).orElse(null);
 
             // ✅ 출발/도착역은 혼잡도 포함
-            SubwayPathDTO.StationInfo startInfo = stationToDto(fid, path.getFname(), route, startStation, true);
-            SubwayPathDTO.StationInfo endInfo = stationToDto(tid, path.getTname(), route, endStation, true);
+            SubwayPathDTO.StationInfo startInfo = stationToDto(fid, path.getFname(), route, startStation, true, queryTime, congestionQueryService);
+            SubwayPathDTO.StationInfo endInfo = stationToDto(tid, path.getTname(), route, endStation, true, queryTime, congestionQueryService);
 
             // 중간역 ID 목록 추출 (역순 포함)
             List<String> stationCodesInPath = getIntermediateCodes(startCode, endCode);
@@ -52,8 +56,9 @@ public class SubwayPathConverter {
                     .map(code -> {
                         Station s = stationMap.get(code);
                         String id = code + "0";
-                        return stationToDto(id, s != null ? s.getName() : "(Unknown)", route, s, false);
+                        return stationToDto(id, s != null ? s.getName() : "(Unknown)", route, s, false, queryTime, congestionQueryService);
                     })
+
                     .collect(Collectors.toList());
 
             steps.add(SubwayPathDTO.SubwayStepDto.builder()
@@ -73,12 +78,13 @@ public class SubwayPathConverter {
 
     // ✅ 혼잡도 포함 여부를 flag로 제어
     private static SubwayPathDTO.StationInfo stationToDto(
-            String id, String name, String line, Station station, boolean includeCongestion) {
-
-        CongestionDTO congestion = null;
+            String id, String name, String line, Station station,
+            boolean includeCongestion,
+            LocalDateTime queryTime, CongestionQueryService congestionQueryService
+    ) {
+        PredictionResponseDTO congestion = null;
         if (includeCongestion && station != null) {
-            congestion = CongestionDTO.builder()
-                    .build();
+            congestion = congestionQueryService.getCongestion(station.getId(), queryTime); // ✅ 혼잡도 진짜 조회
         }
 
         return SubwayPathDTO.StationInfo.builder()
@@ -106,3 +112,4 @@ public class SubwayPathConverter {
         return codes;
     }
 }
+
