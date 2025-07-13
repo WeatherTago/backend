@@ -85,7 +85,7 @@ public class StationRestController {
             @RequestParam("stationId") Long stationId,
 
             @Parameter(description = "기준 시각 (yyyy-MM-ddTHH:mm:ss)")
-            @RequestParam("baseDatetime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime baseDatetime
+            @RequestParam("time") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime baseDatetime
     ) {
         return ApiResponse.onSuccess(
                 stationQueryService.getStatus(stationId, baseDatetime)
