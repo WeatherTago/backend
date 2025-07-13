@@ -5,6 +5,8 @@ import com.tave.weathertago.apiPayload.ApiResponse;
 import com.tave.weathertago.dto.station.StationResponseDTO;
 import com.tave.weathertago.infrastructure.csv.StationCsvImporter;
 import com.tave.weathertago.service.station.StationQueryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -74,6 +76,20 @@ public class StationRestController {
     public ApiResponse<List<StationResponseDTO.StationInfoDTO>> getAllStationsInfo() {
         List<StationResponseDTO.StationInfoDTO> result = stationQueryService.getAllStationsInfo();
         return ApiResponse.onSuccess(result);
+    }
+
+    @Operation(summary = "지하철 역 시간대별 상태 조회", description = "지정된 기준 시각부터 3일 뒤 00시까지의 날씨와 혼잡도 정보를 시간대별로 조회합니다.")
+    @GetMapping("/status")
+    public ApiResponse<StationResponseDTO.StationStatusResponseDTO> getStatus(
+            @Parameter(description = "조회할 역의 ID")
+            @RequestParam("stationId") Long stationId,
+
+            @Parameter(description = "기준 시각 (yyyy-MM-ddTHH:mm:ss)")
+            @RequestParam("baseDatetime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime baseDatetime
+    ) {
+        return ApiResponse.onSuccess(
+                stationQueryService.getStatus(stationId, baseDatetime)
+        );
     }
 
 }

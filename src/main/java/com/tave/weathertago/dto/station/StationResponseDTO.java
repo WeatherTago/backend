@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 public class StationResponseDTO {
@@ -54,5 +55,26 @@ public class StationResponseDTO {
         private String stationLine;
         private String phoneNumber;
         private String address;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    @Builder
+    public static class StationStatusResponseDTO {
+        private List<TimedWeatherDTO> weathers;
+        private List<TimedCongestionDTO> congestions;
+
+        @Getter
+        @Builder
+        public static class TimedWeatherDTO {
+            private String datetime;
+            private WeatherResponseDTO weather;
+        }
+
+        @Getter @Builder
+        public static class TimedCongestionDTO {
+            private String datetime;
+            private PredictionResponseDTO prediction;
+        }
     }
 }

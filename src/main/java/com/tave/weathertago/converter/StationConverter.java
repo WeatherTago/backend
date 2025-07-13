@@ -6,6 +6,7 @@ import com.tave.weathertago.dto.station.StationResponseDTO;
 import com.tave.weathertago.dto.weather.WeatherResponseDTO;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 public class StationConverter {
@@ -46,6 +47,16 @@ public class StationConverter {
                 .stationLine(station.getLine())
                 .phoneNumber(station.getPhoneNumber())
                 .address(station.getAddress())
+                .build();
+    }
+
+    public static StationResponseDTO.StationStatusResponseDTO toStatusResponse(
+            List<StationResponseDTO.StationStatusResponseDTO.TimedWeatherDTO> weathers,
+            List<StationResponseDTO.StationStatusResponseDTO.TimedCongestionDTO> congestions
+    ) {
+        return StationResponseDTO.StationStatusResponseDTO.builder()
+                .weathers(weathers)
+                .congestions(congestions)
                 .build();
     }
 
