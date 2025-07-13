@@ -19,7 +19,7 @@ public class WeatherConverter {
 
     private static String resolveStatus(int pty, int sky) {
         return switch (pty) {
-            case 1 -> "비";
+            case 1, 4 -> "비";
             case 2 -> "눈비";
             case 3 -> "눈";
             default -> resolveSkyStatus(sky);
