@@ -31,24 +31,29 @@ public class StationRestController {
     public ApiResponse<String> initializeStations() {
         try (
                 InputStream inputStream = getClass().getClassLoader().getResourceAsStream("station.xlsx.csv");
-                InputStream locationStream = getClass().getClassLoader().getResourceAsStream("station_location.csv")
+                InputStream locationStream = getClass().getClassLoader().getResourceAsStream("station_location.csv");
+                InputStream contactStream = getClass().getClassLoader().getResourceAsStream("stationInfo.csv")
         ) {
             if (inputStream == null) {
                 throw new RuntimeException("station.xlsx.csv 파일을 classpath에서 찾을 수 없습니다.");
             }
-
             if (locationStream == null) {
                 throw new RuntimeException("station_location.csv 파일을 classpath에서 찾을 수 없습니다.");
             }
+            if (contactStream == null) {
+                throw new RuntimeException("stationInfo.csv 파일을 classpath에서 찾을 수 없습니다.");
+            }
 
             stationCsvImporter.importFromCsv(inputStream);              // 역 목록 저장
-            stationCsvImporter.importFromLocationCsv(locationStream);   // ⬅ 좌표 정보 저장
+            stationCsvImporter.importFromLocationCsv(locationStream);   // 좌표 정보 저장
+            stationCsvImporter.importFromContactCsv(contactStream);     // 전화번호 + 주소 정보 저장
 
-            return ApiResponse.onSuccess("역 정보 + 좌표 초기화 완료");
+            return ApiResponse.onSuccess("역 정보 + 좌표 + 연락처 초기화 완료");
         } catch (IOException e) {
             throw new RuntimeException("CSV 파일을 읽는 중 오류가 발생했습니다.", e);
         }
     }
+
 
     @GetMapping("/search")
     public ApiResponse<StationResponseDTO.JoinResultDTO> getStationById(
@@ -62,6 +67,12 @@ public class StationRestController {
     @GetMapping("/info")
     public ApiResponse<List<StationResponseDTO.SimpleStationDTO>> getAllSimpleStations() {
         List<StationResponseDTO.SimpleStationDTO> result = stationQueryService.getAllSimpleStations();
+        return ApiResponse.onSuccess(result);
+    }
+
+    @GetMapping("/detailInfo")
+    public ApiResponse<List<StationResponseDTO.StationInfoDTO>> getAllStationsInfo() {
+        List<StationResponseDTO.StationInfoDTO> result = stationQueryService.getAllStationsInfo();
         return ApiResponse.onSuccess(result);
     }
 

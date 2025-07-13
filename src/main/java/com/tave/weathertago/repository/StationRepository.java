@@ -16,9 +16,12 @@ public interface StationRepository extends JpaRepository<Station,Long> {
 
     boolean existsByNameAndLine(String name, String line);
 
-    Optional<Station> findByStationCode(String stationCode);
+    Optional<Station> findByStationCodeAndLineAndDirection(String stationCode, String line, String direction);
 
     List<Station> findByLineAndStationCodeIn(String line, List<String> stationCodes);
+
+    List<Station> findByStationCodeInAndLineAndDirection(List<String> stationCodes, String line, String direction);
+
 
     List<Station> findAllByNameAndLine(String name, String line);
 

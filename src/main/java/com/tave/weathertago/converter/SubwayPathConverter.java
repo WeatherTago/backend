@@ -31,34 +31,48 @@ public class SubwayPathConverter {
 
         for (SubwayPathResponseDTO.Path path : bestItem.getPathList()) {
             String route = path.getRouteNm();
-            String fid = path.getFid();
-            String tid = path.getTid();
-            String startCode = fid.substring(0, fid.length() - 1);
-            String endCode = tid.substring(0, tid.length() - 1);
+            String fid = path.getFid();  // 예: "10010"
+            String tid = path.getTid();  // 예: "03010"
 
-            Station startStation = stationRepository.findByStationCode(startCode).orElse(null);
-            Station endStation = stationRepository.findByStationCode(endCode).orElse(null);
+            // ✅ API 코드 → DB 코드로 복원
+            String startCode = restoreStationCodeFromApiCode(fid);  // "03010" → "301"
+            String endCode = restoreStationCodeFromApiCode(tid);    // "10010" → "1001"
 
-            // ✅ 출발/도착역은 혼잡도 포함
-            SubwayPathDTO.StationInfo startInfo = stationToDto(fid, path.getFname(), route, startStation, true, queryTime, congestionQueryService);
-            SubwayPathDTO.StationInfo endInfo = stationToDto(tid, path.getTname(), route, endStation, true, queryTime, congestionQueryService);
+            String direction;
+            if (route.equals("2호선")) {
+                direction = Integer.parseInt(fid) < Integer.parseInt(tid) ? "외선" : "내선";
+            } else {
+                direction = Integer.parseInt(fid) < Integer.parseInt(tid) ? "상행" : "하행";
+            }
 
-            // 중간역 ID 목록 추출 (역순 포함)
             List<String> stationCodesInPath = getIntermediateCodes(startCode, endCode);
-            List<Station> stationsInPath = stationRepository.findByLineAndStationCodeIn(route, stationCodesInPath);
 
-            // 매핑해서 순서 보장
+            Station startStation = stationRepository.findByStationCodeAndLineAndDirection(startCode, route, direction)
+                    .orElse(null);
+            Station endStation = stationRepository.findByStationCodeAndLineAndDirection(endCode, route, direction)
+                    .orElse(null);
+
+            List<Station> stationsInPath = stationRepository.findByStationCodeInAndLineAndDirection(
+                    stationCodesInPath, route, direction
+            );
+
+            SubwayPathDTO.StationInfo startInfo = stationToDto(
+                    path.getFname(), route, startStation, true, direction, queryTime, congestionQueryService);
+            SubwayPathDTO.StationInfo endInfo = stationToDto(
+                    path.getTname(), route, endStation, true, direction, queryTime, congestionQueryService);
+
             Map<String, Station> stationMap = stationsInPath.stream()
-                    .collect(Collectors.toMap(Station::getStationCode, s -> s));
+                    .collect(Collectors.toMap(Station::getStationCode, s -> s, (a, b) -> a));
 
-            // ✅ 중간역은 혼잡도 없이 변환
             List<SubwayPathDTO.StationInfo> allStations = stationCodesInPath.stream()
                     .map(code -> {
                         Station s = stationMap.get(code);
-                        String id = code + "0";
-                        return stationToDto(id, s != null ? s.getName() : "(Unknown)", route, s, false, queryTime, congestionQueryService);
+                        return SubwayPathDTO.StationInfo.builder()
+                                .stationId(s != null ? String.valueOf(s.getId()) : null)
+                                .stationName(s != null ? s.getName() : "(Unknown)")
+                                .line(route)
+                                .build();
                     })
-
                     .collect(Collectors.toList());
 
             steps.add(SubwayPathDTO.SubwayStepDto.builder()
@@ -76,25 +90,38 @@ public class SubwayPathConverter {
                 .build());
     }
 
-    // ✅ 혼잡도 포함 여부를 flag로 제어
     private static SubwayPathDTO.StationInfo stationToDto(
-            String id, String name, String line, Station station,
+            String name, String line, Station station,
             boolean includeCongestion,
+            String direction,
             LocalDateTime queryTime, CongestionQueryService congestionQueryService
     ) {
         PredictionResponseDTO congestion = null;
         if (includeCongestion && station != null) {
-            congestion = congestionQueryService.getCongestion(station.getId(), queryTime); // ✅ 혼잡도 진짜 조회
+            congestion = congestionQueryService.getCongestion(station.getId(), queryTime);
         }
 
         return SubwayPathDTO.StationInfo.builder()
-                .stationId(id)
+                .stationId(station != null ? String.valueOf(station.getId()) : null)
                 .stationName(station != null ? station.getName() : name)
                 .line(station != null ? station.getLine() : line)
+                .direction(direction)
                 .congestion(congestion)
                 .build();
     }
 
+    // ✅ API → DB 코드 복원
+    private static String restoreStationCodeFromApiCode(String apiCode) {
+        if (apiCode.length() != 5) return apiCode;
+        String trimmed = apiCode.substring(0, 4); // 마지막 자리 제거
+        if (trimmed.startsWith("0")) {
+            return String.valueOf(Integer.parseInt(trimmed)); // 앞 0 제거 → 0301 → 301
+        } else {
+            return trimmed; // 1001
+        }
+    }
+
+    // ✅ DB 코드 목록 생성
     private static List<String> getIntermediateCodes(String startCode, String endCode) {
         int start = Integer.parseInt(startCode);
         int end = Integer.parseInt(endCode);
@@ -102,11 +129,11 @@ public class SubwayPathConverter {
         List<String> codes = new ArrayList<>();
         if (start <= end) {
             for (int i = start; i <= end; i++) {
-                codes.add(String.format("%04d", i));
+                codes.add(String.valueOf(i)); // 3자리 or 4자리 그대로 사용
             }
         } else {
             for (int i = start; i >= end; i--) {
-                codes.add(String.format("%04d", i));
+                codes.add(String.valueOf(i));
             }
         }
         return codes;

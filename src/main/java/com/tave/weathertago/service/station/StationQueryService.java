@@ -11,6 +11,8 @@ public interface StationQueryService {
 
     List<StationResponseDTO.SimpleStationDTO> getAllSimpleStations();
 
+    List<StationResponseDTO.StationInfoDTO> getAllStationsInfo();
+
 
 }
 

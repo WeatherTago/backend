@@ -98,6 +98,7 @@ public class WeatherApiClient {
                 .queryParam("ny", station.getNy())
                 .build(true)
                 .toUri();
+
     }
 
     private String sendApiRequest(URI uri) {
@@ -112,6 +113,7 @@ public class WeatherApiClient {
                 throw new WeatherHandler(ErrorStatus.WEATHER_API_RESPONSE_EMPTY);
             }
 
+            log.info("🌐 기상청 API 요청 URI: {}", uri);
             log.info("📄 Raw Response (일부): {}", body.substring(0, Math.min(200, body.length())));
             return body;
 
@@ -156,7 +158,7 @@ public class WeatherApiClient {
             LocalDateTime fcstTime = LocalDateTime.parse(entry.getKey(), DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
 
             if (fcstTime.getHour() >= 1 && fcstTime.getHour() <= 4) continue;
-            if (fcstTime.toLocalDate().isAfter(now.toLocalDate().plusDays(2))) continue;
+            if (fcstTime.isAfter(now.toLocalDate().plusDays(3).atTime(0, 0))) continue;
 
             Map<String, String> cat = entry.getValue();
             WeatherResponseDTO dto = WeatherResponseDTO.builder()
