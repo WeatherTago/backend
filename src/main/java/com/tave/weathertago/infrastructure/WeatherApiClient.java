@@ -197,17 +197,46 @@ public class WeatherApiClient {
     }
 
     private double parse(String category, String val) {
-        if (val == null) return 0.0;
+        if (val == null || val.equals("0") || val.equals("강수없음") || val.equals("적설없음")) {
+            return 0.0;
+        }
+
         try {
-            return switch (category) {
-                case "PCP" -> val.contains("mm") ? Double.parseDouble(val.replace("mm", "")) : 0.0;
-                case "SNO" -> val.contains("cm") ? Double.parseDouble(val.replace("cm", "")) : 0.0;
-                default -> Double.parseDouble(val);
-            };
+            switch (category) {
+                case "PCP":
+                    if (val.contains("mm 미만")) return 1.0;
+                    if (val.contains("mm 이상")) return 50.0;
+                    if (val.contains("~")) {
+                        String[] parts = val.replace("mm", "").split("~");
+                        return Double.parseDouble(parts[1]);
+                    }
+                    return Double.parseDouble(val.replace("mm", ""));
+
+                case "SNO":
+                    if (val.contains("0.5cm 미만")) return 0.5;
+                    if (val.contains("cm 이상")) return 5.0;
+                    if (val.contains("~")) {
+                        String[] parts = val.replace("cm", "").split("~");
+                        return Double.parseDouble(parts[1]);
+                    }
+                    return Double.parseDouble(val.replace("cm", ""));
+
+                default:
+                    return Double.parseDouble(val);
+            }
         } catch (NumberFormatException e) {
             return 0.0;
         }
     }
+
+//    private int parseInt(String val) {
+//        if (val == null) return 0;
+//        try {
+//            return Integer.parseInt(val);
+//        } catch (NumberFormatException e) {
+//            return 0;
+//        }
+//    }
 
     private String makeRedisKey(Integer nx, Integer ny, LocalDateTime time) {
         return "weather:" + nx + ":" + ny + ":" + time.format(DATETIME_KEY_FMT);
