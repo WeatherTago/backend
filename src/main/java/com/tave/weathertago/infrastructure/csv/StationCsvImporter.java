@@ -120,5 +120,49 @@ public class StationCsvImporter {
             return null;
         }
     }
+
+    /**
+     * 전화번호/주소 CSV(호선,역명,전화번호,도로명주소) → 기존 역 정보 보완 (name + line 기준으로 모든 direction 적용)
+     */
+    @Transactional
+    public void importFromContactCsv(InputStream contactStream) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(contactStream, StandardCharsets.UTF_8))) {
+            String line;
+            boolean isFirst = true;
+
+            while ((line = reader.readLine()) != null) {
+                if (isFirst) {
+                    isFirst = false;
+                    continue;
+                }
+
+                String[] fields = line.split("\\s*,\\s*");
+                if (fields.length < 4) continue;
+
+                String rawLine = fields[0].trim();           // "1"
+                String name = fields[1].trim();              // "서울역"
+                String phone = fields[2].trim();             // "02-123-4567"
+                String address = fields[3].trim();           // "서울특별시 중구 세종대로 100"
+
+                String lineName = rawLine + "호선";
+
+                List<Station> matchingStations = stationRepository.findAllByNameAndLine(name, lineName);
+                if (!matchingStations.isEmpty()) {
+                    for (Station station : matchingStations) {
+                        station.updateContact(phone, address); // 새 메서드로 연락처/주소 설정
+                        stationRepository.save(station);
+                        System.out.printf("정보 업데이트: %s (%s, %s) → %s / %s%n",
+                                station.getName(), station.getLine(), station.getDirection(), phone, address);
+                    }
+                } else {
+                    System.out.printf("일치하는 역 없음: %s (%s)%n", name, lineName);
+                }
+            }
+
+        } catch (IOException e) {
+            throw new StationHandler(ErrorStatus.FILE_READ_ERROR);
+        }
+    }
+
 }
 

@@ -31,7 +31,6 @@ public class StationConverter {
                 .build();
     }
 
-
     public static StationResponseDTO.SimpleStationDTO toSimpleDTO(Station station) {
         return StationResponseDTO.SimpleStationDTO.builder()
                 .stationId(station.getId())
@@ -39,4 +38,15 @@ public class StationConverter {
                 .stationLine(station.getLine())
                 .build();
     }
+
+    public static StationResponseDTO.StationInfoDTO toStationInfoDTO(Station station) {
+        return StationResponseDTO.StationInfoDTO.builder()
+                .stationId(station.getId())
+                .stationName(station.getName())
+                .stationLine(station.getLine())
+                .phoneNumber(station.getPhoneNumber())
+                .address(station.getAddress())
+                .build();
+    }
+
 }

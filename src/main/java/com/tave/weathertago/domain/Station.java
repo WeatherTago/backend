@@ -37,9 +37,18 @@ public class Station extends BaseEntity {
 
     private Integer ny;
 
+    private String phoneNumber;
+
+    private String Address;
+
     // 위치 좌표를 한 번에 갱신하는 메서드
     public void updateLocation(Double latitude, Double longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
+    }
+
+    public void updateContact(String phone, String roadAddress) {
+        this.phoneNumber = phone;
+        this.Address = roadAddress;
     }
 }
