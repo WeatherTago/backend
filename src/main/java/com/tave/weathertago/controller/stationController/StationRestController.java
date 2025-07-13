@@ -7,6 +7,7 @@ import com.tave.weathertago.infrastructure.csv.StationCsvImporter;
 import com.tave.weathertago.service.station.StationQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Tag(name = "Station", description = "지하철역 정보 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/station")
