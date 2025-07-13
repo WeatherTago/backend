@@ -5,6 +5,7 @@ import com.tave.weathertago.apiPayload.ApiResponse;
 import com.tave.weathertago.dto.prediction.PredictionResponseDTO;
 import com.tave.weathertago.dto.prediction.PredictionWithWeatherResponseDTO;
 import com.tave.weathertago.service.congestion.CongestionQueryService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Tag(name = "테스트용", description = "테스트용임 프론트 사용 X 추후 삭제 예정")
 @RestController
 @RequestMapping("/api/congestion")
 @RequiredArgsConstructor
