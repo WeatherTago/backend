@@ -7,8 +7,6 @@ import com.tave.weathertago.apiPayload.code.status.ErrorStatus;
 import com.tave.weathertago.apiPayload.exception.handler.AlarmHandler;
 import com.tave.weathertago.converter.AlarmConverter;
 import com.tave.weathertago.domain.Alarm;
-import com.tave.weathertago.domain.AlarmDay;
-import com.tave.weathertago.domain.AlarmPeriod;
 import com.tave.weathertago.dto.alarm.AlarmFcmMessageDto;
 import com.tave.weathertago.dto.prediction.PredictionResponseDTO;
 import com.tave.weathertago.dto.prediction.PredictionWithWeatherResponseDTO;
@@ -17,19 +15,14 @@ import com.tave.weathertago.repository.AlarmRepository;
 import com.tave.weathertago.repository.UserRepository;
 import com.tave.weathertago.service.congestion.CongestionQueryService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Set;
 
 @Service
