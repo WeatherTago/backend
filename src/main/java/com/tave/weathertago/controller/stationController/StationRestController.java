@@ -32,7 +32,7 @@ public class StationRestController {
         try (
                 InputStream inputStream = getClass().getClassLoader().getResourceAsStream("station.xlsx.csv");
                 InputStream locationStream = getClass().getClassLoader().getResourceAsStream("station_location.csv");
-                InputStream contactStream = getClass().getClassLoader().getResourceAsStream("station_contact.csv")
+                InputStream contactStream = getClass().getClassLoader().getResourceAsStream("stationInfo.csv")
         ) {
             if (inputStream == null) {
                 throw new RuntimeException("station.xlsx.csv 파일을 classpath에서 찾을 수 없습니다.");
@@ -41,7 +41,7 @@ public class StationRestController {
                 throw new RuntimeException("station_location.csv 파일을 classpath에서 찾을 수 없습니다.");
             }
             if (contactStream == null) {
-                throw new RuntimeException("station_contact.csv 파일을 classpath에서 찾을 수 없습니다.");
+                throw new RuntimeException("stationInfo.csv 파일을 classpath에서 찾을 수 없습니다.");
             }
 
             stationCsvImporter.importFromCsv(inputStream);              // 역 목록 저장
