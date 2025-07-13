@@ -1,16 +1,7 @@
 package com.tave.weathertago.infrastructure;
 
 import com.tave.weathertago.dto.weather.WeatherResponseDTO;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.RedisTemplate;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

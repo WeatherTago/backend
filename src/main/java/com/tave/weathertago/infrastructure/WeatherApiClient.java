@@ -5,7 +5,7 @@ import com.tave.weathertago.apiPayload.code.status.ErrorStatus;
 import com.tave.weathertago.apiPayload.exception.handler.WeatherHandler;
 import com.tave.weathertago.domain.Station;
 import com.tave.weathertago.dto.weather.WeatherApiResponseDTO;
-import com.tave.weathertago.dto.weather.WeatherResponseDTO;
+import com.tave.weathertago.dto.weather.WeatherInternalDTO;
 import com.tave.weathertago.repository.StationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +49,7 @@ public class WeatherApiClient {
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HHmm");
     private static final DateTimeFormatter DATETIME_KEY_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
-    public WeatherResponseDTO getAndCacheWeather(Long stationId, LocalDateTime datetime) {
+    public WeatherInternalDTO getAndCacheWeather(Long stationId, LocalDateTime datetime) {
         Station station = stationRepository.findById(stationId)
                 .orElseThrow(() -> new WeatherHandler(ErrorStatus.STATION_ID_NOT_FOUND));
 
@@ -58,12 +58,12 @@ public class WeatherApiClient {
 
         String responseBody = sendApiRequest(uri);
         WeatherApiResponseDTO apiResponse = parseWeatherResponse(responseBody);
-        Map<String, WeatherResponseDTO> cacheMap = processApiResponse(station, apiResponse);
+        Map<String, WeatherInternalDTO> cacheMap = processApiResponse(station, apiResponse);
 
         bulkSaveToRedis(cacheMap);
 
         String redisKey = makeRedisKey(station.getNx(), station.getNy(), datetime);
-        WeatherResponseDTO result = cacheMap.get(redisKey);
+        WeatherInternalDTO result = cacheMap.get(redisKey);
 
         // 정확히 일치하는 예보 시간이 없을 경우: 가장 가까운 예보 시간으로 fallback
         if (result == null && !cacheMap.isEmpty()) {
@@ -74,7 +74,7 @@ public class WeatherApiClient {
         return result;
     }
 
-    private WeatherResponseDTO getNearestForecast(Map<String, WeatherResponseDTO> cacheMap, Station station, LocalDateTime targetTime) {
+    private WeatherInternalDTO getNearestForecast(Map<String, WeatherInternalDTO> cacheMap, Station station, LocalDateTime targetTime) {
         return cacheMap.entrySet().stream()
                 .min(Comparator.comparing(entry -> {
                     String keyTime = entry.getKey().split(":")[3]; // yyyy-MM-dd'T'HH:mm:ss
@@ -130,7 +130,7 @@ public class WeatherApiClient {
         }
     }
 
-    private Map<String, WeatherResponseDTO> processApiResponse(Station station, WeatherApiResponseDTO apiResponse) {
+    private Map<String, WeatherInternalDTO> processApiResponse(Station station, WeatherApiResponseDTO apiResponse) {
         if (apiResponse == null ||
                 apiResponse.getResponse() == null ||
                 apiResponse.getResponse().getBody() == null ||
@@ -151,7 +151,7 @@ public class WeatherApiClient {
                     .put(item.getCategory(), item.getFcstValue());
         }
 
-        Map<String, WeatherResponseDTO> cacheMap = new HashMap<>();
+        Map<String, WeatherInternalDTO> cacheMap = new HashMap<>();
         LocalDateTime now = LocalDateTime.now();
 
         for (Map.Entry<String, Map<String, String>> entry : grouped.entrySet()) {
@@ -161,13 +161,15 @@ public class WeatherApiClient {
             if (fcstTime.isAfter(now.toLocalDate().plusDays(3).atTime(0, 0))) continue;
 
             Map<String, String> cat = entry.getValue();
-            WeatherResponseDTO dto = WeatherResponseDTO.builder()
+            WeatherInternalDTO dto = WeatherInternalDTO.builder()
                     .tmp(parse("TMP", cat.get("TMP")))
                     .reh(parse("REH", cat.get("REH")))
                     .pcp(parse("PCP", cat.get("PCP")))
                     .wsd(parse("WSD", cat.get("WSD")))
                     .sno(parse("SNO", cat.get("SNO")))
                     .vec(parse("VEC", cat.get("VEC")))
+                    .sky(parseInt(cat.get("SKY")))
+                    .pty(parseInt(cat.get("PTY")))
                     .build();
 
             String redisKey = makeRedisKey(station.getNx(), station.getNy(), fcstTime);
@@ -177,12 +179,12 @@ public class WeatherApiClient {
         return cacheMap;
     }
 
-    private void bulkSaveToRedis(Map<String, WeatherResponseDTO> dataMap) {
+    private void bulkSaveToRedis(Map<String, WeatherInternalDTO> dataMap) {
         RedisSerializer<String> keySerializer = redisTemplate.getStringSerializer();
         RedisSerializer<Object> valueSerializer = (RedisSerializer<Object>) redisTemplate.getValueSerializer();
 
         redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
-            for (Map.Entry<String, WeatherResponseDTO> entry : dataMap.entrySet()) {
+            for (Map.Entry<String, WeatherInternalDTO> entry : dataMap.entrySet()) {
                 byte[] key = keySerializer.serialize(entry.getKey());
                 byte[] value = valueSerializer.serialize(entry.getValue());
                 connection.stringCommands().set(
@@ -197,15 +199,44 @@ public class WeatherApiClient {
     }
 
     private double parse(String category, String val) {
-        if (val == null) return 0.0;
+        if (val == null || val.equals("0") || val.equals("강수없음") || val.equals("적설없음")) {
+            return 0.0;
+        }
+
         try {
-            return switch (category) {
-                case "PCP" -> val.contains("mm") ? Double.parseDouble(val.replace("mm", "")) : 0.0;
-                case "SNO" -> val.contains("cm") ? Double.parseDouble(val.replace("cm", "")) : 0.0;
-                default -> Double.parseDouble(val);
-            };
+            switch (category) {
+                case "PCP":
+                    if (val.contains("mm 미만")) return 1.0;
+                    if (val.contains("mm 이상")) return 50.0;
+                    if (val.contains("~")) {
+                        String[] parts = val.replace("mm", "").split("~");
+                        return Double.parseDouble(parts[1]);
+                    }
+                    return Double.parseDouble(val.replace("mm", ""));
+
+                case "SNO":
+                    if (val.contains("0.5cm 미만")) return 0.5;
+                    if (val.contains("cm 이상")) return 5.0;
+                    if (val.contains("~")) {
+                        String[] parts = val.replace("cm", "").split("~");
+                        return Double.parseDouble(parts[1]);
+                    }
+                    return Double.parseDouble(val.replace("cm", ""));
+
+                default:
+                    return Double.parseDouble(val);
+            }
         } catch (NumberFormatException e) {
             return 0.0;
+        }
+    }
+
+    private int parseInt(String val) {
+        if (val == null) return 0;
+        try {
+            return Integer.parseInt(val);
+        } catch (NumberFormatException e) {
+            return 0;
         }
     }
 
