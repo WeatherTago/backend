@@ -16,10 +16,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,6 +28,7 @@ public class StationQueryServiceImpl implements StationQueryService {
     private final WeatherQueryService weatherQueryService;
     private final CongestionQueryService congestionQueryService;
 
+    private static final DateTimeFormatter DATETIME_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     /*
     @Override
@@ -148,5 +147,35 @@ public class StationQueryServiceImpl implements StationQueryService {
     }
     */
 
+    @Override
+    public StationResponseDTO.StationStatusResponseDTO getStatus(Long stationId, LocalDateTime baseDatetime) {
+        Station station = stationRepository.findById(stationId)
+                .orElseThrow(() -> new StationHandler(ErrorStatus.STATION_ID_NOT_FOUND));
+
+        List<StationResponseDTO.StationStatusResponseDTO.TimedWeatherDTO> weathers = new ArrayList<>();
+        List<StationResponseDTO.StationStatusResponseDTO.TimedCongestionDTO> congestions = new ArrayList<>();
+
+        LocalDateTime now = baseDatetime;
+        LocalDateTime end = now.toLocalDate().plusDays(3).atTime(0, 0);
+
+        for (LocalDateTime dt = now; !dt.isAfter(end); dt = dt.plusHours(1)) {
+            if (dt.getHour() >= 1 && dt.getHour() <= 4) continue;
+
+            WeatherResponseDTO weather = weatherQueryService.getWeather(stationId, dt);
+            PredictionResponseDTO prediction = congestionQueryService.getCongestion(stationId, dt);
+
+            weathers.add(StationResponseDTO.StationStatusResponseDTO.TimedWeatherDTO.builder()
+                    .datetime(dt.format(DATETIME_FMT))
+                    .weather(weather)
+                    .build());
+
+            congestions.add(StationResponseDTO.StationStatusResponseDTO.TimedCongestionDTO.builder()
+                    .datetime(dt.format(DATETIME_FMT))
+                    .prediction(prediction)
+                    .build());
+        }
+
+        return StationConverter.toStatusResponse(weathers, congestions);
+    }
 }
 
