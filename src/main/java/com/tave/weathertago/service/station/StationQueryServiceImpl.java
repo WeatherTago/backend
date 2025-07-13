@@ -98,6 +98,27 @@ public class StationQueryServiceImpl implements StationQueryService {
         };
     }
 
+    @Override
+    @Transactional
+    public List<StationResponseDTO.StationInfoDTO> getAllStationsInfo() {
+        List<Station> allStations = stationRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+
+        Map<String, Station> representativeStations = allStations.stream()
+                .collect(Collectors.toMap(
+                        s -> s.getName() + "::" + s.getLine(),
+                        s -> s,
+                        (existing, incoming) -> compareDirectionPriority(existing.getDirection()) <= compareDirectionPriority(incoming.getDirection())
+                                ? existing : incoming
+                ));
+
+        // Map의 값들도 id 순 정렬
+        return representativeStations.values().stream()
+                .sorted(Comparator.comparing(Station::getId))
+                .map(StationConverter::toStationInfoDTO)
+                .toList();
+    }
+
+
     /*
     /**
      * 역 이름 + 호선으로 정확히 일치하는 역 코드 조회

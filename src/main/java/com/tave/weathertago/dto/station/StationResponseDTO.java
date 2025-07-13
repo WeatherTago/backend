@@ -45,4 +45,14 @@ public class StationResponseDTO {
         private String stationName;
         private String stationLine;
     }
+
+    @Data
+    @Builder
+    public static class StationInfoDTO{
+        private Long stationId;
+        private String stationName;
+        private String stationLine;
+        private String phoneNumber;
+        private String address;
+    }
 }
