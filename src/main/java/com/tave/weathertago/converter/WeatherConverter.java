@@ -27,9 +27,11 @@ public class WeatherConverter {
     }
 
     private static String resolveSkyStatus(int sky) {
-        if (sky >= 0 && sky <= 5) return "맑음";
-        if (sky >= 6 && sky <= 8) return "구름많음";
-        if (sky >= 9 && sky <= 10) return "흐림";
-        return "정보 없음";
+        return switch (sky) {
+            case 1 -> "맑음";
+            case 2, 3 -> "구름많음";
+            case 4 -> "흐림";
+            default -> "정보 없음";
+        };
     }
 }
