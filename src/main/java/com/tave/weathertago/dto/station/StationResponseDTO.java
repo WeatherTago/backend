@@ -58,30 +58,24 @@ public class StationResponseDTO {
     }
 
     @Getter
-    @AllArgsConstructor
     @Builder
-    public static class StationStatusResponseDTO {
-        private Map<String, DirectionalData> directions;
+    @AllArgsConstructor
+    public static class DirectionalData {
+        private List<TimedWeatherDTO> weathers;
+        private List<TimedCongestionDTO> congestions;
+    }
 
-        @Getter
-        @Builder
-        public static class DirectionalData {
-            private List<TimedWeatherDTO> weathers;
-            private List<TimedCongestionDTO> congestions;
-        }
+    @Getter
+    @Builder
+    public static class TimedWeatherDTO {
+        private String datetime;
+        private WeatherResponseDTO weather;
+    }
 
-        @Getter
-        @Builder
-        public static class TimedWeatherDTO {
-            private String datetime;
-            private WeatherResponseDTO weather;
-        }
-
-        @Getter
-        @Builder
-        public static class TimedCongestionDTO {
-            private String datetime;
-            private PredictionResponseDTO prediction;
-        }
+    @Getter
+    @Builder
+    public static class TimedCongestionDTO {
+        private String datetime;
+        private PredictionResponseDTO prediction;
     }
 }

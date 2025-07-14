@@ -50,11 +50,11 @@ public class StationConverter {
                 .build();
     }
 
-    public static StationResponseDTO.StationStatusResponseDTO toStatusResponse(
-            List<StationResponseDTO.StationStatusResponseDTO.TimedWeatherDTO> weathers,
-            List<StationResponseDTO.StationStatusResponseDTO.TimedCongestionDTO> congestions
+    public static StationResponseDTO.DirectionalData toDirectionalDataDTO(
+            List<StationResponseDTO.TimedWeatherDTO> weathers,
+            List<StationResponseDTO.TimedCongestionDTO> congestions
     ) {
-        return StationResponseDTO.StationStatusResponseDTO.builder()
+        return StationResponseDTO.DirectionalData.builder()
                 .weathers(weathers)
                 .congestions(congestions)
                 .build();

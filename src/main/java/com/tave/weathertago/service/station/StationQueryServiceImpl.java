@@ -148,17 +148,18 @@ public class StationQueryServiceImpl implements StationQueryService {
     */
 
     @Override
-    public StationResponseDTO.StationStatusResponseDTO getStatus(Long stationId) {
+    @Transactional
+    public Map<String, StationResponseDTO.DirectionalData> getStatus(Long stationId) {
         Station baseStation = stationRepository.findById(stationId)
                 .orElseThrow(() -> new StationHandler(ErrorStatus.STATION_ID_NOT_FOUND));
 
         List<Station> stations = stationRepository.findAllByNameAndLine(baseStation.getName(), baseStation.getLine());
 
-        Map<String, StationResponseDTO.StationStatusResponseDTO.DirectionalData> directions = new HashMap<>();
+        Map<String, StationResponseDTO.DirectionalData> directionMap = new HashMap<>();
 
         for (Station s : stations) {
-            List<StationResponseDTO.StationStatusResponseDTO.TimedWeatherDTO> weathers = new ArrayList<>();
-            List<StationResponseDTO.StationStatusResponseDTO.TimedCongestionDTO> congestions = new ArrayList<>();
+            List<StationResponseDTO.TimedWeatherDTO> weathers = new ArrayList<>();
+            List<StationResponseDTO.TimedCongestionDTO> congestions = new ArrayList<>();
 
             LocalDateTime now = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0).plusHours(1);
             LocalDateTime end = now.toLocalDate().plusDays(3).atTime(0, 0);
@@ -169,29 +170,24 @@ public class StationQueryServiceImpl implements StationQueryService {
                 WeatherResponseDTO weather = weatherQueryService.getWeather(s.getId(), dt);
                 PredictionResponseDTO prediction = congestionQueryService.getCongestion(s.getId(), dt);
 
-                weathers.add(StationResponseDTO.StationStatusResponseDTO.TimedWeatherDTO.builder()
+                weathers.add(StationResponseDTO.TimedWeatherDTO.builder()
                         .datetime(dt.format(DATETIME_FMT))
                         .weather(weather)
                         .build());
 
-                congestions.add(StationResponseDTO.StationStatusResponseDTO.TimedCongestionDTO.builder()
+                congestions.add(StationResponseDTO.TimedCongestionDTO.builder()
                         .datetime(dt.format(DATETIME_FMT))
                         .prediction(prediction)
                         .build());
             }
 
-            StationResponseDTO.StationStatusResponseDTO.DirectionalData dto =
-                    StationResponseDTO.StationStatusResponseDTO.DirectionalData.builder()
-                            .weathers(weathers)
-                            .congestions(congestions)
-                            .build();
+            StationResponseDTO.DirectionalData data =
+                    StationConverter.toDirectionalDataDTO(weathers, congestions);
 
-            directions.put(s.getDirection(), dto);
+            directionMap.put(s.getDirection(), data);
         }
 
-        return StationResponseDTO.StationStatusResponseDTO.builder()
-                .directions(directions)
-                .build();
+        return directionMap;
     }
 }
 
