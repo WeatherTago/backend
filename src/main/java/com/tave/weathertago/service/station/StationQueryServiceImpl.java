@@ -148,14 +148,14 @@ public class StationQueryServiceImpl implements StationQueryService {
     */
 
     @Override
-    public StationResponseDTO.StationStatusResponseDTO getStatus(Long stationId, LocalDateTime baseDatetime) {
+    public StationResponseDTO.StationStatusResponseDTO getStatus(Long stationId) {
         Station station = stationRepository.findById(stationId)
                 .orElseThrow(() -> new StationHandler(ErrorStatus.STATION_ID_NOT_FOUND));
 
         List<StationResponseDTO.StationStatusResponseDTO.TimedWeatherDTO> weathers = new ArrayList<>();
         List<StationResponseDTO.StationStatusResponseDTO.TimedCongestionDTO> congestions = new ArrayList<>();
 
-        LocalDateTime now = baseDatetime;
+        LocalDateTime now = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0).plusHours(1);
         LocalDateTime end = now.toLocalDate().plusDays(3).atTime(0, 0);
 
         for (LocalDateTime dt = now; !dt.isAfter(end); dt = dt.plusHours(1)) {
