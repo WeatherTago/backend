@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -35,10 +36,18 @@ public class AuthServiceImpl implements AuthService {
         KakaoUserInfo kakaoUserInfo = kakaoApiClient.getUserInfo(accessToken);
 
         // 사용자 정보로 회원 존재 여부 확인
-        User user = findOrCreateUser(kakaoUserInfo);
-        boolean isNewUser = user.getCreatedAt().equals(user.getUpdatedAt());
+        Optional<User> optionalUser = userRepository.findByKakaoId(kakaoUserInfo.getKakaoId());
+        boolean isNewUser = optionalUser.isEmpty();
 
-        // WT 발급
+        // 유저가 없으면 생성
+        User user = optionalUser.orElseGet(() ->
+                userRepository.save(User.builder()
+                        .kakaoId(kakaoUserInfo.getKakaoId())
+                        .email(kakaoUserInfo.getEmail())
+                        .nickname(kakaoUserInfo.getNickname())
+                        .build()));
+
+        // JWT 발급
         String accessJwt = jwtTokenProvider.generateAccessToken(user.getKakaoId());
         String refreshJwt = jwtTokenProvider.generateRefreshToken(user.getKakaoId());
         saveRefreshToken(user.getId(), refreshJwt);
@@ -95,14 +104,5 @@ public class AuthServiceImpl implements AuthService {
         long ttl = jwtTokenProvider.getRefreshTokenExpiration();
 
         redisTemplate.opsForValue().set(key, refreshToken, ttl, TimeUnit.MILLISECONDS);
-    }
-
-    private User findOrCreateUser(KakaoUserInfo kakaoUserInfo) {
-        return userRepository.findByKakaoId(kakaoUserInfo.getKakaoId())
-                .orElseGet(() -> userRepository.save(User.builder()
-                        .kakaoId(kakaoUserInfo.getKakaoId())
-                        .email(kakaoUserInfo.getEmail())
-                        .nickname(kakaoUserInfo.getNickname())
-                        .build()));
     }
 }
