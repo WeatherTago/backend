@@ -120,6 +120,7 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token)
                 .getBody()
                 .getExpiration();
-        return expiration.getTime() - System.currentTimeMillis();
+        long remaining = expiration.getTime() - System.currentTimeMillis();
+        return Math.max(0, remaining);
     }
 }
