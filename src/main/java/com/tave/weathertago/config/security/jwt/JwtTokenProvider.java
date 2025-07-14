@@ -111,4 +111,15 @@ public class JwtTokenProvider {
     public long getRefreshTokenExpiration() {
         return jwtProperties.getExpiration().getRefresh();
     }
+
+    // 토큰 남은 유효 시간 반환
+    public long getTokenRemainingTime(String token) {
+        Date expiration = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getExpiration();
+        return expiration.getTime() - System.currentTimeMillis();
+    }
 }
