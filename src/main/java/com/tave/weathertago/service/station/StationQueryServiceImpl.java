@@ -149,33 +149,49 @@ public class StationQueryServiceImpl implements StationQueryService {
 
     @Override
     public StationResponseDTO.StationStatusResponseDTO getStatus(Long stationId) {
-        Station station = stationRepository.findById(stationId)
+        Station baseStation = stationRepository.findById(stationId)
                 .orElseThrow(() -> new StationHandler(ErrorStatus.STATION_ID_NOT_FOUND));
 
-        List<StationResponseDTO.StationStatusResponseDTO.TimedWeatherDTO> weathers = new ArrayList<>();
-        List<StationResponseDTO.StationStatusResponseDTO.TimedCongestionDTO> congestions = new ArrayList<>();
+        List<Station> stations = stationRepository.findAllByNameAndLine(baseStation.getName(), baseStation.getLine());
 
-        LocalDateTime now = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0).plusHours(1);
-        LocalDateTime end = now.toLocalDate().plusDays(3).atTime(0, 0);
+        Map<String, StationResponseDTO.StationStatusResponseDTO.DirectionalData> directions = new HashMap<>();
 
-        for (LocalDateTime dt = now; !dt.isAfter(end); dt = dt.plusHours(1)) {
-            if (dt.getHour() >= 1 && dt.getHour() <= 4) continue;
+        for (Station s : stations) {
+            List<StationResponseDTO.StationStatusResponseDTO.TimedWeatherDTO> weathers = new ArrayList<>();
+            List<StationResponseDTO.StationStatusResponseDTO.TimedCongestionDTO> congestions = new ArrayList<>();
 
-            WeatherResponseDTO weather = weatherQueryService.getWeather(stationId, dt);
-            PredictionResponseDTO prediction = congestionQueryService.getCongestion(stationId, dt);
+            LocalDateTime now = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0).plusHours(1);
+            LocalDateTime end = now.toLocalDate().plusDays(3).atTime(0, 0);
 
-            weathers.add(StationResponseDTO.StationStatusResponseDTO.TimedWeatherDTO.builder()
-                    .datetime(dt.format(DATETIME_FMT))
-                    .weather(weather)
-                    .build());
+            for (LocalDateTime dt = now; !dt.isAfter(end); dt = dt.plusHours(1)) {
+                if (dt.getHour() >= 1 && dt.getHour() <= 4) continue;
 
-            congestions.add(StationResponseDTO.StationStatusResponseDTO.TimedCongestionDTO.builder()
-                    .datetime(dt.format(DATETIME_FMT))
-                    .prediction(prediction)
-                    .build());
+                WeatherResponseDTO weather = weatherQueryService.getWeather(s.getId(), dt);
+                PredictionResponseDTO prediction = congestionQueryService.getCongestion(s.getId(), dt);
+
+                weathers.add(StationResponseDTO.StationStatusResponseDTO.TimedWeatherDTO.builder()
+                        .datetime(dt.format(DATETIME_FMT))
+                        .weather(weather)
+                        .build());
+
+                congestions.add(StationResponseDTO.StationStatusResponseDTO.TimedCongestionDTO.builder()
+                        .datetime(dt.format(DATETIME_FMT))
+                        .prediction(prediction)
+                        .build());
+            }
+
+            StationResponseDTO.StationStatusResponseDTO.DirectionalData dto =
+                    StationResponseDTO.StationStatusResponseDTO.DirectionalData.builder()
+                            .weathers(weathers)
+                            .congestions(congestions)
+                            .build();
+
+            directions.put(s.getDirection(), dto);
         }
 
-        return StationConverter.toStatusResponse(weathers, congestions);
+        return StationResponseDTO.StationStatusResponseDTO.builder()
+                .directions(directions)
+                .build();
     }
 }
 
