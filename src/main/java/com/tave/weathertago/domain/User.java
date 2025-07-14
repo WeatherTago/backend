@@ -4,6 +4,9 @@ import com.tave.weathertago.domain.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Builder
@@ -23,4 +26,10 @@ public class User extends BaseEntity {
 
     @Column(nullable = false, length = 255)
     private String email;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private Favorite favorite;
+
+    @OneToMany(mappedBy = "userId", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Alarm> alarms = new ArrayList<>();
 }

@@ -15,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -24,6 +25,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final ObjectMapper objectMapper;
+
+    private static final List<String> EXCLUDED_PATHS = List.of(
+            "/api/auth/login",
+            "/api/auth/reissue"
+    );
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return EXCLUDED_PATHS.contains(path);
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
