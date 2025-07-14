@@ -8,6 +8,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
@@ -23,6 +24,7 @@ import java.util.Date;
 public class JwtTokenProvider {
 
     private final JwtProperties jwtProperties;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     // 시크릿 키 바이트 배열로 변환
     private Key getSigningKey() {
@@ -50,6 +52,12 @@ public class JwtTokenProvider {
 
     // JWT 유효성 검사
     public void validateToken(String token) {
+        String blacklistKey = "blacklist:" + token;
+        Object value = redisTemplate.opsForValue().get(blacklistKey);
+        if (value != null) {
+            throw new GeneralException(ErrorStatus.ACCESS_TOKEN_BLACKLISTED);
+        }
+
         try {
             Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
