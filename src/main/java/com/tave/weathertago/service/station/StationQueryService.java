@@ -4,6 +4,7 @@ import com.tave.weathertago.dto.station.StationResponseDTO;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 public interface StationQueryService {
 
@@ -13,7 +14,7 @@ public interface StationQueryService {
 
     List<StationResponseDTO.StationInfoDTO> getAllStationsInfo();
 
-    StationResponseDTO.StationStatusResponseDTO getStatus(Long stationId);
+    Map<String, StationResponseDTO.DirectionalData> getStatus(Long stationId);
 }
 
 

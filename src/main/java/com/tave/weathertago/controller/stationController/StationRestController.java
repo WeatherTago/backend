@@ -82,7 +82,7 @@ public class StationRestController {
 
     @Operation(summary = "지하철 역 시간대별 상태 조회", description = "현재 시각부터 3일 뒤 00시까지의 날씨와 혼잡도 정보를 시간대별로 조회합니다.")
     @GetMapping("/status")
-    public ApiResponse<StationResponseDTO.StationStatusResponseDTO> getStatus(
+    public ApiResponse<Map<String, StationResponseDTO.DirectionalData>> getStatus(
             @Parameter(description = "조회할 역의 ID")
             @RequestParam("stationId") Long stationId
     ) {
