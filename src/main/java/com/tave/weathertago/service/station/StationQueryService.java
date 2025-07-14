@@ -13,7 +13,7 @@ public interface StationQueryService {
 
     List<StationResponseDTO.StationInfoDTO> getAllStationsInfo();
 
-    StationResponseDTO.StationStatusResponseDTO getStatus(Long stationId, LocalDateTime baseDatetime);
+    StationResponseDTO.StationStatusResponseDTO getStatus(Long stationId);
 }
 
 

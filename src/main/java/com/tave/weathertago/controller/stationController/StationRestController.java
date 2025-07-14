@@ -80,17 +80,14 @@ public class StationRestController {
         return ApiResponse.onSuccess(result);
     }
 
-    @Operation(summary = "지하철 역 시간대별 상태 조회", description = "지정된 기준 시각부터 3일 뒤 00시까지의 날씨와 혼잡도 정보를 시간대별로 조회합니다.")
+    @Operation(summary = "지하철 역 시간대별 상태 조회", description = "현재 시각부터 3일 뒤 00시까지의 날씨와 혼잡도 정보를 시간대별로 조회합니다.")
     @GetMapping("/status")
     public ApiResponse<StationResponseDTO.StationStatusResponseDTO> getStatus(
             @Parameter(description = "조회할 역의 ID")
-            @RequestParam("stationId") Long stationId,
-
-            @Parameter(description = "기준 시각 (yyyy-MM-ddTHH:mm:ss)")
-            @RequestParam("time") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime baseDatetime
+            @RequestParam("stationId") Long stationId
     ) {
         return ApiResponse.onSuccess(
-                stationQueryService.getStatus(stationId, baseDatetime)
+                stationQueryService.getStatus(stationId)
         );
     }
 
