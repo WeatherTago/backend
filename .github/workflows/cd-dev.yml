@@ -38,7 +38,7 @@ jobs:
         run: |
           mkdir -p ./src/main/resources
           echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
-          echo "${{ secrets.FIREBASE_JSON }}" | base64 -d > ./src/main/resources/weathertago-firebase-adminsdk-fbsvc-4885ca4b1e.json
+          echo "${{ secrets.FIREBASE_JSON }}" | base64 -d > ./src/main/resources/weathertago-17db0-firebase-adminsdk-fbsvc-762577f71f.json
           echo "${{ secrets.APPLICATION_API_KEY_PROPERTIES }}" > ./src/main/resources/application-API-KEY.properties
 
       # Gradle Build
@@ -50,7 +50,9 @@ jobs:
       # 날짜 기반 태그 생성
       - name: Set Docker image tag
         id: set_tag
-        run: echo "docker_image_tag=$(date +'%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
+        run: |
+          export TZ=Asia/Seoul
+          echo "docker_image_tag=$(date +'%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
 
       - name: Export Docker tag
         id: export_tag
