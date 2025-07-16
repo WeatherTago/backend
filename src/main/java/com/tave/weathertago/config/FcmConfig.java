@@ -20,7 +20,7 @@ public class FcmConfig {
 
     @Bean
     public FirebaseMessaging firebaseMessaging() {
-        try (InputStream serviceAccount = getClass().getResourceAsStream("/weathertago-firebase-adminsdk-fbsvc-4885ca4b1e.json")) {
+        try (InputStream serviceAccount = getClass().getResourceAsStream("/weathertago-17db0-firebase-adminsdk-fbsvc-762577f71f.json")) {
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                     .build();
