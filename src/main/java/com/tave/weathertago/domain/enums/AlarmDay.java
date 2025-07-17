@@ -1,4 +1,4 @@
-package com.tave.weathertago.domain;
+package com.tave.weathertago.domain.enums;
 
 public enum AlarmDay {
     TODAY,

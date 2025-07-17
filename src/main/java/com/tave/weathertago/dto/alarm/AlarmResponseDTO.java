@@ -1,10 +1,9 @@
 package com.tave.weathertago.dto.alarm;
 
-import com.tave.weathertago.domain.*;
+import com.tave.weathertago.domain.enums.AlarmDay;
+import com.tave.weathertago.domain.enums.AlarmPeriod;
 import lombok.Builder;
 import lombok.Getter;
-
-import java.time.LocalTime;
 
 public class AlarmResponseDTO {
 
