@@ -21,10 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -110,14 +107,57 @@ public class AlarmSendServiceImpl implements AlarmSendService {
 
     private PredictionWithWeatherResponseDTO getCongestionAndWeather(Alarm alarm, LocalDateTime refDateTime) {
         try {
-            return congestionQueryService.getCongestionWithWeather(
-                    alarm.getStationId().getId(), refDateTime);
+            // 1. 날짜 유효성 검증
+            if (refDateTime == null) {
+                log.error("기준 날짜가 null입니다: alarmId={}", alarm.getAlarmId());
+                throw new IllegalArgumentException("기준 날짜가 null입니다.");
+            }
+
+            // 2. 날짜 정규화 (초와 나노초를 0으로 설정)
+            LocalDateTime normalizedDateTime = refDateTime.withSecond(0).withNano(0);
+
+            // 3. 날짜 범위 검증 (선택사항)
+            LocalDateTime now = LocalDateTime.now();
+            if (normalizedDateTime.isBefore(now.minusDays(7)) || normalizedDateTime.isAfter(now.plusDays(7))) {
+                log.warn("날짜 범위 초과 - alarmId={}, refDateTime={}", alarm.getAlarmId(), normalizedDateTime);
+            }
+
+            // 4. 로그 출력 (디버깅용)
+            log.debug("혼잡도 및 날씨 정보 조회 시작: alarmId={}, stationId={}, refDateTime={}",
+                    alarm.getAlarmId(), alarm.getStationId().getId(), normalizedDateTime);
+
+            // 5. 실제 조회 수행
+            PredictionWithWeatherResponseDTO result = congestionQueryService.getCongestionWithWeather(
+                    alarm.getStationId().getId(), normalizedDateTime);
+
+            // 6. 결과 검증
+            if (result == null) {
+                log.error("혼잡도 및 날씨 정보 조회 결과가 null입니다: alarmId={}", alarm.getAlarmId());
+                throw new RuntimeException("조회 결과가 null입니다.");
+            }
+
+            log.debug("혼잡도 및 날씨 정보 조회 완료: alarmId={}", alarm.getAlarmId());
+            return result;
+
+        } catch (IllegalArgumentException e) {
+            log.error("날짜 형식 오류: alarmId={}, refDateTime={}, error={}",
+                    alarm.getAlarmId(), refDateTime, e.getMessage());
+            throw new AlarmHandler(ErrorStatus.ALARM_INVALID_INPUT);
+
+        } catch (DateTimeException e) {
+            log.error("날짜 시간 처리 오류: alarmId={}, refDateTime={}, error={}",
+                    alarm.getAlarmId(), refDateTime, e.getMessage());
+            throw new AlarmHandler(ErrorStatus.ALARM_INVALID_INPUT);
+
         } catch (Exception e) {
-            log.error("혼잡도 및 날씨 정보 조회 실패: alarmId={}, error={}",
-                    alarm.getAlarmId(), e.getMessage());
+            log.error("혼잡도 및 날씨 정보 조회 실패: alarmId={}, stationId={}, refDateTime={}, error={}",
+                    alarm.getAlarmId(),
+                    alarm.getStationId() != null ? alarm.getStationId().getId() : null,
+                    refDateTime, e.getMessage(), e);
             throw new AlarmHandler(ErrorStatus.ALARM_SEND_FAIL);
         }
     }
+
 
     private String createNotificationTitle(Alarm alarm) {
         return String.format("[Weathertago] %s %s %s %s 혼잡도 알림",
