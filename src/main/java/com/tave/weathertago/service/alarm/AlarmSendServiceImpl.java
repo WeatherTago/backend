@@ -70,9 +70,15 @@ public class AlarmSendServiceImpl implements AlarmSendService {
 
 
         // 3. 혼잡도·날씨 정보 조회
-        PredictionWithWeatherResponseDTO result = congestionQueryService.getCongestionWithWeather(
-                alarm.getStationId().getId(), refDateTime
-        );
+        PredictionWithWeatherResponseDTO result;
+        try {
+            result = congestionQueryService.getCongestionWithWeather(
+                    alarm.getStationId().getId(), refDateTime);
+        } catch (Exception e) {
+            log.error("혼잡도 및 날씨 정보 조회 실패: alarmId={}, error={}", alarmId, e.getMessage());
+            throw new AlarmHandler(ErrorStatus.ALARM_SEND_FAIL);
+        }
+
         PredictionResponseDTO prediction = result.getPrediction();
         WeatherResponseDTO weather = result.getWeather();
 
@@ -106,8 +112,8 @@ public class AlarmSendServiceImpl implements AlarmSendService {
                 weatherStr
         );
 
-        log.info(title);
-        log.info(body);
+        log.info("알림 제목: {}", title);
+        log.info("알림 내용: {}", body);
 
         // 7. Expo Push Token 조회
         String userId = String.valueOf(alarm.getUserId().getId());
@@ -122,8 +128,12 @@ public class AlarmSendServiceImpl implements AlarmSendService {
         // 8. Expo Push 메시지 전송
         List<String> receiptIds = sendExpoPushNotifications(expoPushTokens, title, body);
 
-        // 9. 영수증 확인 (비동기로 처리하는 것이 좋음)
-        // 실제 운영 환경에서는 15분 후에 영수증을 확인하는 별도의 스케줄러나 비동기 작업으로 처리
+        if (receiptIds.isEmpty()) {
+            log.warn("알림 전송에 실패했습니다: alarmId={}", alarmId);
+            throw new AlarmHandler(ErrorStatus.ALARM_SEND_FAIL);
+        }
+
+        log.info("알림 전송 완료: alarmId={}, receiptCount={}", alarmId, receiptIds.size());
 
         return AlarmConverter.toAlarmFcmMessageDto(title, body);
     }
