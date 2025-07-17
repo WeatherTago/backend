@@ -38,14 +38,16 @@ public class AlarmSendServiceImpl implements AlarmSendService {
     private static final String REDIS_KEY_PREFIX = "pushtoken:";
     private static final String EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send";
     private static final String EXPO_RECEIPT_URL = "https://exp.host/--/api/v2/push/getReceipts";
-    private static final int BATCH_SIZE = 100;
-    private static final int RECEIPT_BATCH_SIZE = 1000;
+    private static final int BATCH_SIZE = 100; // 한 번에 전송할 최대 알림 수 (Expo 제한)
+    private static final int RECEIPT_BATCH_SIZE = 1000; // 한 번에 확인할 최대 영수증 수
 
     @Override
     @Transactional
     public AlarmFcmMessageDto sendAlarm(Long alarmId) {
+        // 알림 설정 정보 조회
         Alarm alarm = getAlarmById(alarmId);
 
+        // 알림 기준 시간 계산 (오늘/어제 기준)
         AlarmTimeInfo timeInfo = calculateAlarmTime(alarm);
         PredictionWithWeatherResponseDTO result = getCongestionAndWeather(alarm, timeInfo.refDateTime());
 
@@ -98,8 +100,8 @@ public class AlarmSendServiceImpl implements AlarmSendService {
                     LocalDate.now().atTime(localTime).withSecond(0)
             );
             case YESTERDAY -> new AlarmTimeInfo(
-                    "어제",
-                    LocalDate.now().minusDays(1).atTime(localTime).withSecond(0)
+                    "내일",
+                    LocalDate.now().plusDays(1).atTime(localTime).withSecond(0)
             );
             default -> throw new AlarmHandler(ErrorStatus.ALARM_INVALID_INPUT);
         };
@@ -115,12 +117,6 @@ public class AlarmSendServiceImpl implements AlarmSendService {
 
             // 2. 날짜 정규화 (초와 나노초를 0으로 설정)
             LocalDateTime normalizedDateTime = refDateTime.withSecond(0).withNano(0);
-
-            // 3. 날짜 범위 검증 (선택사항)
-            LocalDateTime now = LocalDateTime.now();
-            if (normalizedDateTime.isBefore(now.minusDays(7)) || normalizedDateTime.isAfter(now.plusDays(7))) {
-                log.warn("날짜 범위 초과 - alarmId={}, refDateTime={}", alarm.getAlarmId(), normalizedDateTime);
-            }
 
             // 4. 로그 출력 (디버깅용)
             log.debug("혼잡도 및 날씨 정보 조회 시작: alarmId={}, stationId={}, refDateTime={}",
@@ -390,7 +386,7 @@ public class AlarmSendServiceImpl implements AlarmSendService {
                 AlarmPeriod.EVERYDAY, AlarmDay.YESTERDAY, now);
 
         sendAlarmBatch(todayAlarms, "매일-오늘");
-        sendAlarmBatch(yesterdayAlarms, "매일-어제");
+        sendAlarmBatch(yesterdayAlarms, "매일-내일");
     }
 
     private void sendWeeklyAlarms(LocalTime now, DayOfWeek today) {
@@ -402,7 +398,7 @@ public class AlarmSendServiceImpl implements AlarmSendService {
                 todayPeriod, AlarmDay.YESTERDAY, now);
 
         sendAlarmBatch(weeklyTodayAlarms, "요일별-오늘");
-        sendAlarmBatch(weeklyYesterdayAlarms, "요일별-어제");
+        sendAlarmBatch(weeklyYesterdayAlarms, "요일별-내일");
     }
 
     private AlarmPeriod convertDayOfWeekToAlarmPeriod(DayOfWeek dayOfWeek) {
