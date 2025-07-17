@@ -1,6 +1,8 @@
 package com.tave.weathertago.repository;
 
 import com.tave.weathertago.domain.*;
+import com.tave.weathertago.domain.enums.AlarmDay;
+import com.tave.weathertago.domain.enums.AlarmPeriod;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalTime;

@@ -1,6 +1,8 @@
 package com.tave.weathertago.domain;
 
 import com.tave.weathertago.domain.common.BaseEntity;
+import com.tave.weathertago.domain.enums.AlarmDay;
+import com.tave.weathertago.domain.enums.AlarmPeriod;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
