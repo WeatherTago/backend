@@ -170,7 +170,7 @@ public class AlarmSendServiceImpl implements AlarmSendService {
 
         String congestionStr = String.format("%s (%.0f%%)",
                 prediction.getCongestionLevel(),
-                prediction.getCongestionScore() * 100);
+                prediction.getCongestionScore());
 
         String weatherStr = String.format(
                 "기온 %.1f°C, 습도 %.1f%%, 강수량 %.1fmm, 풍속 %.1fm/s, 적설 %.1fcm, 풍향 %.1f°",
