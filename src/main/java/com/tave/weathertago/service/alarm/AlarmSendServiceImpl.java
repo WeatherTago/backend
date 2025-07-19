@@ -18,6 +18,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
@@ -380,9 +381,9 @@ public class AlarmSendServiceImpl implements AlarmSendService {
     // ===== Scheduled Alarm Methods =====
 
     private void sendDailyAlarms(LocalTime now) {
-        List<Alarm> todayAlarms = alarmRepository.findAllByAlarmPeriodAndAlarmDayAndAlarmTime(
+        List<Alarm> todayAlarms = alarmRepository.findAllWithStationAndUserByAlarmPeriodAndAlarmDayAndAlarmTime(
                 AlarmPeriod.EVERYDAY, AlarmDay.TODAY, now);
-        List<Alarm> yesterdayAlarms = alarmRepository.findAllByAlarmPeriodAndAlarmDayAndAlarmTime(
+        List<Alarm> yesterdayAlarms = alarmRepository.findAllWithStationAndUserByAlarmPeriodAndAlarmDayAndAlarmTime(
                 AlarmPeriod.EVERYDAY, AlarmDay.YESTERDAY, now);
 
         sendAlarmBatch(todayAlarms, "매일-오늘");
@@ -392,14 +393,15 @@ public class AlarmSendServiceImpl implements AlarmSendService {
     private void sendWeeklyAlarms(LocalTime now, DayOfWeek today) {
         AlarmPeriod todayPeriod = convertDayOfWeekToAlarmPeriod(today);
 
-        List<Alarm> weeklyTodayAlarms = alarmRepository.findAllByAlarmPeriodAndAlarmDayAndAlarmTime(
+        List<Alarm> weeklyTodayAlarms = alarmRepository.findAllWithStationAndUserByAlarmPeriodAndAlarmDayAndAlarmTime(
                 todayPeriod, AlarmDay.TODAY, now);
-        List<Alarm> weeklyYesterdayAlarms = alarmRepository.findAllByAlarmPeriodAndAlarmDayAndAlarmTime(
+        List<Alarm> weeklyYesterdayAlarms = alarmRepository.findAllWithStationAndUserByAlarmPeriodAndAlarmDayAndAlarmTime(
                 todayPeriod, AlarmDay.YESTERDAY, now);
 
         sendAlarmBatch(weeklyTodayAlarms, "요일별-오늘");
         sendAlarmBatch(weeklyYesterdayAlarms, "요일별-내일");
     }
+
 
     private AlarmPeriod convertDayOfWeekToAlarmPeriod(DayOfWeek dayOfWeek) {
         return switch (dayOfWeek) {
@@ -413,6 +415,7 @@ public class AlarmSendServiceImpl implements AlarmSendService {
         };
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     private void sendAlarmBatch(List<Alarm> alarms, String alarmType) {
         if (alarms.isEmpty()) {
             return;
