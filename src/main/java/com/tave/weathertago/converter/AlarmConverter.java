@@ -26,8 +26,6 @@ public class AlarmConverter {
                 .alarmPeriod(alarm.getAlarmPeriod())
                 .alarmDay(alarm.getAlarmDay())
                 .alarmTime(alarm.getAlarmTime() != null ? alarm.getAlarmTime().format(TIME_FORMATTER) : null)
-                // .weather(weatherDTO) // 필요 시 추가
-                // .congestion(congestionDTO) // 필요 시 추가
                 .build();
     }
 
