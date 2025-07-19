@@ -12,6 +12,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+
 @Service
 @RequiredArgsConstructor
 public class FavoriteQueryServiceImpl implements FavoriteQueryService {
@@ -24,10 +26,13 @@ public class FavoriteQueryServiceImpl implements FavoriteQueryService {
         String kakaoId = getCurrentKakaoId();
 
         //즐겨찾기 가져오기
-        Favorite favorite = favoriteRepository.findByUser_KakaoId(kakaoId)
-                .orElseThrow(() -> new FavoriteHandler(ErrorStatus.FAVORITE_NOT_FOUND));
-
-        return FavoriteConverter.toFavoriteResultDTO(favorite);
+        return favoriteRepository.findByUser_KakaoId(kakaoId)
+                .map(FavoriteConverter::toFavoriteResultDTO)
+                .orElseGet(() -> FavoriteResponseDTO.FavoriteResultDTO.builder()
+                        .favoriteId(null)
+                        .stations(Collections.emptyList())
+                        .build()
+                );
     }
 
     private String getCurrentKakaoId() {
