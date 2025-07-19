@@ -76,14 +76,14 @@ public class StationRestController {
         return ApiResponse.onSuccess(result);
     }
 
-    @Operation(summary = "지하철 역 상세 정보 조회", description = "지하철역의 id, 이름, 호선, 전화번호, 주소를 조회합니다. ")
+    @Operation(summary = "지하철역 상세 정보 조회", description = "지하철역의 id, 이름, 호선, 전화번호, 주소를 조회합니다. ")
     @GetMapping("/detailInfo")
     public ApiResponse<List<StationResponseDTO.StationInfoDTO>> getAllStationsInfo() {
         List<StationResponseDTO.StationInfoDTO> result = stationQueryService.getAllStationsInfo();
         return ApiResponse.onSuccess(result);
     }
 
-    @Operation(summary = "지하철 역 시간대별 상태 조회", description = "현재 시각부터 3일 뒤 00시까지의 날씨와 혼잡도 정보를 시간대별로 조회합니다.")
+    @Operation(summary = "지하철역 시간대별 상태 조회", description = "현재 시각부터 3일 뒤 00시까지의 날씨와 혼잡도 정보를 시간대별로 조회합니다.")
     @GetMapping("/status")
     public ApiResponse<Map<String, StationResponseDTO.DirectionalData>> getStatus(
             @Parameter(description = "조회할 역의 ID")
