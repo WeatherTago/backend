@@ -1,4 +1,4 @@
-package com.tave.weathertago.config.security.properties;
+package com.tave.weathertago.security.properties;
 
 import lombok.Getter;
 import lombok.Setter;

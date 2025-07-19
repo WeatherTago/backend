@@ -1,9 +1,9 @@
-package com.tave.weathertago.config.security.jwt;
+package com.tave.weathertago.security.jwt;
 
 import com.tave.weathertago.apiPayload.code.status.ErrorStatus;
 import com.tave.weathertago.apiPayload.exception.GeneralException;
-import com.tave.weathertago.config.security.properties.Constants;
-import com.tave.weathertago.config.security.properties.JwtProperties;
+import com.tave.weathertago.security.properties.Constants;
+import com.tave.weathertago.security.properties.JwtProperties;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,4 +1,4 @@
-package com.tave.weathertago.config.security.jwt;
+package com.tave.weathertago.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tave.weathertago.apiPayload.code.status.ErrorStatus;

@@ -1,9 +1,9 @@
-package com.tave.weathertago.config.security;
+package com.tave.weathertago.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tave.weathertago.config.security.jwt.JwtAuthenticationEntryPoint;
-import com.tave.weathertago.config.security.jwt.JwtAuthenticationFilter;
-import com.tave.weathertago.config.security.jwt.JwtTokenProvider;
+import com.tave.weathertago.security.jwt.JwtAuthenticationEntryPoint;
+import com.tave.weathertago.security.jwt.JwtAuthenticationFilter;
+import com.tave.weathertago.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
