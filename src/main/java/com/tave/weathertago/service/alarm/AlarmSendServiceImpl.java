@@ -42,12 +42,22 @@ public class AlarmSendServiceImpl implements AlarmSendService {
     private static final int BATCH_SIZE = 100; // 한 번에 전송할 최대 알림 수 (Expo 제한)
     private static final int RECEIPT_BATCH_SIZE = 1000; // 한 번에 확인할 최대 영수증 수
 
+    // 기존 메서드 (단일 ID로 조회)
     @Override
     @Transactional
     public AlarmFcmMessageDto sendAlarm(Long alarmId) {
-        // 알림 설정 정보 조회
-        Alarm alarm = getAlarmById(alarmId);
+        Alarm alarm = getAlarmByIdWithFetch(alarmId); // Fetch Join 사용
+        return sendAlarmInternal(alarm);
+    }
 
+    // 새로운 메서드 (이미 조회된 Alarm 객체 사용)
+    @Transactional
+    public AlarmFcmMessageDto sendAlarm(Alarm alarm) {
+        return sendAlarmInternal(alarm);
+    }
+
+    // 실제 알림 전송 로직을 담당하는 내부 메서드
+    private AlarmFcmMessageDto sendAlarmInternal(Alarm alarm) {
         // 알림 기준 시간 계산 (오늘/어제 기준)
         AlarmTimeInfo timeInfo = calculateAlarmTime(alarm);
         PredictionWithWeatherResponseDTO result = getCongestionAndWeather(alarm, timeInfo.refDateTime());
@@ -58,9 +68,9 @@ public class AlarmSendServiceImpl implements AlarmSendService {
         Set<String> expoPushTokens = getExpoPushTokens(alarm.getUserId().getId());
         List<String> receiptIds = sendExpoPushNotifications(expoPushTokens, title, body);
 
-        validateAlarmSent(alarmId, receiptIds);
+        validateAlarmSent(alarm.getAlarmId(), receiptIds);
 
-        log.info("알림 전송 완료: alarmId={}, receiptCount={}", alarmId, receiptIds.size());
+        log.info("알림 전송 완료: alarmId={}, receiptCount={}", alarm.getAlarmId(), receiptIds.size());
         return AlarmConverter.toAlarmFcmMessageDto(title, body);
     }
 
@@ -91,6 +101,13 @@ public class AlarmSendServiceImpl implements AlarmSendService {
         return alarmRepository.findById(alarmId)
                 .orElseThrow(() -> new AlarmHandler(ErrorStatus.ALARM_NOT_FOUND));
     }
+
+    // Fetch Join을 사용하는 새로운 메서드 추가
+    private Alarm getAlarmByIdWithFetch(Long alarmId) {
+        return alarmRepository.findByIdWithStationAndUser(alarmId)
+                .orElseThrow(() -> new AlarmHandler(ErrorStatus.ALARM_NOT_FOUND));
+    }
+
 
     private AlarmTimeInfo calculateAlarmTime(Alarm alarm) {
         LocalTime localTime = alarm.getReferenceTime();
@@ -416,7 +433,7 @@ public class AlarmSendServiceImpl implements AlarmSendService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    private void sendAlarmBatch(List<Alarm> alarms, String alarmType) {
+    protected void sendAlarmBatch(List<Alarm> alarms, String alarmType) {
         if (alarms.isEmpty()) {
             return;
         }
@@ -425,11 +442,13 @@ public class AlarmSendServiceImpl implements AlarmSendService {
 
         alarms.forEach(alarm -> {
             try {
-                sendAlarm(alarm.getAlarmId());
+                // 이미 조회된 Alarm 객체를 사용하는 오버로드된 메서드 호출
+                sendAlarm(alarm);  // sendAlarm(alarm.getAlarmId()) 대신 alarm 객체 직접 전달
             } catch (Exception e) {
                 log.error("{} 알림 전송 실패: alarmId={}, error={}",
                         alarmType, alarm.getAlarmId(), e.getMessage());
             }
         });
     }
+
 }
