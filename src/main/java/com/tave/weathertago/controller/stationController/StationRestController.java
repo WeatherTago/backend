@@ -31,6 +31,7 @@ public class StationRestController {
 
     private final StationCsvImporter stationCsvImporter; // CsvImporter로 변경
 
+    @Operation(summary = "DB 초기화", description = "DB에 지하철역 정보를 저장합니다.")
     @PostMapping("/initialize")
     public ApiResponse<String> initializeStations() {
         try (
@@ -58,7 +59,7 @@ public class StationRestController {
         }
     }
 
-
+    @Operation(summary = "지하철역 정보 조회", description = "원하는 시간대의 지하철역의 정보를 조회합니다.")
     @GetMapping("/search")
     public ApiResponse<StationResponseDTO.JoinResultDTO> getStationById(
             @RequestParam("stationId") Long stationId,
@@ -68,12 +69,14 @@ public class StationRestController {
         return ApiResponse.onSuccess(result);
     }
 
+    @Operation(summary = "지하철역 기본 정보 조회", description = "지하철역 id, 이름, 호선을 조회합니다.")
     @GetMapping("/info")
     public ApiResponse<List<StationResponseDTO.SimpleStationDTO>> getAllSimpleStations() {
         List<StationResponseDTO.SimpleStationDTO> result = stationQueryService.getAllSimpleStations();
         return ApiResponse.onSuccess(result);
     }
 
+    @Operation(summary = "지하철 역 상세 정보 조회", description = "지하철역의 id, 이름, 호선, 전화번호, 주소를 조회합니다. ")
     @GetMapping("/detailInfo")
     public ApiResponse<List<StationResponseDTO.StationInfoDTO>> getAllStationsInfo() {
         List<StationResponseDTO.StationInfoDTO> result = stationQueryService.getAllStationsInfo();

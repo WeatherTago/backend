@@ -1,6 +1,7 @@
 package com.tave.weathertago.controller.stationController;
 
 import com.tave.weathertago.apiPayload.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 import com.tave.weathertago.dto.station.SubwayPathDTO;
 import com.tave.weathertago.service.station.SubwayPathQueryServiceImpl;
@@ -20,6 +21,7 @@ public class SubwayPathController {
 
     private final SubwayPathQueryServiceImpl subwayPathQueryService;
 
+    @Operation(summary = "경로 찾기" , description = "역과 역 사이의 경로를 조회합니다.")
     @GetMapping("/path")
     public ResponseEntity<ApiResponse<SubwayPathDTO>> getPath(
             @RequestParam("startStationId") Long startStationId,
