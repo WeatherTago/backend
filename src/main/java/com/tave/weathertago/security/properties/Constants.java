@@ -1,4 +1,4 @@
-package com.tave.weathertago.config.security.properties;
+package com.tave.weathertago.security.properties;
 
 public final class Constants {
     public static final String AUTH_HEADER = "Authorization";

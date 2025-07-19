@@ -1,7 +1,7 @@
 package com.tave.weathertago.controller.user;
 
 import com.tave.weathertago.apiPayload.ApiResponse;
-import com.tave.weathertago.config.security.jwt.JwtTokenProvider;
+import com.tave.weathertago.security.jwt.JwtTokenProvider;
 import com.tave.weathertago.dto.user.UserInfoResponseDTO;
 import com.tave.weathertago.service.user.UserCommandService;
 import com.tave.weathertago.service.user.UserQueryService;

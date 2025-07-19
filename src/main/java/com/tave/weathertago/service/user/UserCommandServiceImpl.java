@@ -2,7 +2,7 @@ package com.tave.weathertago.service.user;
 
 import com.tave.weathertago.apiPayload.code.status.ErrorStatus;
 import com.tave.weathertago.apiPayload.exception.handler.UserHandler;
-import com.tave.weathertago.config.security.jwt.JwtTokenProvider;
+import com.tave.weathertago.security.jwt.JwtTokenProvider;
 import com.tave.weathertago.domain.User;
 import com.tave.weathertago.repository.AlarmRepository;
 import com.tave.weathertago.repository.FavoriteRepository;
