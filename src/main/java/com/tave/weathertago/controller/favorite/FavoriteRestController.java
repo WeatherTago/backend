@@ -7,6 +7,7 @@ import com.tave.weathertago.dto.station.StationResponseDTO;
 import com.tave.weathertago.service.favorite.FavoriteCommandService;
 import com.tave.weathertago.service.favorite.FavoriteQueryService;
 import com.tave.weathertago.service.station.StationQueryService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ public class FavoriteRestController {
     private final StationQueryService stationQueryService;
 
     //즐겨찾기 등록
+    @Operation(summary = "즐겨찾기 등록", description = "즐겨찾기 목록에 지하철역을 등록합니다.")
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> addFavorite(@RequestBody FavoriteRequestDTO requestDTO){
         favoriteCommandService.addStationToFavorite(requestDTO);
@@ -33,6 +35,7 @@ public class FavoriteRestController {
     }
 
     //즐겨찾기 삭제
+    @Operation(summary = "즐겨찾기 삭제", description = "즐겨찾기 목록에 있는 지하철역을 삭제합니다.")
     @DeleteMapping
     public ResponseEntity<ApiResponse<Void>> removeFavorite(@RequestBody FavoriteRequestDTO requestDTO){
         favoriteCommandService.removeStationFromFavorite(requestDTO);
@@ -40,6 +43,7 @@ public class FavoriteRestController {
     }
 
     //나의 즐겨찾기 목록 조회
+    @Operation(summary = "즐겨찾기 목록 조회", description = "즐겨찾기 목록에 있는 역들을 조회합니다.")
     @GetMapping
     public ResponseEntity<ApiResponse<FavoriteResponseDTO.FavoriteResultDTO>> getMyFavorite() {
         FavoriteResponseDTO.FavoriteResultDTO favorite = favoriteQueryService.getMyFavorite();
@@ -47,6 +51,7 @@ public class FavoriteRestController {
     }
 
     //즐겨찾기 내 특정 역 상세 조회
+    @Operation(summary = "즐겨찾기 내 특정 역 상세 조회", description = "즐겨찾기 내 특정 역을 조회합니다.")
     @GetMapping("/detail")
     public ResponseEntity<ApiResponse<StationResponseDTO.JoinResultDTO>> getStationDetailById(
             @RequestParam("stationId") Long stationId,
