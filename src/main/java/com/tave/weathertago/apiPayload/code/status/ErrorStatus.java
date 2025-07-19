@@ -35,7 +35,7 @@ public enum ErrorStatus implements BaseErrorCode {
     NO_SUBWAY_ROUTE_FOUND(HttpStatus.BAD_REQUEST, "STATION4006", "해당 경로를 찾을 수 없습니다."),
 
     // 즐겨찾기 관련 애러
-    FAVORITE_NOT_FOUND(HttpStatus.BAD_REQUEST, "STATION4004", "즐겨찾기를 찾을 수 없습니다."),
+    FAVORITE_NOT_FOUND(HttpStatus.BAD_REQUEST, "FAVORITE4004", "즐겨찾기를 찾을 수 없습니다."),
 
     // 경로 관련 에러
     PATH_NOT_FOUND(HttpStatus.BAD_REQUEST, "STATION4005", "해당 경로를 찾을 수 없습니다."),
@@ -58,13 +58,13 @@ public enum ErrorStatus implements BaseErrorCode {
     NOTICE_CRAWLING_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "NOTICE5001", "공지사항 크롤링에 실패했습니다."),
 
     // 알림 관련 에러
-    ALARM_INVALID_INPUT(HttpStatus.BAD_REQUEST, "NOTICE4001", "잘못된 요청입니다."),
-    ALARM_FORBIDDEN(HttpStatus.FORBIDDEN, "NOTICE4031", "권한이 없습니다."),
-    ALARM_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE4041", "알림을 찾을 수 없습니다."),
-    ALARM_CREATE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "NOTICE5001", "알림 생성에 실패했습니다."),
-    ALARM_UPDATE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "NOTICE5002", "알림 수정에 실패했습니다."),
-    ALARM_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "NOTICE5003", "알림 삭제에 실패했습니다."),
-    ALARM_SEND_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "NOTICE5004", "알림(Firebase) 전송에 실패했습니다.");
+    ALARM_INVALID_INPUT(HttpStatus.BAD_REQUEST, "ALARM4001", "잘못된 요청입니다."),
+    ALARM_FORBIDDEN(HttpStatus.FORBIDDEN, "ALARM4031", "권한이 없습니다."),
+    ALARM_NOT_FOUND(HttpStatus.NOT_FOUND, "ALARM4041", "알림을 찾을 수 없습니다."),
+    ALARM_CREATE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "ALARM5001", "알림 생성에 실패했습니다."),
+    ALARM_UPDATE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "ALARM5002", "알림 수정에 실패했습니다."),
+    ALARM_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "ALARM5003", "알림 삭제에 실패했습니다."),
+    ALARM_SEND_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "ALARM5004", "알림 전송에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
