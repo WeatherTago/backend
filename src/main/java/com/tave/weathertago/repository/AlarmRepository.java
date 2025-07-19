@@ -23,4 +23,9 @@ public interface AlarmRepository extends JpaRepository<Alarm, Long> {
             @Param("alarmDay") AlarmDay alarmDay,
             @Param("alarmTime") LocalTime alarmTime);
 
+
+    @Query("SELECT a FROM Alarm a JOIN FETCH a.stationId JOIN FETCH a.userId WHERE a.alarmId = :alarmId")
+    Optional<Alarm> findByIdWithStationAndUser(@Param("alarmId") Long alarmId);
+
+
 }
