@@ -16,11 +16,8 @@ public class SubwayOpenApiClient {
 
     private static final String BASE_URL = "http://ws.bus.go.kr/api/rest/pathinfo/getPathInfoBySubway";
 
-
     @Value("${subwaypath.api.key}")
     private String serviceKey;
-
-
 
     public SubwayOpenApiClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
