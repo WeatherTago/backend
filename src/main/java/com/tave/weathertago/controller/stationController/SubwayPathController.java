@@ -2,6 +2,7 @@ package com.tave.weathertago.controller.stationController;
 
 import com.tave.weathertago.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import com.tave.weathertago.dto.station.SubwayPathDTO;
 import com.tave.weathertago.service.station.SubwayPathQueryServiceImpl;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 
+@Tag(name = "StationPath", description = "경로 찾기 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/subway")

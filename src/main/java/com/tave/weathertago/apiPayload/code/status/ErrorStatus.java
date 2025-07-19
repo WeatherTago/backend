@@ -35,7 +35,7 @@ public enum ErrorStatus implements BaseErrorCode {
     NO_SUBWAY_ROUTE_FOUND(HttpStatus.BAD_REQUEST, "STATION4006", "해당 경로를 찾을 수 없습니다."),
 
     // 즐겨찾기 관련 애러
-    FAVORITE_NOT_FOUND(HttpStatus.BAD_REQUEST, "STATION4004", "즐겨찾기를 찾을 수 없습니다."),
+    FAVORITE_NOT_FOUND(HttpStatus.BAD_REQUEST, "FAVORITE4004", "즐겨찾기를 찾을 수 없습니다."),
 
     // 경로 관련 에러
     PATH_NOT_FOUND(HttpStatus.BAD_REQUEST, "STATION4005", "해당 경로를 찾을 수 없습니다."),

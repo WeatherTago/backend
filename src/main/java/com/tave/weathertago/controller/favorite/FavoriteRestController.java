@@ -8,6 +8,7 @@ import com.tave.weathertago.service.favorite.FavoriteCommandService;
 import com.tave.weathertago.service.favorite.FavoriteQueryService;
 import com.tave.weathertago.service.station.StationQueryService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 
+@Tag(name = "Favorite", description = "즐겨찾기 관련 API")
 @RestController
 @RequestMapping("/api/users/me/favorite")
 @RequiredArgsConstructor
