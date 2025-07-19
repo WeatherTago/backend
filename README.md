@@ -21,8 +21,13 @@
 <div>
 <img src="https://img.shields.io/badge/Github Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white">
 <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white">
-<img src="https://img.shields.io/badge/AWS EC2-FF9900?style=flat-square&logoColor=white">
-<img src="https://img.shields.io/badge/AWS RDS-527FFF?style=flat-square&logoColor=white">
+<img src="https://img.shields.io/badge/AWS EC2-FF9900?style=flat-square&logo=amazonec2&logoColor=white">
+<img src="https://img.shields.io/badge/AWS ALB-FF9900?style=flat-square&logo=awselasticloadbalancing&logoColor=white">
+<img src="https://img.shields.io/badge/AWS CloudFront-FF9900?style=flat-square&logo=amazoncloudfront&logoColor=white">
+<img src="https://img.shields.io/badge/AWS RDS-527FFF?style=flat-square&logo=amazonrds&logoColor=white">
+<img src="https://img.shields.io/badge/AWS ElastiCache-C925D1?style=flat-square&logo=amazonelasticache&logoColor=white">
+<img src="https://img.shields.io/badge/AWS Route53-FF9900?style=flat-square&logo=amazonroute53&logoColor=white">
+<img src="https://img.shields.io/badge/AWS ACM-FF9900?style=flat-square&logo=awscertificatemanager&logoColor=white">
 </div>
 
 ## 3. Architecture
