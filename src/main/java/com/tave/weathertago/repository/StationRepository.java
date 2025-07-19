@@ -8,8 +8,6 @@ import java.util.Optional;
 
 public interface StationRepository extends JpaRepository<Station,Long> {
 
-    Optional<Station> findByNameAndLine(String name, String line);
-
     boolean existsByNameAndLineAndDirection(String name, String line, String direction);
 
     boolean existsByName(String name);
@@ -18,10 +16,7 @@ public interface StationRepository extends JpaRepository<Station,Long> {
 
     Optional<Station> findByStationCodeAndLineAndDirection(String stationCode, String line, String direction);
 
-    List<Station> findByLineAndStationCodeIn(String line, List<String> stationCodes);
-
     List<Station> findByStationCodeInAndLineAndDirection(List<String> stationCodes, String line, String direction);
-
 
     List<Station> findAllByNameAndLine(String name, String line);
 

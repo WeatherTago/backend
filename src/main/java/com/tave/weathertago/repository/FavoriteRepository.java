@@ -8,5 +8,4 @@ import java.util.Optional;
 
 public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
     Optional<Favorite> findByUser_KakaoId(String kakaoId);
-
 }
