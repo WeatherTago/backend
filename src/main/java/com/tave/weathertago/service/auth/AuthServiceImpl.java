@@ -11,6 +11,7 @@ import com.tave.weathertago.dto.Auth.AuthResponseDTO;
 import com.tave.weathertago.dto.Auth.KakaoUserInfo;
 import com.tave.weathertago.infrastructure.KakaoApiClient;
 import com.tave.weathertago.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -61,6 +63,7 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponseDTO.ReissueResultDTO reissueToken(AuthRequestDTO.ReissueRequest request) {
 
         jwtTokenProvider.validateToken(request.getRefreshToken());
+        log.info("[토큰 재발급] Refresh Token 유효성 검사 통과");
 
         String kakaoId = jwtTokenProvider.getKakaoId(request.getRefreshToken());
 
@@ -71,6 +74,7 @@ public class AuthServiceImpl implements AuthService {
         Object cached = redisTemplate.opsForValue().get(key);
 
         if (!(cached instanceof String storedToken) || !storedToken.equals(request.getRefreshToken())) {
+            log.error("[토큰 재발급] Redis에 저장된 Refresh Token과 일치하지 않음: userId={}", user.getId());
             throw new AuthHandler(ErrorStatus.INVALID_TOKEN);
         }
 
@@ -79,6 +83,7 @@ public class AuthServiceImpl implements AuthService {
 
         saveRefreshToken(user.getId(), newRefreshToken);
 
+        log.info("[토큰 재발급] 토큰 재발급 완료: userId={}", user.getId());
         return AuthConverter.toReissueResultDTO(newAccessToken, newRefreshToken);
     }
 
@@ -92,11 +97,13 @@ public class AuthServiceImpl implements AuthService {
 
         // Refresh Token 삭제
         redisTemplate.delete("refresh:" + user.getId());
+        log.info("[로그아웃] Refresh Token 삭제 완료: userId={}", user.getId());
 
         // Access Token Blacklist 등록
         String blacklistKey = "blacklist:" + accessToken;
         long remaining = jwtTokenProvider.getTokenRemainingTime(accessToken);
         redisTemplate.opsForValue().set(blacklistKey, "logout", remaining, TimeUnit.MILLISECONDS);
+        log.info("[로그아웃] Access Token 블랙리스트 등록 완료: 남은 시간={}ms", remaining);
     }
 
     private void saveRefreshToken(Long userId, String refreshToken) {
@@ -104,5 +111,6 @@ public class AuthServiceImpl implements AuthService {
         long ttl = jwtTokenProvider.getRefreshTokenExpiration();
 
         redisTemplate.opsForValue().set(key, refreshToken, ttl, TimeUnit.MILLISECONDS);
+        log.info("[토큰 저장] Refresh Token 저장 완료: userId={}, TTL={}ms", userId, ttl);
     }
 }
