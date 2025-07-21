@@ -65,25 +65,25 @@ public class WeatherApiClient {
         String redisKey = makeRedisKey(station.getNx(), station.getNy(), datetime);
         WeatherInternalDTO result = cacheMap.get(redisKey);
 
-        // 정확히 일치하는 예보 시간이 없을 경우: 가장 가까운 예보 시간으로 fallback
-        if (result == null && !cacheMap.isEmpty()) {
-            result = getNearestForecast(cacheMap, station, datetime);
-            log.warn("⚠ 요청 시간 {}에 대한 예보가 없어 fallback 예보 사용", datetime);
-        }
+//        // 정확히 일치하는 예보 시간이 없을 경우: 가장 가까운 예보 시간으로 fallback
+//        if (result == null && !cacheMap.isEmpty()) {
+//            result = getNearestForecast(cacheMap, station, datetime);
+//            log.warn("⚠ 요청 시간 {}에 대한 예보가 없어 fallback 예보 사용", datetime);
+//        }
 
         return result;
     }
 
-    private WeatherInternalDTO getNearestForecast(Map<String, WeatherInternalDTO> cacheMap, Station station, LocalDateTime targetTime) {
-        return cacheMap.entrySet().stream()
-                .min(Comparator.comparing(entry -> {
-                    String keyTime = entry.getKey().split(":")[3]; // yyyy-MM-dd'T'HH:mm:ss
-                    LocalDateTime forecastTime = LocalDateTime.parse(keyTime, DATETIME_KEY_FMT);
-                    return Duration.between(forecastTime, targetTime).abs();
-                }))
-                .map(Map.Entry::getValue)
-                .orElse(null);
-    }
+//    private WeatherInternalDTO getNearestForecast(Map<String, WeatherInternalDTO> cacheMap, Station station, LocalDateTime targetTime) {
+//        return cacheMap.entrySet().stream()
+//                .min(Comparator.comparing(entry -> {
+//                    String keyTime = entry.getKey().split(":")[3]; // yyyy-MM-dd'T'HH:mm:ss
+//                    LocalDateTime forecastTime = LocalDateTime.parse(keyTime, DATETIME_KEY_FMT);
+//                    return Duration.between(forecastTime, targetTime).abs();
+//                }))
+//                .map(Map.Entry::getValue)
+//                .orElse(null);
+//    }
 
     private URI buildRequestUri(Station station, LocalDateTime baseTime) {
         String encodedKey = URLEncoder.encode(serviceKey, StandardCharsets.UTF_8);
@@ -246,8 +246,8 @@ public class WeatherApiClient {
 
     private LocalDateTime calculateBaseTime(LocalDateTime now) {
         int[][] timeSlots = {
-                {2, 10}, {5, 10}, {8, 10}, {11, 10},
-                {14, 10}, {17, 10}, {20, 10}, {23, 10}
+                {2, 20}, {5, 20}, {8, 20}, {11, 20},
+                {14, 20}, {17, 20}, {20, 20}, {23, 20}
         };
 
         for (int i = 0; i < timeSlots.length; i++) {
