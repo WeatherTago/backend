@@ -12,6 +12,7 @@ import com.tave.weathertago.service.congestion.CongestionQueryService;
 import com.tave.weathertago.service.weather.WeatherQueryService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StationQueryServiceImpl implements StationQueryService {
@@ -150,12 +152,15 @@ public class StationQueryServiceImpl implements StationQueryService {
     @Override
     @Transactional
     public Map<String, StationResponseDTO.DirectionalData> getStatus(Long stationId) {
+        long totalStart = System.currentTimeMillis();
+
         Station baseStation = stationRepository.findById(stationId)
                 .orElseThrow(() -> new StationHandler(ErrorStatus.STATION_ID_NOT_FOUND));
 
         List<Station> stations = stationRepository.findAllByNameAndLine(baseStation.getName(), baseStation.getLine());
 
         Map<String, StationResponseDTO.DirectionalData> directionMap = new HashMap<>();
+        int totalCount = 0;
 
         for (Station s : stations) {
             List<StationResponseDTO.TimedWeatherDTO> weathers = new ArrayList<>();
@@ -179,6 +184,8 @@ public class StationQueryServiceImpl implements StationQueryService {
                         .datetime(dt.format(DATETIME_FMT))
                         .prediction(prediction)
                         .build());
+
+                totalCount++;
             }
 
             StationResponseDTO.DirectionalData data =
@@ -186,6 +193,10 @@ public class StationQueryServiceImpl implements StationQueryService {
 
             directionMap.put(s.getDirection(), data);
         }
+
+        long totalEnd = System.currentTimeMillis();
+        log.info("✅ 전체 응답 시간: {}ms (총 {}건 측정)", totalEnd - totalStart, totalCount);
+
 
         return directionMap;
     }
