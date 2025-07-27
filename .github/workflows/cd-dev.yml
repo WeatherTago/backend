@@ -1,108 +1,105 @@
-name: CD - Dev
-
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - dev
-
-jobs:
-  build:
-    name: build
-    runs-on: ubuntu-latest
-    outputs:
-      docker_image_tag: ${{ steps.set_tag.outputs.docker_image_tag }}
-    steps:
-      - name: Discord Notification
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        uses: Ilshidur/action-discord@master
-        with:
-          args:
-            '🚀 CD - Dev workflow 실행됨  Triggered by: **${{ github.actor }}**'
-
-      # 코드 체크아웃
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      # JDK 설치
-      - name: Set up JDK 17
-        uses: actions/setup-java@v1
-        with:
-          java-version: 17
-
-      # secret 파일 불러오기
-      - name: make secret files
-        run: |
-          mkdir -p ./src/main/resources
-          echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
-          echo "${{ secrets.FIREBASE_JSON }}" | base64 -d > ./src/main/resources/weathertago-17db0-firebase-adminsdk-fbsvc-762577f71f.json
-          echo "${{ secrets.APPLICATION_API_KEY_PROPERTIES }}" > ./src/main/resources/application-API-KEY.properties
-
-      # Gradle Build
-      - name: Build with Gradle
-        run: |
-          sudo chmod +x ./gradlew
-          sudo ./gradlew clean build
-
-      # 날짜 기반 태그 생성
-      - name: Set Docker image tag
-        id: set_tag
-        run: |
-          export TZ=Asia/Seoul
-          echo "docker_image_tag=$(date +'%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
-
-      - name: Export Docker tag
-        id: export_tag
-        run: echo "docker_image_tag=$(echo '${{ steps.meta.outputs.tags }}' | cut -d ':' -f2)" >> $GITHUB_OUTPUT
-
-      # DockerHub 로그인
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-
-      # DockerHub Push
-      - name: Build and Push Docker image
-        run: |
-          docker build --no-cache -t ${{ secrets.DOCKER_HUB_USERNAME }}/weathertago:${{ steps.set_tag.outputs.docker_image_tag }} .
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/weathertago:${{ steps.set_tag.outputs.docker_image_tag }}
-
-
-  deploy:
-    name: Deploy
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      # AWS 배포
-      - name: SSH to EC2 and deploy
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd backend
-            git pull
-            echo "TAG=${{ needs.build.outputs.docker_image_tag }}" > .env
-            sudo docker compose stop weathertago-app
-            sudo docker compose rm -f weathertago-app    
-            sudo docker rmi ${{ secrets.DOCKER_HUB_USERNAME }}/weathertago:$TAG || true         
-            sudo docker compose pull weathertago-app
-            sudo docker compose up -d weathertago-app --no-deps
-        env:
-          ACTIONS_RUNNER_DEBUG: true
-
-
-      - name: Discord Notification
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        uses: Ilshidur/action-discord@master
-        with:
-          args:
-            '😎 배포 완료됨 Triggered by: **${{ github.actor }}**'
-
+#name: CD - Dev
+#
+#on:
+#  workflow_dispatch:
+#
+#jobs:
+#  build:
+#    name: build
+#    runs-on: ubuntu-latest
+#    outputs:
+#      docker_image_tag: ${{ steps.set_tag.outputs.docker_image_tag }}
+#    steps:
+#      - name: Discord Notification
+#        env:
+#          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+#        uses: Ilshidur/action-discord@master
+#        with:
+#          args:
+#            '🚀 CD - Dev workflow 실행됨  Triggered by: **${{ github.actor }}**'
+#
+#      # 코드 체크아웃
+#      - name: Checkout repository
+#        uses: actions/checkout@v2
+#        with:
+#          fetch-depth: 0
+#
+#      # JDK 설치
+#      - name: Set up JDK 17
+#        uses: actions/setup-java@v1
+#        with:
+#          java-version: 17
+#
+#      # secret 파일 불러오기
+#      - name: make secret files
+#        run: |
+#          mkdir -p ./src/main/resources
+#          echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
+#          echo "${{ secrets.FIREBASE_JSON }}" | base64 -d > ./src/main/resources/weathertago-17db0-firebase-adminsdk-fbsvc-762577f71f.json
+#          echo "${{ secrets.APPLICATION_API_KEY_PROPERTIES }}" > ./src/main/resources/application-API-KEY.properties
+#
+#      # Gradle Build
+#      - name: Build with Gradle
+#        run: |
+#          sudo chmod +x ./gradlew
+#          sudo ./gradlew clean build
+#
+#      # 날짜 기반 태그 생성
+#      - name: Set Docker image tag
+#        id: set_tag
+#        run: |
+#          export TZ=Asia/Seoul
+#          echo "docker_image_tag=$(date +'%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
+#
+#      - name: Export Docker tag
+#        id: export_tag
+#        run: echo "docker_image_tag=$(echo '${{ steps.meta.outputs.tags }}' | cut -d ':' -f2)" >> $GITHUB_OUTPUT
+#
+#      # DockerHub 로그인
+#      - name: Login to DockerHub
+#        uses: docker/login-action@v1
+#        with:
+#          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+#          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+#
+#      # DockerHub Push
+#      - name: Build and Push Docker image
+#        run: |
+#          docker build --no-cache -t ${{ secrets.DOCKER_HUB_USERNAME }}/weathertago:${{ steps.set_tag.outputs.docker_image_tag }} .
+#          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/weathertago:${{ steps.set_tag.outputs.docker_image_tag }}
+#
+#
+#  deploy:
+#    name: Deploy
+#    runs-on: ubuntu-latest
+#    needs: build
+#
+#    steps:
+#      # AWS 배포
+#      - name: SSH to EC2 and deploy
+#        uses: appleboy/ssh-action@v1.2.0
+#        with:
+#          host: ${{ secrets.EC2_HOST }}
+#          username: ${{ secrets.EC2_USER }}
+#          key: ${{ secrets.EC2_SSH_KEY }}
+#          script: |
+#            cd backend
+#            git pull
+#            echo "TAG=${{ needs.build.outputs.docker_image_tag }}" > .env
+#            sudo docker compose stop weathertago-app
+#            sudo docker compose rm -f weathertago-app
+#            sudo docker rmi ${{ secrets.DOCKER_HUB_USERNAME }}/weathertago:$TAG || true
+#            sudo docker compose pull weathertago-app
+#            sudo docker compose up -d weathertago-app --no-deps
+#        env:
+#          ACTIONS_RUNNER_DEBUG: true
+#
+#
+#      - name: Discord Notification
+#        env:
+#          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+#        uses: Ilshidur/action-discord@master
+#        with:
+#          args:
+#            '😎 배포 완료됨 Triggered by: **${{ github.actor }}**'
+#
