@@ -1,7 +1,7 @@
 ## 🌤️웨더타고 | 교통 약자를 위한 지하철 혼잡도 안내 서비스
 
 ## 1. Project Introduction
-
+<img width="800" alt="image" src="https://github.com/user-attachments/assets/dc471387-8b0f-4def-9d46-b033ff2dbb23" />
 
 ## 2. Tech Stack
 <div>
