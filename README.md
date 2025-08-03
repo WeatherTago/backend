@@ -3,6 +3,9 @@
 ## 1. Project Introduction
 <img width="800" alt="image" src="https://github.com/user-attachments/assets/dc471387-8b0f-4def-9d46-b033ff2dbb23" />
 
+>TAVE 15기 연합 프로젝트 <대상🏆> 수상
+<br>
+
 ## 2. Tech Stack
 <div>
 <img src="https://img.shields.io/badge/Java-007396?style=flat-square&logo=java&logoColor=white">
@@ -29,9 +32,11 @@
 <img src="https://img.shields.io/badge/AWS Route53-FF9900?style=flat-square&logo=amazonroute53&logoColor=white">
 <img src="https://img.shields.io/badge/AWS ACM-FF9900?style=flat-square&logo=awscertificatemanager&logoColor=white">
 </div>
+<br>
 
 ## 3. Architecture
 <img width="3480" height="1806" alt="weathertago_cloud_architecture drawio" src="https://github.com/user-attachments/assets/48e83d00-e741-4b94-90d4-70fdcd50406b" />
+<br>
 
 ## 4. Directory Structure
 ```
@@ -48,6 +53,8 @@
 ├── 📁 service            # 비즈니스 로직 계층
 └── 📄 WeathertagoApplication.java
 ```
+<br>
+
 ## 5. Developers
 | 전지원 | 이원준 | 박유정 |
 |:------:|:------:|:------:|
