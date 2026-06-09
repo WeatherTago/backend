@@ -38,7 +38,18 @@
 <img width="3480" height="1806" alt="weathertago_cloud_architecture drawio" src="https://github.com/user-attachments/assets/48e83d00-e741-4b94-90d4-70fdcd50406b" />
 <br>
 
-## 4. Directory Structure
+
+## 4. API Documentation
+
+프로젝트의 전체 API 명세는 Notion을 통해 관리하고 있습니다.
+
+### 🔗 Documentation
+
+* Notion API Docs : https://app.notion.com/p/API-202e5df8bb9080ddb3a4c6d84f05b050
+
+---
+
+## 5. Directory Structure
 ```
 📦 src/main/java/com/tave/weathertago
 ├── 📁 apiPayload         # 공통 응답, 에러 코드, 예외 처리 등 API 응답 관련 패키지
@@ -55,7 +66,7 @@
 ```
 <br>
 
-## 5. Developers
+## 6. Developers
 | 전지원 | 이원준 | 박유정 |
 |:------:|:------:|:------:|
 | <img src="https://github.com/jiwonly.png" alt="전지원" width="150"> | <img src="https://github.com/wonjun-lee-fcwj245.png" alt="이원준" width="150"> | <img src="https://github.com/yujeong430.png" alt="박유정" width="150"> |
